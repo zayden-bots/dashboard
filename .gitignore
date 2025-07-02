@@ -11,6 +11,8 @@ target/
 
 # User Files
 .env
+.env.dev
 weapons.json
 
-.idea/
+# Old files kept for reference
+Dockerfile
