@@ -6,6 +6,7 @@ version = 4
 name = "accounts"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "jiff",
  "jiff-sqlx",
  "reqwest 0.13.5",
@@ -98,9 +99,12 @@ name = "ai"
 version = "1.0.0"
 dependencies = [
  "async-openai",
+ "async-trait",
  "reqwest 0.13.5",
+ "secrecy",
  "serde",
  "serde_json",
+ "serenity",
  "tokio",
  "tracing",
  "zayden-app",
@@ -486,10 +490,11 @@ dependencies = [
  "lfg",
  "llamad2",
  "marathon",
+ "misc",
+ "moderation",
  "music",
  "palworld",
  "patreon",
- "rand 0.10.3",
  "reaction-roles",
  "rustls",
  "secrecy",
@@ -1188,6 +1193,7 @@ dependencies = [
 name = "deadlock"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "deadlock-api",
  "futures",
  "jiff",
@@ -1333,17 +1339,20 @@ dependencies = [
 name = "destiny2"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "bungie-api",
  "futures",
  "google-sheets-api",
  "itertools 0.15.0",
  "jiff-cron",
+ "secrecy",
  "serde_json",
  "serenity",
  "sqlx",
  "thiserror 2.0.21",
  "tokio",
  "tracing",
+ "zayden-app",
  "zayden-core",
 ]
 
@@ -1667,6 +1676,7 @@ dependencies = [
 name = "family"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "futures",
  "jiff",
  "moka",
@@ -1939,6 +1949,7 @@ dependencies = [
 name = "gambling"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "bigdecimal",
  "dashmap",
  "futures",
@@ -2037,6 +2048,7 @@ dependencies = [
 name = "gold-star"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "jiff",
  "jiff-sqlx",
  "serenity",
@@ -2061,6 +2073,7 @@ dependencies = [
 name = "greetings"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "jiff",
  "moka",
  "rand 0.10.3",
@@ -2292,6 +2305,8 @@ dependencies = [
 name = "honeypot"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
+ "moderation",
  "moka",
  "serenity",
  "sqlx",
@@ -2306,6 +2321,7 @@ dependencies = [
 name = "hosting"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "jiff",
  "jiff-cron",
  "jiff-sqlx",
@@ -2844,6 +2860,7 @@ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 name = "jellyfin"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "futures",
  "image",
  "jiff",
@@ -3060,6 +3077,7 @@ dependencies = [
 name = "levels"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "jiff",
  "jiff-sqlx",
  "rand 0.10.3",
@@ -3074,6 +3092,7 @@ dependencies = [
 name = "lfg"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "futures",
  "jiff",
  "jiff-sqlx",
@@ -3350,6 +3369,7 @@ checksum = "47d9d19d1d6efa0109d2f65ff4c85cddd50bd572e5a00127ab10987290bcefae"
 name = "llamad2"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "serenity",
  "sqlx",
  "thiserror 2.0.21",
@@ -3407,6 +3427,7 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 name = "marathon"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "criterion",
  "futures",
  "itertools 0.15.0",
@@ -3563,6 +3584,28 @@ dependencies = [
  "libc",
  "wasi",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "misc"
+version = "1.0.0"
+dependencies = [
+ "async-trait",
+ "rand 0.10.3",
+ "serenity",
+ "tracing",
+ "zayden-core",
+]
+
+[[package]]
+name = "moderation"
+version = "1.0.0"
+dependencies = [
+ "async-trait",
+ "jiff",
+ "serenity",
+ "sqlx",
+ "zayden-core",
 ]
 
 [[package]]
@@ -4036,6 +4079,7 @@ dependencies = [
 name = "palworld"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "criterion",
  "flate2",
  "gvas",
@@ -4764,6 +4808,7 @@ dependencies = [
 name = "reaction-roles"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "serenity",
  "sqlx",
  "zayden-core",
@@ -6168,6 +6213,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 name = "suggestions"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "futures",
  "serenity",
  "sqlx",
@@ -6347,7 +6393,9 @@ checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
 name = "temp-voice"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "dashmap",
+ "futures",
  "serde_json",
  "serenity",
  "sqlx",
@@ -6464,6 +6512,7 @@ name = "ticket"
 version = "1.0.0"
 dependencies = [
  "ai",
+ "async-trait",
  "dashmap",
  "futures",
  "htmd",
@@ -7726,6 +7775,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 name = "verify"
 version = "1.0.0"
 dependencies = [
+ "async-trait",
  "serenity",
  "sqlx",
  "thiserror 2.0.21",
@@ -7847,6 +7897,7 @@ name = "watch"
 version = "1.0.0"
 dependencies = [
  "ai",
+ "async-trait",
  "futures",
  "jellyfin",
  "jiff",

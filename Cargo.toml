@@ -158,6 +158,8 @@ levels = { path = "./bot-modules/levels" }
 lfg = { path = "./bot-modules/lfg" }
 llamad2 = { path = "./bot-modules/llamad2" }
 marathon = { path = "./bot-modules/marathon" }
+misc = { path = "./bot-modules/misc" }
+moderation = { path = "./bot-modules/moderation" }
 music = { path = "./bot-modules/music" }
 palworld = { path = "./bot-modules/palworld" }
 patreon = { path = "./bot-modules/patreon" }
