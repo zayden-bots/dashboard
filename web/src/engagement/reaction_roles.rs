@@ -62,6 +62,7 @@ fn panel_embed(emoji: &str, role: u64) -> Embed {
         color: None,
         description: Some(format!("{emoji} | <@&{role}>")),
         fields: Vec::new(),
+        flags: None,
         footer: None,
         image: None,
         kind: "rich".to_string(),
