@@ -464,7 +464,7 @@ pub(super) async fn wiki(
             <fieldset class="settings-section">
                 <legend>"Wiki FAQ"</legend>
                 <p class="page-lead">
-                    "Backs \"/ticket faq ask\" with a Wiki.js instance. Wiki.js is the only supported wiki - Zayden talks to its GraphQL API and falls back to its source view."
+                    "Backs \"/ticket faq ask\" with a Wiki.js 3 instance. Wiki.js is the only supported wiki - Zayden reads it through its REST API under /_api."
                 </p>
                 toggle_row(
                     form: WIKI_FORM,
@@ -499,7 +499,7 @@ pub(super) async fn wiki(
                     label: "Wiki URL",
                     value: sent.value("wiki_url", Some(&s.wiki_url)),
                     help: Some(
-                        "Site origin only, starting with http:// or https://, no trailing path. Zayden appends /graphql, /<locale>/ and /s/<locale>/ itself - pointing this at the GraphQL endpoint breaks page reads and article links.",
+                        "Site origin only, starting with http:// or https://, no trailing path. Zayden appends /_api/ and /<locale>/ itself - pointing this at the API endpoint breaks page reads and article links.",
                     ),
                     error: sent.error("wiki_url"),
                     input_type: "url",
@@ -566,7 +566,7 @@ pub(super) async fn wiki(
             <fieldset class="settings-section">
                 <legend>"API key"</legend>
                 <p class="page-lead">
-                    "The key needs a group with \"read:source\" so Zayden can read page Markdown. Wiki.js also gates its GraphQL page-source queries behind \"manage:pages\"; without either grant the command still answers with matching article links, but cannot summarise them."
+                    "Optional. Public pages are read anonymously. A key is only needed for pages guests cannot read, and only works when the wiki has its API enabled; a key the wiki rejects is ignored and Zayden reads anonymously."
                 </p>
                 text_row(
                     form: KEY_FORM,
@@ -574,7 +574,7 @@ pub(super) async fn wiki(
                     label: "Wiki API key",
                     value: "",
                     help: Some(
-                        "A Wiki.js API key. Its group needs read:pages, plus manage:pages or read:source to read page content. A saved key is never sent back to the browser, so leaving this blank keeps it.",
+                        "A Wiki.js API key. Only needed for pages guests cannot read. A saved key is never sent back to the browser, so leaving this blank keeps it.",
                     ),
                     error: key.error("wiki_api_key"),
                     input_type: "password",

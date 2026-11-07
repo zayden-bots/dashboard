@@ -35,15 +35,12 @@ fn is_authorize_path(path: &str) -> bool {
     let Some(rest) = path.strip_suffix("/oauth2/authorize") else {
         return false;
     };
-    rest.strip_prefix("/api").map_or_else(
-        || rest.is_empty(),
-        |version| {
-            version.is_empty()
-                || version.strip_prefix("/v").is_some_and(|digits| {
-                    !digits.is_empty() && digits.bytes().all(|b| b.is_ascii_digit())
-                })
-        },
-    )
+    rest.strip_prefix("/api").map_or(rest.is_empty(), |version| {
+        version.is_empty()
+            || version.strip_prefix("/v").is_some_and(|digits| {
+                !digits.is_empty() && digits.bytes().all(|b| b.is_ascii_digit())
+            })
+    })
 }
 
 fn preselect(address: &str, guild: u64) -> Option<String> {

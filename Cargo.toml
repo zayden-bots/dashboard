@@ -211,10 +211,6 @@ serde_json = { version = "*", default-features = false }
 toml = { version = "*", default-features = false }
 quick-xml = { version = "*", default-features = false }
 
-# -- GraphQL
-cynic = { version = "*", default-features = false }
-cynic-codegen = { version = "*", default-features = false }
-
 # -- Dates and times
 jiff = { version = "*", default-features = false }
 jiff-cron = { version = "*", default-features = false }
@@ -242,6 +238,7 @@ oauth2 = { version = "*", default-features = false, features = [
 rustls = { version = "*", default-features = false }
 ego-tree = { version = "*", default-features = false }
 scraper = { version = "*", default-features = false }
+htmd = { version = "*", default-features = false }
 url = { version = "*", default-features = false }
 
 # -- HTTP server
