@@ -7,7 +7,8 @@ them. Serenity for Discord, Topcoat for the dashboard, Postgres via `sqlx`.
 
 | Path                      | What it is                                                      |
 | ------------------------- | --------------------------------------------------------------- |
-| `bot/`                    | the bot binary — wires modules into a Serenity client           |
+| `bot-runtime/`            | shared bot runtime — boot, handler, registry, cron loop         |
+| `bots/zayden/`            | the bot binary — wires modules into a Serenity client          |
 | `bot-modules/*`           | one crate per feature (gambling, levels, music, palworld, …)    |
 | `bot-modules/zayden-core` | command/event routing traits shared by every module             |
 | `zayden-app`              | application layer: config, entitlements, shared state           |
@@ -58,7 +59,7 @@ command weaker than CI is how drift starts.
 renders on the server. Routes follow the module tree under `web/src/app/`
 (Topcoat module routing: the module path is the URL), and `web::router()`
 returns the builder that the binary and the `tests/` harness share.
-It reads the `[dashboard]` keys of `bot/config.toml` and the `DASHBOARD_*`
+It reads the `[dashboard]` keys of `bots/zayden/config.toml` and the `DASHBOARD_*`
 environment variables.
 
 It needs the Topcoat CLI, pinned to the same version as the crate:
@@ -147,7 +148,7 @@ docker build -f docker/Dockerfile.web -t zayden-web .
 ```
 
 CI publishes it as `zayden-web`; `docker-compose.yml` runs it as the `web`
-service on host port `3100` with `bot/config.toml` mounted read-only.
+service on host port `3100` with `bots/zayden/config.toml` mounted read-only.
 
 ## Conventions
 

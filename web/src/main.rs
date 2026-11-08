@@ -1,4 +1,5 @@
 use std::io;
+use std::net::SocketAddr;
 use std::process::ExitCode;
 use std::sync::Arc;
 
@@ -16,6 +17,7 @@ use web::{config, router, session_pruning};
 use zayden_app::config::BotConfig;
 use zayden_app::events::listener::EventListener;
 use zayden_app::state::AppState as ZaydenAppState;
+use zayden_app::telemetry::{LogFormat, install_metrics};
 
 #[tokio::main]
 async fn main() -> ExitCode {
@@ -71,8 +73,14 @@ async fn run() -> Result<(), StartupError> {
 }
 
 fn logging() {
-    let stdout_log =
-        fmt::layer().with_writer(io::stdout).with_filter(LevelFilter::INFO);
+    let json = LogFormat::from_env() == LogFormat::Json;
+    let text_log = (!json).then(|| {
+        fmt::layer().with_writer(io::stdout).with_filter(LevelFilter::INFO)
+    });
+    let json_log = json.then(|| {
+        fmt::layer().json().with_writer(io::stdout).with_filter(LevelFilter::INFO)
+    });
 
-    Registry::default().with(stdout_log).init();
+    Registry::default().with(text_log).with(json_log).init();
+    install_metrics("dashboard", SocketAddr::from(([0, 0, 0, 0], 9101)));
 }

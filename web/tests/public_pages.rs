@@ -74,10 +74,10 @@ fn write_bundle() -> TestResult<PathBuf> {
 fn config(invite_url: Option<&str>) -> BotConfig {
     BotConfig {
         discord_token: SecretString::from("test-bot-token"),
-        bungie_api_key: SecretString::from(""),
-        ai_provider_key: SecretString::from(""),
-        google_api_key: SecretString::from(""),
-        discord_client_secret: SecretString::from("test-client-secret"),
+        bungie_api_key: None,
+        ai_provider_key: None,
+        google_api_key: None,
+        discord_client_secret: Some(SecretString::from("test-client-secret")),
         spotify: None,
         ai_api_endpoint: String::new(),
         ai_model: String::new(),

@@ -21,6 +21,7 @@ use zayden_app::config::BotConfig;
 use zayden_app::state::AppState as ZaydenAppState;
 
 use crate::auth::SessionUser;
+use crate::error::StartupError;
 
 const DISCORD_OAUTH_AUTH_URL: &str = "https://discord.com/oauth2/authorize";
 const DISCORD_OAUTH_TOKEN_URL: &str = "https://discord.com/api/oauth2/token";
@@ -86,12 +87,16 @@ impl WebState {
     pub fn new(
         app: Arc<ZaydenAppState>,
         config: &BotConfig,
-    ) -> Result<Self, ParseError> {
+    ) -> Result<Self, StartupError> {
+        let client_secret = config
+            .discord_client_secret
+            .as_ref()
+            .ok_or(StartupError::MissingConfig("DISCORD_CLIENT_SECRET"))?;
         Ok(Self {
             app,
             sessions: cache(CACHE_TTL),
             oauth: OAuthState {
-                client: build_oauth_client(config)?,
+                client: build_oauth_client(config, client_secret)?,
                 http: oauth2::reqwest::Client::new(),
             },
             discord: DiscordState {
@@ -121,9 +126,17 @@ impl WebState {
                     client_secret: y.client_secret.expose_secret().to_owned(),
                     redirect_uri: y.redirect_uri.clone(),
                 }),
-                youtube_runtime: config.youtube.as_ref().map(|y| YoutubeRuntime {
-                    api_key: Arc::from(config.google_api_key.expose_secret()),
-                    webhook_uri: Arc::from(y.webhook_uri.as_str()),
+                youtube_runtime: config.youtube.as_ref().and_then(|y| {
+                    let Some(key) = config.google_api_key.as_ref() else {
+                        tracing::warn!(
+                            "youtube is configured but GOOGLE_API_KEY is not set; youtube is disabled"
+                        );
+                        return None;
+                    };
+                    Some(YoutubeRuntime {
+                        api_key: Arc::from(key.expose_secret()),
+                        webhook_uri: Arc::from(y.webhook_uri.as_str()),
+                    })
                 }),
                 kofi_verification_token: config.kofi_verification_token.clone(),
             },
@@ -157,11 +170,12 @@ where
     Cache::builder().max_capacity(CACHE_CAPACITY).time_to_live(ttl).build()
 }
 
-fn build_oauth_client(config: &BotConfig) -> Result<DiscordOAuthClient, ParseError> {
+fn build_oauth_client(
+    config: &BotConfig,
+    secret: &SecretString,
+) -> Result<DiscordOAuthClient, ParseError> {
     Ok(BasicClient::new(ClientId::new(config.zayden_id.to_string()))
-        .set_client_secret(ClientSecret::new(
-            config.discord_client_secret.expose_secret().to_owned(),
-        ))
+        .set_client_secret(ClientSecret::new(secret.expose_secret().to_owned()))
         .set_auth_uri(AuthUrl::new(DISCORD_OAUTH_AUTH_URL.to_string())?)
         .set_token_uri(TokenUrl::new(DISCORD_OAUTH_TOKEN_URL.to_string())?)
         .set_redirect_uri(RedirectUrl::new(config.redirect_uri.clone())?))
