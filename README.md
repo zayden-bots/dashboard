@@ -8,7 +8,7 @@ them. Serenity for Discord, Topcoat for the dashboard, Postgres via `sqlx`.
 | Path                      | What it is                                                      |
 | ------------------------- | --------------------------------------------------------------- |
 | `bot-runtime/`            | shared bot runtime — boot, handler, registry, cron loop         |
-| `bots/zayden/`            | the bot binary — wires modules into a Serenity client          |
+| `bots/zayden/`            | the bot binary — wires modules into a Serenity client           |
 | `bot-modules/*`           | one crate per feature (gambling, levels, music, palworld, …)    |
 | `bot-modules/zayden-core` | command/event routing traits shared by every module             |
 | `zayden-app`              | application layer: config, entitlements, shared state           |
@@ -144,10 +144,10 @@ looks for `assets/` next to itself). It runs as the `zayden` user, listens on
 `0.0.0.0:3000` (`DASHBOARD_BIND_ADDR`) and reads `/app/config.toml`.
 
 ```bash
-docker build -f docker/Dockerfile.web -t zayden-web .
+docker build -f docker/Dockerfile.web -t dashboard .
 ```
 
-CI publishes it as `zayden-web`; `docker-compose.yml` runs it as the `web`
+CI publishes it as `dashboard`; `docker-compose.yml` runs it as the `web`
 service on host port `3100` with `bots/zayden/config.toml` mounted read-only.
 
 ## Conventions
