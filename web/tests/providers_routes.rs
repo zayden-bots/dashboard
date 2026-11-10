@@ -334,7 +334,7 @@ async fn kofi_grants_to(pool: &PgPool, user_id: i64) -> TestResult<i64> {
     .await?)
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn kofi_refuses_what_is_not_a_single_data_form(pool: PgPool) {
     let app = standard(pool).await.unwrap();
 
@@ -391,7 +391,7 @@ async fn kofi_refuses_what_is_not_a_single_data_form(pool: PgPool) {
     }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn kofi_records_subscriptions_for_the_linked_account(pool: PgPool) {
     let app = standard(pool.clone()).await.unwrap();
 
@@ -604,7 +604,7 @@ async fn patreon_event(
     app.post("/webhooks/patreon", &headers, body).await
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn patreon_stores_only_signed_posts_of_an_announced_campaign(pool: PgPool) {
     let app = standard(pool.clone()).await.unwrap();
     seed_patreon(&pool).await.unwrap();
@@ -728,7 +728,7 @@ fn verify_path(channel: &str, mode: &str, extra: &str) -> String {
     )
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn youtube_verification_agrees_only_with_what_is_wanted(pool: PgPool) {
     let app = standard(pool.clone()).await.unwrap();
     let wanted = channel_id(1);
@@ -843,7 +843,7 @@ async fn expect_silence(listener: &mut PgListener, what: &str) {
     assert!(heard.is_err(), "{what}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn youtube_forwards_only_signed_notifications_of_announced_channels(
     pool: PgPool,
 ) {
@@ -914,7 +914,7 @@ fn outcome_location(flow: &str, guild: &str, outcome: &str) -> String {
     format!("/guild/{guild}/{flow}?{flow}={outcome}")
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_connect_routes_start_a_flow_only_for_a_guild_admin(pool: PgPool) {
     let app = standard(pool.clone()).await.unwrap();
     let bare = unconfigured(pool.clone()).await.unwrap();
@@ -1032,7 +1032,7 @@ fn spent(flow: &str) -> String {
     format!("{flow}_oauth_state=; Path=/; Max-Age=0")
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_callback_routes_check_the_nonce_then_the_caller(pool: PgPool) {
     let app = standard(pool.clone()).await.unwrap();
     let bare = unconfigured(pool.clone()).await.unwrap();

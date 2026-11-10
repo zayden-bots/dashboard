@@ -13,7 +13,7 @@ them. Serenity for Discord, Topcoat for the dashboard, Postgres via `sqlx`.
 | `bot-modules/zayden-core` | command/event routing traits shared by every module             |
 | `zayden-app`              | application layer: config, entitlements, shared state           |
 | `web/`                    | Topcoat server-rendered operator dashboard                      |
-| `migrations/`             | sqlx migrations, immutable once written                         |
+| `schema/`                 | embeds the sqlx migrations in `schema/migrations/`, immutable   |
 | `.sqlx/`                  | offline query cache; committed, regenerated on any query change |
 | `design-docs/`            | specs, plans, and per-module audits                             |
 
@@ -195,7 +195,7 @@ every event except pull requests.
 ```bash
 cp .env.example .env
 sqlx database create
-sqlx migrate run
+sqlx migrate run --source schema/migrations
 cargo sqlx prepare --workspace -- --all-targets
 ```
 
@@ -226,5 +226,5 @@ user. Both build on **stable** — `.dockerignore` keeps `rust-toolchain.toml` a
 `.cargo/` out of the context, so anything in the manifests must parse on stable
 cargo.
 
-`.sqlx/`, `migrations/`, `config.toml` and `radio.toml` are deliberately in the
+`.sqlx/`, `schema/migrations/`, `config.toml` and `radio.toml` are deliberately in the
 build context; almost everything else, including `.claude/`, is not.

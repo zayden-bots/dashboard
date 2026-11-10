@@ -241,7 +241,7 @@ async fn seed(pool: &PgPool) -> TestResult<()> {
     Ok(())
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn sign_in_sends_the_browser_to_discord_with_a_state_cookie(pool: PgPool) {
     let app = harness(pool).unwrap();
 
@@ -267,7 +267,7 @@ async fn sign_in_sends_the_browser_to_discord_with_a_state_cookie(pool: PgPool) 
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_callback_without_code_or_state_is_a_bad_request(pool: PgPool) {
     let app = harness(pool).unwrap();
 
@@ -279,7 +279,7 @@ async fn a_callback_without_code_or_state_is_a_bad_request(pool: PgPool) {
     }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_callback_with_a_mismatched_state_fails_and_spends_the_cookie(
     pool: PgPool,
 ) {
@@ -300,7 +300,7 @@ async fn a_callback_with_a_mismatched_state_fails_and_spends_the_cookie(
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_callback_without_a_state_cookie_fails(pool: PgPool) {
     let app = harness(pool).unwrap();
 
@@ -312,7 +312,7 @@ async fn a_callback_without_a_state_cookie_fails(pool: PgPool) {
     assert_eq!(set_cookies(&response), Vec::<String>::new());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn an_empty_state_never_matches(pool: PgPool) {
     let app = harness(pool).unwrap();
 
@@ -324,7 +324,7 @@ async fn an_empty_state_never_matches(pool: PgPool) {
 
 /// The cookie and the `web_sessions` row share one TTL, so the browser never
 /// drops a session the server still honours, or the reverse.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_started_session_sets_a_seven_day_cookie_and_row(pool: PgPool) {
     let app = harness(pool).unwrap();
 
@@ -355,7 +355,7 @@ async fn a_started_session_sets_a_seven_day_cookie_and_row(pool: PgPool) {
     assert!((604_800 - 60..=604_800).contains(&remaining), "{remaining}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn logout_without_a_session_still_clears_the_cookie(pool: PgPool) {
     let app = harness(pool).unwrap();
 
@@ -368,7 +368,7 @@ async fn logout_without_a_session_still_clears_the_cookie(pool: PgPool) {
     ]);
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn logout_deletes_the_row_and_forgets_the_cached_identity(pool: PgPool) {
     let app = harness(pool).unwrap();
     seed(&app.pool).await.unwrap();
@@ -394,7 +394,7 @@ async fn logout_deletes_the_row_and_forgets_the_cached_identity(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn members_only_pages_send_signed_out_visitors_to_login(pool: PgPool) {
     let app = harness(pool).unwrap();
     seed(&app.pool).await.unwrap();
@@ -413,7 +413,7 @@ async fn members_only_pages_send_signed_out_visitors_to_login(pool: PgPool) {
     assert_eq!(body_text(response).await.unwrap(), "41");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_session_helpers_read_the_cookie(pool: PgPool) {
     let app = harness(pool).unwrap();
     seed(&app.pool).await.unwrap();
@@ -435,7 +435,7 @@ async fn the_session_helpers_read_the_cookie(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn roles_are_required_from_the_signed_in_user(pool: PgPool) {
     let app = harness(pool).unwrap();
     seed(&app.pool).await.unwrap();
@@ -451,7 +451,7 @@ async fn roles_are_required_from_the_signed_in_user(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn guild_access_comes_from_the_cached_guild_list(pool: PgPool) {
     let app = harness(pool).unwrap();
     seed(&app.pool).await.unwrap();
@@ -500,7 +500,7 @@ async fn guild_access_comes_from_the_cached_guild_list(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn protected_routes_refuse_requests_without_a_live_session(pool: PgPool) {
     let app = harness(pool).unwrap();
     seed(&app.pool).await.unwrap();
@@ -521,7 +521,7 @@ async fn protected_routes_refuse_requests_without_a_live_session(pool: PgPool) {
 
 /// Nothing but the app's own router and state: removing the cookie layer or
 /// the sign-in routes from it fails here.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_app_router_serves_the_sign_in_routes(pool: PgPool) {
     let app = web::router().app_context(web_state(&pool).unwrap()).build();
     let get = |path: &str, cookie: Option<&str>| {
@@ -548,7 +548,7 @@ async fn the_app_router_serves_the_sign_in_routes(pool: PgPool) {
 }
 
 /// Without the cookie layer the helpers report it instead of panicking.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn helpers_without_a_cookie_layer_fail_cleanly(pool: PgPool) {
     let cx = CxTestBuilder::new().app_context(web_state(&pool).unwrap()).build();
 
@@ -564,7 +564,7 @@ async fn helpers_without_a_cookie_layer_fail_cleanly(pool: PgPool) {
 
 /// Topcoat drops a `Cookie` header holding any non-ASCII byte, so a foreign
 /// non-ASCII cookie on the host hides the session cookie sent beside it.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_non_ascii_cookie_header_reads_as_signed_out(pool: PgPool) {
     let app = harness(pool).unwrap();
     seed(&app.pool).await.unwrap();
@@ -586,7 +586,7 @@ async fn a_non_ascii_cookie_header_reads_as_signed_out(pool: PgPool) {
 
 /// A members-only page renders a session-store failure inline, with the
 /// dashboard's error prefix, rather than failing the whole response.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_session_store_failure_renders_inline_on_members_pages(pool: PgPool) {
     let app = harness(pool).unwrap();
     app.pool.close().await;
@@ -601,7 +601,7 @@ async fn a_session_store_failure_renders_inline_on_members_pages(pool: PgPool) {
 }
 
 /// A protected route answers a session-store failure with an empty 500.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn protected_routes_fail_closed_when_the_session_store_is_down(pool: PgPool) {
     let app = harness(pool).unwrap();
     app.pool.close().await;

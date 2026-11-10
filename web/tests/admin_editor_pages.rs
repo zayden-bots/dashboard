@@ -422,7 +422,7 @@ fn assert_filled_markup(html: &str, form: &LoadoutForm) -> TestResult {
     Ok(())
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn visitors_sign_in_and_non_admins_get_a_403(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -484,7 +484,7 @@ async fn visitors_sign_in_and_non_admins_get_a_403(
     Ok(())
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn admins_get_the_server_rendered_editor(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -574,7 +574,7 @@ async fn admins_get_the_server_rendered_editor(
     Ok(())
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn endpoints_check_save_and_refuse_bad_emoji_names(
     options: PgPoolOptions,
     connect: PgConnectOptions,

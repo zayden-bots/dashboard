@@ -729,7 +729,7 @@ async fn body_text(response: Response) -> TestResult<String> {
     Ok(String::from_utf8(bytes.to_vec())?)
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_leaderboard_pages_ten_members_and_names_them_from_discord(
     pool: PgPool,
 ) {
@@ -891,7 +891,7 @@ async fn the_leaderboard_pages_ten_members_and_names_them_from_discord(
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn mappings_list_in_channel_message_emoji_order_for_this_guild_only(
     pool: PgPool,
 ) {
@@ -937,7 +937,7 @@ async fn mappings_list_in_channel_message_emoji_order_for_this_guild_only(
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn removing_a_mapping_clears_its_reaction_only_when_it_was_this_guilds(
     pool: PgPool,
 ) {
@@ -1053,7 +1053,7 @@ async fn removing_a_mapping_clears_its_reaction_only_when_it_was_this_guilds(
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn adding_a_mapping_validates_before_anything_is_sent_to_discord(
     pool: PgPool,
 ) {
@@ -1149,7 +1149,7 @@ async fn adding_a_mapping_validates_before_anything_is_sent_to_discord(
     assert_eq!(app.discord.count("GET", "/guilds/7/channels"), 8);
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn adding_a_mapping_posts_a_panel_or_uses_the_message_and_seeds_the_reaction(
     pool: PgPool,
 ) {
@@ -1262,7 +1262,7 @@ fn mock_free_guild(app: &Harness, guild: u64) {
         .get(&format!("/applications/{APP_ID}/guilds/{guild}/commands"), "[]");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_greetings_view_starts_at_the_free_plans_defaults_and_saves_show_up(
     pool: PgPool,
 ) {
@@ -1370,7 +1370,7 @@ async fn the_greetings_view_starts_at_the_free_plans_defaults_and_saves_show_up(
     assert_eq!(app.admin("/test/greetings-view/7").await.unwrap(), debug(&expected));
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn higher_plans_lower_the_floors_and_stop_the_upgrade_pitch(pool: PgPool) {
     let app = harness(pool).await.unwrap();
     for guild in [11_u64, 12] {
@@ -1440,7 +1440,7 @@ async fn higher_plans_lower_the_floors_and_stop_the_upgrade_pitch(pool: PgPool) 
     assert_eq!(app.admin("/test/greetings-view/12").await.unwrap(), debug(&saved));
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn greeting_images_are_validated_capped_and_removed_by_their_own_guild_only(
     pool: PgPool,
 ) {
@@ -1588,7 +1588,7 @@ async fn greeting_images_are_validated_capped_and_removed_by_their_own_guild_onl
     assert_eq!(app.images(7, "morning").await.unwrap().len(), 49);
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn members_channel_edits_stop_at_validation_and_the_command_lookup(
     pool: PgPool,
 ) {
@@ -1653,7 +1653,7 @@ async fn members_channel_edits_stop_at_validation_and_the_command_lookup(
     assert_eq!(app.admin("/test/greetings-view/7").await.unwrap(), debug(&unknown));
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn operators_read_a_guilds_channel_allowlist_but_cannot_change_it(
     pool: PgPool,
 ) {
@@ -1788,7 +1788,7 @@ async fn operators_read_a_guilds_channel_allowlist_but_cannot_change_it(
     assert!(rendered.contains("https://example.com/n.gif"), "{rendered}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn every_engagement_call_refuses_the_signed_out_and_non_admins(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 

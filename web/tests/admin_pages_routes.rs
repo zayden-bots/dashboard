@@ -373,7 +373,7 @@ fn flash_cookie(response: &Response) -> Option<String> {
         .map(str::to_owned)
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_server_list_sends_visitors_to_sign_in_and_refuses_users_without_the_role(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -411,7 +411,7 @@ async fn the_server_list_sends_visitors_to_sign_in_and_refuses_users_without_the
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_loadout_list_shows_a_filterable_table_and_refuses_without_the_role(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -517,7 +517,7 @@ async fn the_loadout_list_shows_a_filterable_table_and_refuses_without_the_role(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_delete_goes_back_to_the_list_or_says_why_not(
     options: PgPoolOptions,
     connect: PgConnectOptions,

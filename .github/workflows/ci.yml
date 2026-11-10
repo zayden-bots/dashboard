@@ -150,7 +150,7 @@ jobs:
           cargo install "sqlx-cli@${version}" --locked --no-default-features \
             --features postgres,rustls
       - name: Apply migrations
-        run: sqlx migrate run
+        run: sqlx migrate run --source schema/migrations
       - *fetch-tailwind
       - name: Check the offline cache is current
         run: >-

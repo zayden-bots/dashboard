@@ -774,7 +774,7 @@ fn load_error(title: &str, message: &str) -> String {
 const FORBIDDEN: &str = "You need Manage Server in this server to open this page.";
 const NOT_A_SERVER: &str = "That address doesn't name a Discord server.";
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_levels_page_pages_the_board_by_links_and_names_members_from_discord(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1159,7 +1159,7 @@ fn rr_table() -> String {
     )
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_reaction_role_page_lists_mappings_and_adds_and_removes_them(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1668,7 +1668,7 @@ fn section_flash<'a>(html: &'a str, section: &str) -> Option<&'a str> {
     rest.split_once("</span>").map(|(text, _)| text)
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_greetings_page_renders_every_section_for_a_member_admin(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1869,7 +1869,7 @@ fn image_card(url: &str, id: &str, host: &str, noun: &str) -> String {
     )
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_greetings_saves_redirect_with_their_result_or_rerender_with_the_reason(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -2188,7 +2188,7 @@ async fn the_greetings_saves_redirect_with_their_result_or_rerender_with_the_rea
     app.pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_greetings_header_switch_turns_the_module_on_and_off(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -2248,7 +2248,7 @@ async fn the_greetings_header_switch_turns_the_module_on_and_off(
     app.pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_refused_greetings_save_keeps_what_was_typed_in_its_own_form_only(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -2321,7 +2321,7 @@ async fn a_refused_greetings_save_keeps_what_was_typed_in_its_own_form_only(
     app.pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_refused_reaction_role_add_keeps_what_was_typed(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -2369,7 +2369,7 @@ async fn a_refused_reaction_role_add_keeps_what_was_typed(
     app.pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn operators_see_the_channel_list_read_only(
     options: PgPoolOptions,
     connect: PgConnectOptions,

@@ -260,7 +260,7 @@ async fn seeded(pool: &PgPool) -> TestResult<Harness> {
     harness(pool)
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn role_checks_read_false_for_visitors_and_plain_users(pool: PgPool) {
     let app = seeded(&pool).await.unwrap();
 
@@ -279,7 +279,7 @@ async fn role_checks_read_false_for_visitors_and_plain_users(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn operator_access_is_only_for_operators_without_member_rights(pool: PgPool) {
     let app = seeded(&pool).await.unwrap();
     app.user_guilds
@@ -315,7 +315,7 @@ async fn operator_access_is_only_for_operators_without_member_rights(pool: PgPoo
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn guarded_calls_refuse_visitors_and_users_without_the_role(pool: PgPool) {
     let app = seeded(&pool).await.unwrap();
 
@@ -344,7 +344,7 @@ async fn guarded_calls_refuse_visitors_and_users_without_the_role(pool: PgPool) 
     assert!(refusals.lines().all(|line| line == "denied forbidden"), "{refusals}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn admins_reach_the_loadout_calls(pool: PgPool) {
     let app = seeded(&pool).await.unwrap();
     let as_admin = |path| app.text(path, Some(OPERATOR_COOKIE));
@@ -364,7 +364,7 @@ async fn admins_reach_the_loadout_calls(pool: PgPool) {
 }
 
 /// `admin` and `operator` are independent: neither grants the other's calls.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn each_role_opens_only_its_own_calls(pool: PgPool) {
     let app = seeded(&pool).await.unwrap();
 
@@ -405,7 +405,7 @@ async fn each_role_opens_only_its_own_calls(pool: PgPool) {
 
 /// The checks run in order and stop before Discord: name, reserved icon
 /// keys, then the image, then the bot's application id.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn emoji_creation_checks_the_name_and_image_first(pool: PgPool) {
     let app = seeded(&pool).await.unwrap();
 

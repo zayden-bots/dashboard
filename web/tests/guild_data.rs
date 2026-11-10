@@ -498,7 +498,7 @@ fn debug(settings: &SectionSettings) -> String {
     format!("{settings:?}")
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_guild_list_holds_only_guilds_the_user_manages(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -506,7 +506,7 @@ async fn the_guild_list_holds_only_guilds_the_user_manages(pool: PgPool) {
     assert_eq!(app.text("/test/guilds", Some(MEMBER)).await.unwrap(), "");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_signed_out_guild_list_redirects_to_login(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -516,7 +516,7 @@ async fn a_signed_out_guild_list_redirects_to_login(pool: PgPool) {
     assert_eq!(response.headers().get(header::LOCATION).unwrap(), "/login");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_active_guild_comes_from_the_users_own_list(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -534,7 +534,7 @@ async fn the_active_guild_comes_from_the_users_own_list(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn section_loads_authorize_first(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -552,7 +552,7 @@ async fn section_loads_authorize_first(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn an_unknown_section_reads_the_general_one(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -569,7 +569,7 @@ async fn an_unknown_section_reads_the_general_one(pool: PgPool) {
     assert_eq!(app.section("nope").await.unwrap(), general);
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn blank_ids_clear_settings_without_asking_discord(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -603,7 +603,7 @@ async fn blank_ids_clear_settings_without_asking_discord(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn ai_settings_round_trip(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -618,7 +618,7 @@ async fn ai_settings_round_trip(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn family_partners_are_at_least_one(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -650,7 +650,7 @@ async fn family_partners_are_at_least_one(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn music_clamps_the_disconnect_delay(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -668,7 +668,7 @@ async fn music_clamps_the_disconnect_delay(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn honeypot_validates_through_its_own_form_rules(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -693,7 +693,7 @@ async fn honeypot_validates_through_its_own_form_rules(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_creator_channel_needs_a_category(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -711,7 +711,7 @@ async fn a_creator_channel_needs_a_category(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn support_settings_round_trip(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -787,7 +787,7 @@ async fn support_settings_round_trip(pool: PgPool) {
     }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_blank_wiki_key_with_keep_leaves_the_stored_key(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -810,7 +810,7 @@ async fn a_blank_wiki_key_with_keep_leaves_the_stored_key(pool: PgPool) {
     assert!(!key_set(&app.section("support-wiki").await.unwrap()));
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_wiki_url_is_validated_before_saving(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -821,7 +821,7 @@ async fn the_wiki_url_is_validated_before_saving(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn support_roles_are_listed_and_removed_without_an_ownership_check(
     pool: PgPool,
 ) {
@@ -849,7 +849,7 @@ async fn support_roles_are_listed_and_removed_without_an_ownership_check(
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn helper_links_are_validated_then_stored_normalized(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -896,7 +896,7 @@ async fn helper_links_are_validated_then_stored_normalized(pool: PgPool) {
     assert!(HelperLinks::list(&app.pool, GuildId::new(7)).await.unwrap().is_empty());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn patreon_and_youtube_start_disconnected(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -910,7 +910,7 @@ async fn patreon_and_youtube_start_disconnected(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn announcement_channels_clear_or_must_parse(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -938,7 +938,7 @@ async fn announcement_channels_clear_or_must_parse(pool: PgPool) {
     }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn deadlock_starts_without_an_announcement(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -955,7 +955,7 @@ async fn deadlock_starts_without_an_announcement(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn deadlock_channel_clears_or_must_parse(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -975,7 +975,7 @@ async fn deadlock_channel_clears_or_must_parse(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn disconnecting_nothing_succeeds(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -987,7 +987,7 @@ async fn disconnecting_nothing_succeeds(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_kofi_email_links_once(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -1009,7 +1009,7 @@ async fn a_kofi_email_links_once(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn module_cards_read_stored_states_and_settings(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -1035,7 +1035,7 @@ async fn module_cards_read_stored_states_and_settings(pool: PgPool) {
     assert!(cards.contains("ai=Some(true)"), "{cards}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn module_toggles_refuse_what_they_cannot_switch(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -1061,7 +1061,7 @@ async fn module_toggles_refuse_what_they_cannot_switch(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_user_tier_is_free_until_entitled(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -1073,7 +1073,7 @@ async fn the_user_tier_is_free_until_entitled(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn connection_failures_are_shown_with_one_prefix(pool: PgPool) {
     let app = harness(pool).await.unwrap();
     app.section("ai").await.unwrap();
@@ -1090,7 +1090,7 @@ async fn connection_failures_are_shown_with_one_prefix(pool: PgPool) {
     }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn uncalled_guild_reads_authorize_first(pool: PgPool) {
     let app = harness(pool).await.unwrap();
     SupportRoles::add(&app.pool, GuildId::new(7), RoleId::new(5)).await.unwrap();
@@ -1113,7 +1113,7 @@ async fn uncalled_guild_reads_authorize_first(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_zero_guild_id_has_no_server_tier(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
@@ -1123,7 +1123,7 @@ async fn a_zero_guild_id_has_no_server_tier(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn command_permissions_need_an_application_id(pool: PgPool) {
     let app = harness(pool.clone()).await.unwrap();
     assert_eq!(
@@ -1136,7 +1136,7 @@ async fn command_permissions_need_an_application_id(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_zero_application_id_is_refused(pool: PgPool) {
     let app = harness_for(pool, 0).await.unwrap();
 

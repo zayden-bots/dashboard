@@ -79,7 +79,7 @@ async fn save_new(pool: &PgPool, name: &str) -> Result<i32, AdminError> {
     write_unchecked(pool, None, &draft(&form)?).await
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_saved_loadout_reads_back_as_the_editor_form(pool: PgPool) {
     let id = save_new(&pool, "Round Trip").await.unwrap();
 
@@ -88,7 +88,7 @@ async fn a_saved_loadout_reads_back_as_the_editor_form(pool: PgPool) {
     assert_eq!(form, editor_form(Some(id), raw("Round Trip")));
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn saving_an_existing_id_replaces_it(pool: PgPool) {
     let id = save_new(&pool, "Before").await.unwrap();
 
@@ -108,7 +108,7 @@ async fn saving_an_existing_id_replaces_it(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_list_is_ordered_by_class_then_element(pool: PgPool) {
     let id = save_new(&pool, "Listed").await.unwrap();
 
@@ -138,7 +138,7 @@ async fn the_list_is_ordered_by_class_then_element(pool: PgPool) {
     assert_eq!(keys, sorted);
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_duplicate_class_element_and_name_is_refused(pool: PgPool) {
     save_new(&pool, "Twice").await.unwrap();
 
@@ -152,7 +152,7 @@ async fn a_duplicate_class_element_and_name_is_refused(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn missing_loadouts_name_their_id(pool: PgPool) {
     let form = loadout_form(None, raw("Ghost"));
     let d = draft(&form).unwrap();
@@ -171,7 +171,7 @@ async fn missing_loadouts_name_their_id(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_deleted_loadout_is_gone(pool: PgPool) {
     let id = save_new(&pool, "Doomed").await.unwrap();
 
@@ -184,7 +184,7 @@ async fn a_deleted_loadout_is_gone(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_catalog_offers_what_saved_loadouts_use(pool: PgPool) {
     save_new(&pool, "Catalogued").await.unwrap();
     let emoji = EmojiInfo { name: "song_of_flame".into(), id: "42".into() };
@@ -224,7 +224,7 @@ async fn the_catalog_offers_what_saved_loadouts_use(pool: PgPool) {
 }
 
 /// The bot is asked for its emojis only after every catalog query succeeds.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_catalog_skips_discord_when_the_database_fails(pool: PgPool) {
     let polled = AtomicBool::new(false);
     pool.close().await;

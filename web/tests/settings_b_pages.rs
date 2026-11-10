@@ -665,7 +665,7 @@ fn connect_youtube_json() -> youtube::model::OwnChannel {
 
 const BOT_CANNOT_POST: &str = "Zayden can't post in #rules: it needs View Channel and Send Messages there. Allow them for the bot's role in the channel's permissions, then save again.";
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn provider_pages_follow_the_connection(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -900,7 +900,7 @@ async fn provider_pages_follow_the_connection(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn announcements_keep_a_message_and_ping_roles(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1039,7 +1039,7 @@ async fn announcements_keep_a_message_and_ping_roles(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn deadlock_keeps_a_message_and_ping_roles(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1176,7 +1176,7 @@ const TICKETS: &str = "/guild/7/support";
 
 const TICKET_BODY: &str = "guild=7&support_channel_id=104&solved_tag_id=600&closed_tag_id=&solved_archive_secs=-5&idle_enabled=true&idle_after_secs=10&idle_close_enabled=false&idle_close_after_secs=86400&stale_enabled=true&stale_tag_id=600&stale_after_secs=604800";
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn support_pages_have_their_own_addresses_and_one_form_each(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1420,7 +1420,7 @@ async fn support_pages_have_their_own_addresses_and_one_form_each(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn support_roles_and_links_are_list_actions_behind_confirms(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1593,7 +1593,7 @@ async fn support_roles_and_links_are_list_actions_behind_confirms(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn faq_articles_have_list_new_and_edit_pages(
     options: PgPoolOptions,
     connect: PgConnectOptions,

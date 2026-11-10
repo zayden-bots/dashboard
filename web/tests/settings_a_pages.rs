@@ -627,7 +627,7 @@ fn title(label: &str) -> String {
     format!("<title>{label} - Zayden Dashboard</title>")
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn every_page_renders_its_stored_settings(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -799,7 +799,7 @@ async fn every_page_renders_its_stored_settings(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn saves_redirect_with_the_result_in_the_save_bar(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1001,7 +1001,7 @@ async fn saves_redirect_with_the_result_in_the_save_bar(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn failures_re_render_with_the_reason_at_the_form_and_the_field(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1182,7 +1182,7 @@ async fn failures_re_render_with_the_reason_at_the_form_and_the_field(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_header_switch_turns_a_command_module_on_and_off(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1266,7 +1266,7 @@ async fn the_header_switch_turns_a_command_module_on_and_off(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn pages_report_what_they_cannot_load(
     options: PgPoolOptions,
     connect: PgConnectOptions,

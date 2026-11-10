@@ -227,7 +227,7 @@ fn set_cookies(response: &Response) -> Vec<String> {
         .collect()
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_signed_out_visitor_is_sent_to_discord_and_remembered(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 
@@ -250,7 +250,7 @@ async fn a_signed_out_visitor_is_sent_to_discord_and_remembered(pool: PgPool) {
     }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_signed_in_user_is_sent_to_steam_with_a_fresh_nonce(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 
@@ -281,7 +281,7 @@ async fn a_signed_in_user_is_sent_to_steam_with_a_fresh_nonce(pool: PgPool) {
     assert!(target.contains(&format!("%3Fn%3D{nonce}")), "{target}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_callback_with_a_wrong_nonce_links_nothing(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 
@@ -301,7 +301,7 @@ async fn a_callback_with_a_wrong_nonce_links_nothing(pool: PgPool) {
     assert!(AccountLink::list_for_user(&pool, USER_ID).await.unwrap().is_empty());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_cancelled_steam_sign_in_returns_to_the_page(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 
@@ -318,7 +318,7 @@ async fn a_cancelled_steam_sign_in_returns_to_the_page(pool: PgPool) {
     assert!(AccountLink::list_for_user(&pool, USER_ID).await.unwrap().is_empty());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_account_page_lists_the_linked_steam_account(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
     AccountLink::upsert_transfer(&pool, USER_ID, Provider::Steam, STEAM_ID)
@@ -335,7 +335,7 @@ async fn the_account_page_lists_the_linked_steam_account(pool: PgPool) {
     assert!(!html.contains("/account/link/steam"), "{html}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_account_page_offers_linking_when_nothing_is_linked(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 
@@ -347,7 +347,7 @@ async fn the_account_page_offers_linking_when_nothing_is_linked(pool: PgPool) {
     assert!(html.contains("Link Steam"), "{html}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn unlinking_removes_the_row_and_returns_to_the_page(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
     AccountLink::upsert_transfer(&pool, USER_ID, Provider::Steam, STEAM_ID)
@@ -362,7 +362,7 @@ async fn unlinking_removes_the_row_and_returns_to_the_page(pool: PgPool) {
     assert!(AccountLink::list_for_user(&pool, USER_ID).await.unwrap().is_empty());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn an_unknown_provider_unlinks_nothing(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
     AccountLink::upsert_transfer(&pool, USER_ID, Provider::Steam, STEAM_ID)
@@ -377,7 +377,7 @@ async fn an_unknown_provider_unlinks_nothing(pool: PgPool) {
     assert_eq!(AccountLink::list_for_user(&pool, USER_ID).await.unwrap().len(), 1);
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_account_page_offers_summaries_for_servers_that_use_the_module(
     pool: PgPool,
 ) {
@@ -398,7 +398,7 @@ async fn the_account_page_offers_summaries_for_servers_that_use_the_module(
     assert!(!html.contains(r#"name="squad_8""#), "{html}");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn squad_membership_is_saved_with_the_server_choices(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
     seed_served_guild(&pool).await.unwrap();
@@ -423,7 +423,7 @@ async fn squad_membership_is_saved_with_the_server_choices(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_dm_checkbox_saves_and_clears_the_preference(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 
@@ -443,7 +443,7 @@ async fn the_dm_checkbox_saves_and_clears_the_preference(pool: PgPool) {
     assert!(user_settings::dm_summaries(&pool, USER_ID).await.unwrap());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_briefing_checkbox_saves_independently_of_summaries(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 
@@ -467,7 +467,7 @@ async fn the_briefing_checkbox_saves_independently_of_summaries(pool: PgPool) {
     assert!(user_settings::patch_briefing(&pool, USER_ID).await.unwrap());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn sharing_is_saved_only_for_servers_that_use_the_module(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
     seed_served_guild(&pool).await.unwrap();
@@ -495,7 +495,7 @@ async fn sharing_is_saved_only_for_servers_that_use_the_module(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_signed_out_visitor_cannot_change_summary_settings(pool: PgPool) {
     let router = harness(&pool).await.unwrap();
 

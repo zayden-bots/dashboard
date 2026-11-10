@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["bot-runtime", "bots/*", "bot-modules/*", "web", "zayden-app"]
+members = ["bot-runtime", "bots/*", "bot-modules/*", "schema", "web", "zayden-app"]
 
 [workspace.package]
 version = "1.0.0"
@@ -174,6 +174,7 @@ zayden-core = { path = "./bot-modules/zayden-core" }
 zayden-graphics = { path = "./bot-modules/zayden-graphics" }
 zayden-app = { path = "./zayden-app" }
 bot-runtime = { path = "./bot-runtime" }
+schema = { path = "./schema" }
 
 # -- First-party git dependencies
 bungie-api = { git = "https://github.com/ViridianLink/bungie-api.git", branch = "main" }

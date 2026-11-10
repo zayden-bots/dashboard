@@ -57,7 +57,7 @@ fn session_cache() -> SessionCache {
     Cache::builder().max_capacity(16).time_to_live(Duration::from_secs(60)).build()
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_miss_reads_the_row_and_records_it(pool: PgPool) {
     seed(&pool).await.unwrap();
     let cache = session_cache();
@@ -74,7 +74,7 @@ async fn a_miss_reads_the_row_and_records_it(pool: PgPool) {
 }
 
 /// The token has no row: only the cache can answer.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_hit_answers_without_the_database(pool: PgPool) {
     let cache = session_cache();
     cache
@@ -93,7 +93,7 @@ async fn a_hit_answers_without_the_database(pool: PgPool) {
     assert_eq!(identity.access_token, "cached-only-access-token");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn an_unknown_token_is_not_a_session(pool: PgPool) {
     seed(&pool).await.unwrap();
     let cache = session_cache();
@@ -105,7 +105,7 @@ async fn an_unknown_token_is_not_a_session(pool: PgPool) {
     assert!(cache.get("no-such-token").await.is_none());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn an_expired_session_is_not_revived_by_the_cache(pool: PgPool) {
     seed(&pool).await.unwrap();
     let cache = session_cache();
@@ -117,7 +117,7 @@ async fn an_expired_session_is_not_revived_by_the_cache(pool: PgPool) {
     assert!(cache.get("expired-token").await.is_none());
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_lookup_works_with_no_cache_at_all(pool: PgPool) {
     seed(&pool).await.unwrap();
 
@@ -160,7 +160,7 @@ fn identity(user_id: i64) -> SessionIdentity {
     SessionIdentity { user_id, access_token: "not-a-real-access-token".to_owned() }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_member_who_manages_the_guild_gets_member_access(pool: PgPool) {
     let cache = guilds_cache(41).await;
 
@@ -175,7 +175,7 @@ async fn a_member_who_manages_the_guild_gets_member_access(pool: PgPool) {
 
 /// The context carries the user's bearer token; `Debug` output, which ends up
 /// in logs and panic messages, must not.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_guild_context_debug_output_hides_the_token(pool: PgPool) {
     let cache = guilds_cache(41).await;
 
@@ -189,7 +189,7 @@ async fn the_guild_context_debug_output_hides_the_token(pool: PgPool) {
     );
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_member_without_manage_rights_is_forbidden(pool: PgPool) {
     let cache = guilds_cache(41).await;
 
@@ -200,7 +200,7 @@ async fn a_member_without_manage_rights_is_forbidden(pool: PgPool) {
     assert_eq!(error, AuthError::Forbidden);
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_non_numeric_guild_id_is_rejected(pool: PgPool) {
     let cache = guilds_cache(41).await;
 
@@ -213,7 +213,7 @@ async fn a_non_numeric_guild_id_is_rejected(pool: PgPool) {
 
 /// With no bot client the bot cannot be in the guild, which is the refusal an
 /// operator gets for a guild Zayden has left.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn an_operator_needs_the_bot_in_the_guild(pool: PgPool) {
     let cache = guilds_cache(OPERATOR).await;
 
@@ -224,7 +224,7 @@ async fn an_operator_needs_the_bot_in_the_guild(pool: PgPool) {
     assert_eq!(error.to_string(), "Zayden isn't in that server");
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn an_operator_who_manages_the_guild_is_a_member(pool: PgPool) {
     let cache = guilds_cache(OPERATOR).await;
 

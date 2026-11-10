@@ -34,7 +34,7 @@ When validation is requested:
   ```sh
   docker run --rm -d --name zayden-prepare -p 55432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=zayden_prepare postgres:18-alpine
   export DATABASE_URL="postgres://postgres:postgres@localhost:55432/zayden_prepare"
-  sqlx migrate run
+  sqlx migrate run --source schema/migrations
   ```
 - **Live DB (`.env`)**: Never mutate without explicit user confirmation. Read-only queries are fine.
 - **Regenerating `.sqlx`**: Required when `query!` changes. Run against an empty, freshly-migrated DB (plan-sensitive nullability inference):

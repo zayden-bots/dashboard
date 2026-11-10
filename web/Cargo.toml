@@ -67,6 +67,7 @@ zayden-app = { workspace = true }
 hmac = { workspace = true }
 http-body-util = { workspace = true }
 md-5 = { workspace = true }
+schema = { workspace = true }
 sha1 = { workspace = true }
 
 [build-dependencies]

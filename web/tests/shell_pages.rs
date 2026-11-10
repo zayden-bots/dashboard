@@ -497,7 +497,7 @@ fn group_flash(group: &str, message: &str) -> String {
     )
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_guild_list_frames_the_managed_guilds(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -590,7 +590,7 @@ async fn the_guild_list_frames_the_managed_guilds(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_guild_frame_wraps_the_overview_and_nested_pages(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -749,7 +749,7 @@ async fn the_guild_frame_wraps_the_overview_and_nested_pages(
 /// A `suspense` child that has taken the only connection is not polled again
 /// until the rest of the page has its first content, so a chrome lookup beside
 /// it would wait out the acquire timeout. One connection must be enough.
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_chrome_and_a_streamed_page_body_share_one_connection(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -779,7 +779,7 @@ async fn the_chrome_and_a_streamed_page_body_share_one_connection(
     pool.close().await;
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn module_toggles_save_or_report_why_not(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -927,7 +927,7 @@ fn kofi_form(email: Option<&str>, error: Option<&str>) -> String {
     )
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_upgrade_page_follows_the_viewer_and_links_kofi_emails(
     options: PgPoolOptions,
     connect: PgConnectOptions,
@@ -1103,7 +1103,7 @@ async fn seed_users(users: &SessionUsersCache, ids: &[i64]) {
     }
 }
 
-#[sqlx::test(migrations = "../migrations")]
+#[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn a_missing_page_inside_a_managed_guild_keeps_the_guild_shell(
     options: PgPoolOptions,
     connect: PgConnectOptions,
