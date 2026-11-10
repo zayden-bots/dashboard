@@ -111,6 +111,14 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
         with:
           command: check
+      - run: rustup toolchain install stable --profile minimal
+      - name: One ref per org repository
+        run: |
+          cargo metadata --format-version 1 --locked | jq -e '
+            [.packages[].source // empty
+              | select(test("github.com/[^/]+/(schema|platform|modules)([?#]|$)"))
+              | sub("#.*$"; "")]
+            | unique | group_by(sub("\\?.*$"; "")) | all(length == 1)'
 
   sqlx:
     name: sqlx prepare --check
@@ -150,8 +158,15 @@ jobs:
           cargo install "sqlx-cli@${version}" --locked --no-default-features \
             --features postgres,rustls
       - name: Apply migrations
-        run: sqlx migrate run --source schema/migrations
+        run: |
+          dir="$(cargo metadata --format-version 1 --locked \
+            | jq -r '.packages[] | select(.name == "schema") | .manifest_path | rtrimstr("/Cargo.toml")')"
+          sqlx migrate run --source "$dir/migrations"
       - *fetch-tailwind
+      - name: Build dependencies offline
+        env:
+          SQLX_OFFLINE: true
+        run: cargo check --workspace --all-targets --locked
       - name: Check the offline cache is current
         run: >-
           cargo sqlx prepare --workspace --check -- --all-targets --locked
@@ -170,10 +185,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: bot
-            dockerfile: docker/Dockerfile.bot
-            image: zayden-bot
-            needs_ytdlp: true
           - name: web
             dockerfile: docker/Dockerfile.web
             image: zayden-web

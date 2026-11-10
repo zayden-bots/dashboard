@@ -29,14 +29,6 @@ tarpaulin-report.*
 .claude/settings.local.json
 skills-lock.json
 
-# Root-level scratch planning docs.
-/1_0_release_spec.md
-/EFFECTS_REFACTOR_PLAN.md
-/FUTURE_WORK.md
-/MARATHON_DESIGN.md
-/MARATHON_MANUAL_TESTS.md
-/MARATHON_TODO.md
-
 # Logs
 log.txt
 *.log
@@ -51,12 +43,6 @@ lerna-debug.log*
 palworld_uploads/
 multipler-client-files/
 *.sav
-
-# Test fixtures must be committed despite the *.sav ignore above.
-!bot-modules/marathon/tests/fixtures/
-!bot-modules/marathon/tests/fixtures/**
-!bot-modules/palworld/tests/fixtures/
-!bot-modules/palworld/tests/fixtures/**
 
 # Python helper scripts
 __pycache__/
@@ -85,3 +71,6 @@ build/
 
 # Shared Topcoat reference
 docs/topcoat
+
+# Deployed config, symlinked from the infra checkout
+/config.toml

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["bot-runtime", "bots/*", "bot-modules/*", "schema", "web", "zayden-app"]
+members = ["web"]
 
 [workspace.package]
 version = "1.0.0"
@@ -142,52 +142,23 @@ redundant_pub_crate = "allow"
 
 [workspace.dependencies]
 
-# -- Workspace members
-accounts = { path = "./bot-modules/accounts" }
-ai = { path = "./bot-modules/ai" }
-deadlock = { path = "./bot-modules/deadlock" }
-destiny2 = { path = "./bot-modules/destiny2" }
-family = { path = "./bot-modules/family" }
-gambling = { path = "./bot-modules/gambling" }
-gold-star = { path = "./bot-modules/gold-star" }
-greetings = { path = "./bot-modules/greetings" }
-honeypot = { path = "./bot-modules/honeypot" }
-hosting = { path = "./bot-modules/hosting" }
-jellyfin = { path = "./bot-modules/jellyfin" }
-levels = { path = "./bot-modules/levels" }
-lfg = { path = "./bot-modules/lfg" }
-llamad2 = { path = "./bot-modules/llamad2" }
-marathon = { path = "./bot-modules/marathon" }
-misc = { path = "./bot-modules/misc" }
-moderation = { path = "./bot-modules/moderation" }
-music = { path = "./bot-modules/music" }
-palworld = { path = "./bot-modules/palworld" }
-patreon = { path = "./bot-modules/patreon" }
-reaction-roles = { path = "./bot-modules/reaction-roles" }
-suggestions = { path = "./bot-modules/suggestions" }
-temp-voice = { path = "./bot-modules/temp-voice" }
-ticket = { path = "./bot-modules/ticket" }
-verify = { path = "./bot-modules/verify" }
-watch = { path = "./bot-modules/watch" }
-youtube = { path = "./bot-modules/youtube" }
-zayden-core = { path = "./bot-modules/zayden-core" }
-zayden-graphics = { path = "./bot-modules/zayden-graphics" }
-zayden-app = { path = "./zayden-app" }
-bot-runtime = { path = "./bot-runtime" }
-schema = { path = "./schema" }
-
-# -- First-party git dependencies
-bungie-api = { git = "https://github.com/ViridianLink/bungie-api.git", branch = "main" }
-deadlock-api = { git = "https://github.com/ViridianLink/deadlock-api.git", branch = "main" }
-google-sheets-api = { git = "https://github.com/ViridianLink/google-sheets-api.git", branch = "main" }
+# -- Org repositories (one tag per repository)
+accounts = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+deadlock = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+destiny2 = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+greetings = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+honeypot = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+hosting = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+patreon = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+reaction-roles = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+suggestions = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+ticket = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+youtube = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
+schema = { git = "https://github.com/ViridianLink/schema", tag = "v1.0.0" }
+zayden-app = { git = "https://github.com/ViridianLink/platform", tag = "v1.0.0" }
+zayden-core = { git = "https://github.com/ViridianLink/platform", tag = "v1.0.0" }
 
 # -- Discord
-serenity = { git = "https://github.com/serenity-rs/serenity", branch = "next", default-features = false, features = [
-    "rustls_backend",
-    "transport_compression_zlib",
-    "transport_compression_zstd",
-] }
-songbird = { git = "https://github.com/KiloOscarSix/songbird", branch = "ringbuf-bump", default-features = false }
 twilight-http = { version = "*", default-features = false, features = [
     "decompression",
     "rustls-webpki-roots",
@@ -198,39 +169,21 @@ twilight-model = { version = "*" }
 thiserror = { version = "*", default-features = false }
 
 # -- Collections and concurrency
-dashmap = { version = "*", default-features = false }
-itertools = { version = "*", default-features = false, features = ["use_std"] }
 moka = { version = "*", default-features = false }
-rayon = { version = "*", default-features = false }
 
 # -- Randomness and numerics
-bigdecimal = { version = "*", default-features = false }
 rand = { version = "0.10", default-features = false }
-rand_distr = { version = "*", default-features = false }
 
 # -- Serialization
 base64 = { version = "*", default-features = false }
 serde = { version = "*", default-features = false }
 serde_json = { version = "*", default-features = false }
-toml = { version = "*", default-features = false }
-quick-xml = { version = "*", default-features = false }
 
 # -- Dates and times
 jiff = { version = "*", default-features = false }
-jiff-cron = { version = "*", default-features = false }
 jiff-sqlx = { version = "*", default-features = false }
 
 # -- CLI and configuration
-# Unused; uncomment instead of hand-rolling argument parsing.
-# clap = { version = "*", default-features = false, features = [
-#   "std",
-#   "help",
-#   "usage",
-#   "error-context",
-#   "suggestions",
-#   "derive",
-#   "env",
-# ] }
 dotenvy = { version = "*", default-features = false }
 
 # -- HTTP client
@@ -240,18 +193,7 @@ oauth2 = { version = "*", default-features = false, features = [
     "rustls-tls",
 ] }
 rustls = { version = "*", default-features = false }
-ego-tree = { version = "*", default-features = false }
-scraper = { version = "*", default-features = false }
-htmd = { version = "*", default-features = false }
 url = { version = "*", default-features = false }
-
-# -- HTTP server
-# Unused; uncomment instead of hand-rolling UUID generation or parsing.
-# utoipa = { version = "*", default-features = false, features = [
-#   "macros",
-#   "jiff_0_2",
-#   "uuid",
-# ] }
 
 # -- Database
 sqlx = { version = "*", default-features = false, features = [
@@ -260,69 +202,29 @@ sqlx = { version = "*", default-features = false, features = [
     "tls-rustls-aws-lc-rs",
     "runtime-tokio",
 ] }
-# Unused; uncomment instead of hand-rolling UUID generation or parsing.
-# uuid = { version = "*", default-features = false, features = [
-#   "std",
-#   "v4",
-#   "serde",
-# ] }
 
 # -- Async runtime
-async-trait = { version = "*", default-features = false }
-futures = { version = "*", default-features = false }
 tokio = { version = "*", default-features = false }
 
 # -- Observability
-metrics = { version = "*", default-features = false }
-metrics-exporter-prometheus = { version = "*", default-features = false, features = [
-    "http-listener",
-] }
 tracing = { version = "*", default-features = false }
 tracing-subscriber = { version = "*", default-features = false }
-
-# -- AI
-async-openai = { version = "*", default-features = false }
-
-# -- Media
-image = { version = "*", default-features = false, features = ["jpeg", "png"] }
-png = { version = "*", default-features = false }
-resvg = { version = "*", default-features = false, features = [
-    "text",
-    "memmap-fonts",
-] }
-rspotify = { version = "*", default-features = false }
-symphonia = { version = "0.5", default-features = false }
-
-# -- Game-save and archive formats
-flate2 = { version = "1", default-features = false, features = [
-    "rust_backend",
-] }
-gvas = { version = "0.11" }
-oozextract = { version = "=0.5.0" }
-# Unused; uncomment instead of hand-rolling zip archive handling.
-# zip = { version = "*", default-features = false }
 
 # -- Text and hashing
 # Majors pinned together: `hmac` 0.13, `md-5` 0.11 and `sha1` 0.11 all build on
 # `digest` 0.11, and `*` resolves `hmac` to 0.12 (digest 0.10), which will not compose.
 hmac = { version = "0.13", default-features = false }
 md-5 = { version = "0.11", default-features = false }
-regex = { version = "*", default-features = false }
 sha1 = { version = "0.11", default-features = false }
 sha2 = { version = "*", default-features = false }
 
 # -- Encryption
-# Already built as rustls' crypto provider; reused rather than adding a cipher crate.
-aws-lc-rs = { version = "*", default-features = false }
 secrecy = { version = "*", default-features = false }
 
 # -- Frontend (Topcoat)
 topcoat = { version = "0.11", default-features = false }
 
 # ── Testing and benchmarking ─────────────────────────────────────────────────
-criterion = { version = "*", default-features = false, features = [
-    "cargo_bench_support",
-] }
 http-body-util = { version = "*", default-features = false }
 
 

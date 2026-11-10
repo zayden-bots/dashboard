@@ -10,6 +10,7 @@ rust-toolchain.toml
 
 # Secrets and local config
 .env
+config.toml
 .env.*
 !.env.example
 !.env.docker.example
