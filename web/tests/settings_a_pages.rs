@@ -764,7 +764,7 @@ async fn every_page_renders_its_stored_settings(
         "{main}"
     );
 
-    app.app.modules.set(7, "music", true).await.unwrap();
+    app.app.modules.set(7, 1, "music", true).await.unwrap();
     let html = app.page("/guild/7/music").await.unwrap();
     assert!(html.contains(&title("Music")), "{html}");
     let main = main_content(&html);
@@ -1192,7 +1192,7 @@ async fn the_header_switch_turns_a_command_module_on_and_off(
     let pool = test_pool(options, connect).await.unwrap();
     let app = harness(&pool).await.unwrap();
     let modules = &app.app.modules;
-    modules.set(7, "music", true).await.unwrap();
+    modules.set(7, 1, "music", true).await.unwrap();
 
     let html = app
         .redirected(
@@ -1202,8 +1202,11 @@ async fn the_header_switch_turns_a_command_module_on_and_off(
         )
         .await
         .unwrap();
-    modules.refresh(7).await.unwrap();
-    assert_eq!(modules.states(7).await.unwrap().get("music").copied(), Some(false));
+    modules.refresh(7, 1).await.unwrap();
+    assert_eq!(
+        modules.states(7, 1).await.unwrap().get("music").copied(),
+        Some(false)
+    );
     assert_eq!(top_flash(&html), Some("Music turned off."));
     assert!(html.contains(r#"aria-checked="false" aria-label="Music module" name="enabled" value="true""#), "{html}");
     assert!(
@@ -1255,8 +1258,11 @@ async fn the_header_switch_turns_a_command_module_on_and_off(
         .await
         .unwrap();
     assert!(html.contains("Not changed: invalid value for `guild`"), "{html}");
-    modules.refresh(7).await.unwrap();
-    assert_eq!(modules.states(7).await.unwrap().get("music").copied(), Some(false));
+    modules.refresh(7, 1).await.unwrap();
+    assert_eq!(
+        modules.states(7, 1).await.unwrap().get("music").copied(),
+        Some(false)
+    );
 
     let response = app
         .post("/guild/7/music/module", "guild=7&enabled=true", None)

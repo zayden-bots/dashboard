@@ -134,6 +134,12 @@ async fn seed_served_guild(pool: &PgPool) -> TestResult {
         .execute(pool)
         .await?;
     sqlx::query!(
+        "INSERT INTO applications (application_id, slot, kind, bot_user_id, name)
+         VALUES (1, 'zayden', 'default', 1, 'Zayden')"
+    )
+    .execute(pool)
+    .await?;
+    sqlx::query!(
         "INSERT INTO guild_presence (guild_id, application_id) VALUES ($1, 1)",
         SERVED_GUILD
     )

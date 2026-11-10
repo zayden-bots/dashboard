@@ -3,7 +3,9 @@ use std::hash::BuildHasher;
 
 use topcoat::context::Cx;
 use twilight_model::id::Id;
+use zayden_app::applications::Slot;
 use zayden_app::modules::{self, Backing, MODULES, ModuleDef, ModuleStates};
+use zayden_app::state::AppState;
 
 use super::dto::ModuleView;
 use super::error::{GuildError, server_err};
@@ -81,6 +83,16 @@ async fn settings_flags(
     ]))
 }
 
+async fn seat_application(app: &AppState, guild_id: i64) -> Result<i64, GuildError> {
+    Ok(app
+        .serving
+        .fetch(guild_id, Slot::Zayden)
+        .await
+        .map_err(server_err)?
+        .map_or(app.zayden_id, |bot| bot.application_id)
+        .cast_signed())
+}
+
 pub async fn list_guild_modules(
     cx: &Cx,
     guild: &str,
@@ -89,7 +101,12 @@ pub async fn list_guild_modules(
 
     let (states, flags) = tokio::try_join!(
         async {
-            app_state(cx)?.modules.states(ctx.guild_id).await.map_err(server_err)
+            let app = app_state(cx)?;
+            let application_id = seat_application(app, ctx.guild_id).await?;
+            app.modules
+                .states(ctx.guild_id, application_id)
+                .await
+                .map_err(server_err)
         },
         settings_flags(cx, ctx.guild_id),
     )?;
@@ -140,11 +157,14 @@ pub async fn set_module_enabled(
         Backing::Settings => {
             set_settings_enabled(cx, module.id, ctx.guild_id, enabled).await
         },
-        Backing::Commands => app_state(cx)?
-            .modules
-            .set(ctx.guild_id, module.id, enabled)
-            .await
-            .map_err(server_err),
+        Backing::Commands => {
+            let app = app_state(cx)?;
+            let application_id = seat_application(app, ctx.guild_id).await?;
+            app.modules
+                .set(ctx.guild_id, application_id, module.id, enabled)
+                .await
+                .map_err(server_err)
+        },
         Backing::Derived => Err(GuildError::DerivedModule(module.label)),
     }
 }

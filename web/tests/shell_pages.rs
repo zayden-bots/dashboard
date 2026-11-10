@@ -599,10 +599,10 @@ async fn the_guild_frame_wraps_the_overview_and_nested_pages(
 ) {
     let pool = test_pool(options, connect).await.unwrap();
     let app = harness(&pool, Some(UPGRADE_URL)).await.unwrap();
-    app.app.modules.set(7, "gambling", true).await.unwrap();
+    app.app.modules.set(7, 1, "gambling", true).await.unwrap();
 
     assert_eq!(
-        app.app.modules.states(7).await.unwrap().get("gambling").copied(),
+        app.app.modules.states(7, 1).await.unwrap().get("gambling").copied(),
         Some(true)
     );
     assert!(!app.app.settings.ai.get(7).await.unwrap().enabled);
@@ -819,7 +819,7 @@ async fn module_toggles_save_or_report_why_not(
     assert_eq!(location(&response), Some("/guild/7#modules-community"));
     let flash = flash_cookie(&response).unwrap();
     assert_eq!(
-        app.app.modules.states(7).await.unwrap().get("gambling").copied(),
+        app.app.modules.states(7, 1).await.unwrap().get("gambling").copied(),
         Some(true)
     );
     let html =

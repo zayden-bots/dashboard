@@ -7,6 +7,7 @@ use topcoat::router::error::see_other;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, attributes, component, view};
 use tracing::warn;
+use zayden_app::applications::Slot;
 
 use super::page::{PAGE, SIGN_IN_PATH};
 use crate::auth::{
@@ -109,6 +110,7 @@ async fn allowed_guilds(
         db_pool(cx)?,
         &ids,
         app_state(cx)?.zayden_id.cast_signed(),
+        Slot::Zayden.as_str(),
     )
     .await?;
 

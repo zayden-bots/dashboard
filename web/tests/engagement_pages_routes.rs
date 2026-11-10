@@ -2199,9 +2199,15 @@ async fn the_greetings_header_switch_turns_the_module_on_and_off(
     let app = harness(pool.clone(), |base| base).await.unwrap();
     app.mock_free_guild(7);
     app.guild_directory(7);
-    app.app.modules.set(7, "greetings", true).await.unwrap();
+    app.app.modules.set(7, APP_ID.cast_signed(), "greetings", true).await.unwrap();
     assert_eq!(
-        app.app.modules.states(7).await.unwrap().get("greetings").copied(),
+        app.app
+            .modules
+            .states(7, APP_ID.cast_signed())
+            .await
+            .unwrap()
+            .get("greetings")
+            .copied(),
         Some(true)
     );
 
@@ -2219,7 +2225,13 @@ async fn the_greetings_header_switch_turns_the_module_on_and_off(
     assert_eq!(off.status, StatusCode::SEE_OTHER);
     assert_eq!(off.location.as_deref(), Some(GR));
     assert_eq!(
-        app.app.modules.states(7).await.unwrap().get("greetings").copied(),
+        app.app
+            .modules
+            .states(7, APP_ID.cast_signed())
+            .await
+            .unwrap()
+            .get("greetings")
+            .copied(),
         Some(false)
     );
     let page = app.follow(&off).await.unwrap();
@@ -2243,7 +2255,13 @@ async fn the_greetings_header_switch_turns_the_module_on_and_off(
     );
     assert!(refused.html.contains(&title(GREETINGS_TITLE)), "{}", refused.html);
     assert_eq!(
-        app.app.modules.states(7).await.unwrap().get("greetings").copied(),
+        app.app
+            .modules
+            .states(7, APP_ID.cast_signed())
+            .await
+            .unwrap()
+            .get("greetings")
+            .copied(),
         Some(false)
     );
 

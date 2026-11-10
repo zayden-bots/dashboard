@@ -366,6 +366,7 @@ fn config(zayden_id: u64) -> BotConfig {
 struct Harness {
     router: Router,
     pool: PgPool,
+    app: Arc<ZaydenAppState>,
 }
 
 fn guild(id: u64, name: &str, permissions: Permissions) -> CurrentUserGuild {
@@ -426,7 +427,7 @@ async fn harness_for(pool: PgPool, zayden_id: u64) -> TestResult<Harness> {
 
     let config = config(zayden_id);
     let app = Arc::new(ZaydenAppState::new(pool.clone(), &config));
-    let state = WebState::new(app, &config)?;
+    let state = WebState::new(Arc::clone(&app), &config)?;
     seed_guilds(&state.discord.user_guilds).await;
     seed_users(&state.discord.users, &[41, 43]).await;
     state.discord.member_names.insert((7, 9), "Nine".to_owned()).await;
@@ -446,7 +447,7 @@ async fn harness_for(pool: PgPool, zayden_id: u64) -> TestResult<Harness> {
         .route(server_tier_zero)
         .route(command_context);
 
-    Ok(Harness { router: base.build(), pool })
+    Ok(Harness { router: base.build(), pool, app })
 }
 
 impl Harness {
@@ -1035,6 +1036,23 @@ async fn module_cards_read_stored_states_and_settings(pool: PgPool) {
     let cards = app.text("/test/modules", Some(ADMIN)).await.unwrap();
     assert!(cards.starts_with("music=Some(true),"), "{cards}");
     assert!(cards.contains("ai=Some(true)"), "{cards}");
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR", fixtures("custom_seat"))]
+async fn a_module_toggle_reaches_the_application_serving_the_seat(pool: PgPool) {
+    let app = harness(pool).await.unwrap();
+
+    assert_eq!(
+        app.admin_save("module", "guild=7&module_id=music&enabled=false")
+            .await
+            .unwrap(),
+        "ok"
+    );
+
+    let custom = app.app.modules.states(7, 2000).await.unwrap();
+    assert_eq!(custom.get("music").copied(), Some(false));
+    let default = app.app.modules.states(7, APP_ID.cast_signed()).await.unwrap();
+    assert!(!default.contains_key("music"));
 }
 
 #[sqlx::test(migrator = "schema::MIGRATOR")]
