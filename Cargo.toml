@@ -142,7 +142,7 @@ redundant_pub_crate = "allow"
 
 [workspace.dependencies]
 
-# -- Org repositories (one tag per repository)
+# -- Org repositories (one ref per repository)
 accounts = { git = "https://github.com/zayden-bots/modules" }
 deadlock = { git = "https://github.com/zayden-bots/modules" }
 destiny2 = { git = "https://github.com/zayden-bots/modules" }

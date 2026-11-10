@@ -25,8 +25,9 @@ tarpaulin-report.*
 *.keystore.json
 *.ps1
 
-# Claude Code local state. `.claude/skills/` and `.claude/memory/` ARE tracked.
-.claude/settings.local.json
+# Claude Code local state
+.claude/
+CLAUDE.md
 skills-lock.json
 
 # Logs

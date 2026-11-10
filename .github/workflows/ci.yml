@@ -116,9 +116,11 @@ jobs:
         run: |
           cargo metadata --format-version 1 --locked | jq -e '
             [.packages[].source // empty
-              | select(test("github.com/[^/]+/(schema|platform|modules)([?#]|$)"))
+              | select(test("github\\.com/[^/]+/(schema|platform|modules)(\\.git)?([?#]|$)"; "i"))
               | sub("#.*$"; "")]
-            | unique | group_by(sub("\\?.*$"; "")) | all(length == 1)'
+            | unique
+            | group_by(sub("\\?.*$"; "") | ascii_downcase | sub("\\.git$"; ""))
+            | all(length == 1)'
 
   sqlx:
     name: sqlx prepare --check
