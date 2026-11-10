@@ -143,20 +143,20 @@ redundant_pub_crate = "allow"
 [workspace.dependencies]
 
 # -- Org repositories (one tag per repository)
-accounts = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-deadlock = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-destiny2 = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-greetings = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-honeypot = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-hosting = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-patreon = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-reaction-roles = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-suggestions = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-ticket = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-youtube = { git = "https://github.com/ViridianLink/modules", tag = "v1.0.0" }
-schema = { git = "https://github.com/ViridianLink/schema", tag = "v1.0.0" }
-zayden-app = { git = "https://github.com/ViridianLink/platform", tag = "v1.0.0" }
-zayden-core = { git = "https://github.com/ViridianLink/platform", tag = "v1.0.0" }
+accounts = { git = "https://github.com/zayden-bots/modules" }
+deadlock = { git = "https://github.com/zayden-bots/modules" }
+destiny2 = { git = "https://github.com/zayden-bots/modules" }
+greetings = { git = "https://github.com/zayden-bots/modules" }
+honeypot = { git = "https://github.com/zayden-bots/modules" }
+hosting = { git = "https://github.com/zayden-bots/modules" }
+patreon = { git = "https://github.com/zayden-bots/modules" }
+reaction-roles = { git = "https://github.com/zayden-bots/modules" }
+suggestions = { git = "https://github.com/zayden-bots/modules" }
+ticket = { git = "https://github.com/zayden-bots/modules" }
+youtube = { git = "https://github.com/zayden-bots/modules" }
+schema = { git = "https://github.com/zayden-bots/schema" }
+zayden-app = { git = "https://github.com/zayden-bots/platform" }
+zayden-core = { git = "https://github.com/zayden-bots/platform" }
 
 # -- Discord
 twilight-http = { version = "*", default-features = false, features = [
