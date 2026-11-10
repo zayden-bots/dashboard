@@ -6,7 +6,7 @@ RUN cargo install cargo-chef --locked
 # Plan the dependency build
 FROM chef AS planner
 COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+RUN cargo update && cargo chef prepare --recipe-path recipe.json
 
 # Tailwind CLI, pinned and checksummed so the build never downloads
 # an unverified binary from build.rs.
@@ -39,6 +39,7 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json -p web
 
 COPY . .
+COPY --from=planner /app/Cargo.lock Cargo.lock
 RUN rm -f rust-toolchain.toml \
     && topcoat asset bundle --release -p web
 
