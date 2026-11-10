@@ -5,7 +5,6 @@ version = 4
 [[package]]
 name = "accounts"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "jiff",
@@ -13,7 +12,7 @@ dependencies = [
  "reqwest 0.13.5",
  "serenity",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tracing",
  "url",
  "zayden-core",
@@ -96,7 +95,6 @@ dependencies = [
 [[package]]
 name = "ai"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-openai",
  "async-trait",
@@ -754,7 +752,6 @@ checksum = "4583a4551df46e2792f82ceeac45e850d2e2d5debba0b91f102385cda5b11f06"
 [[package]]
 name = "deadlock"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "deadlock-api",
@@ -769,7 +766,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
  "zayden-core",
@@ -848,7 +845,6 @@ dependencies = [
 [[package]]
 name = "destiny2"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "bungie-api",
@@ -859,7 +855,7 @@ dependencies = [
  "secrecy",
  "serenity",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
  "zayden-app",
@@ -1309,7 +1305,6 @@ dependencies = [
 [[package]]
 name = "greetings"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "jiff",
@@ -1438,14 +1433,13 @@ dependencies = [
 [[package]]
 name = "honeypot"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "moderation",
  "moka",
  "serenity",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tracing",
  "zayden-app",
  "zayden-core",
@@ -1454,7 +1448,6 @@ dependencies = [
 [[package]]
 name = "hosting"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "jiff",
@@ -1466,7 +1459,7 @@ dependencies = [
  "serde",
  "serenity",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
  "zayden-app",
@@ -2260,7 +2253,6 @@ dependencies = [
 [[package]]
 name = "moderation"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "jiff",
@@ -2454,7 +2446,6 @@ dependencies = [
 [[package]]
 name = "patreon"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "ego-tree",
@@ -2471,7 +2462,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
  "url",
@@ -2894,7 +2885,6 @@ dependencies = [
 [[package]]
 name = "reaction-roles"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "serenity",
@@ -3191,7 +3181,6 @@ dependencies = [
 [[package]]
 name = "schema"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/schema#f6064db52ea2c61513b321dfc7e31bb86c87e0b7"
 dependencies = [
  "sqlx",
 ]
@@ -3847,7 +3836,6 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "suggestions"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "futures",
@@ -3966,7 +3954,6 @@ dependencies = [
 [[package]]
 name = "ticket"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "ai",
  "async-trait",
@@ -5486,7 +5473,6 @@ dependencies = [
 [[package]]
 name = "youtube"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#a3e59fd3ddfdf97dcde953b30e652957bcb88751"
 dependencies = [
  "async-trait",
  "futures",
@@ -5501,7 +5487,7 @@ dependencies = [
  "serenity",
  "sha1 0.11.0",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
  "url",
@@ -5512,11 +5498,10 @@ dependencies = [
 [[package]]
 name = "zayden-app"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/platform#25a55f0207ab8ff97ff200889d866eba4bd87840"
 dependencies = [
  "async-trait",
  "aws-lc-rs",
- "base64 0.23.1",
+ "base64 0.22.1",
  "jiff",
  "jiff-sqlx",
  "metrics",
@@ -5526,7 +5511,7 @@ dependencies = [
  "secrecy",
  "serde",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tokio",
  "toml",
  "tracing",
@@ -5535,10 +5520,9 @@ dependencies = [
 [[package]]
 name = "zayden-core"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/platform#25a55f0207ab8ff97ff200889d866eba4bd87840"
 dependencies = [
  "async-trait",
- "base64 0.23.1",
+ "base64 0.22.1",
  "dashmap",
  "jiff",
  "jiff-cron",
@@ -5548,7 +5532,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
- "thiserror 2.0.21",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
  "zayden-app",
@@ -5675,3 +5659,67 @@ dependencies = [
  "cc",
  "pkg-config",
 ]
+
+[[patch.unused]]
+name = "bot-runtime"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "zayden-graphics"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "family"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "gambling"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "gold-star"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "jellyfin"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "levels"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "lfg"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "llamad2"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "marathon"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "misc"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "music"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "palworld"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "temp-voice"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "verify"
+version = "1.0.0"
+
+[[patch.unused]]
+name = "watch"
+version = "1.0.0"

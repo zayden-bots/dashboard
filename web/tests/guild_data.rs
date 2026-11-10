@@ -335,6 +335,8 @@ fn config(zayden_id: u64) -> BotConfig {
         zayden_guild: 0,
         llamad2_guild: 0,
         zayden_id,
+        maria_id: None,
+        auto_leave: false,
         error_log_webhook: None,
         normal_log_webhook: None,
         flaresolverr_url: None,

@@ -129,6 +129,8 @@ fn config(upgrade_url: Option<&str>) -> BotConfig {
         zayden_guild: 0,
         llamad2_guild: 0,
         zayden_id: 1,
+        maria_id: None,
+        auto_leave: false,
         error_log_webhook: None,
         normal_log_webhook: None,
         flaresolverr_url: None,
