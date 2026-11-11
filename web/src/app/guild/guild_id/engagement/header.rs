@@ -1,6 +1,7 @@
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::view::{Child, View, ViewExt, attributes, component, view};
+use zayden_app::applications::Slot;
 use zayden_app::modules::{self, Backing};
 
 use super::state::{Done, Failure, settle};
@@ -31,7 +32,7 @@ async fn module_state(
     module_id: &str,
 ) -> Option<ModuleState> {
     let backing = modules::find(module_id)?.backing;
-    let views = list_guild_modules(cx, guild_id).await.ok()?;
+    let views = list_guild_modules(cx, guild_id, Slot::Zayden).await.ok()?;
     let enabled = views.into_iter().find(|view| view.id == module_id)?.enabled;
 
     Some(match (backing, enabled) {
@@ -140,7 +141,7 @@ pub(super) async fn switch_module(
     let values = pairs.clone();
     let (result, enabled) = match requested(pairs, guild_id) {
         Ok(enabled) => (
-            set_module_enabled(cx, guild_id, module_id, enabled)
+            set_module_enabled(cx, guild_id, Slot::Zayden, module_id, enabled)
                 .await
                 .map_err(EngagementError::from),
             enabled,

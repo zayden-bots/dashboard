@@ -1624,7 +1624,7 @@ fn see_plans() -> String {
 }
 const GOOD_WORKS_LEAD: &str = "<h2 class=\"label\" id=\"good-channels-title\">Where /good works</h2><p class=\"page-lead\">With nothing listed, <code>/good</code> works in every channel. Add one or more and Discord hides the command everywhere else - it never even shows up in the picker. Adding a category covers every channel inside it.</p><p class=\"page-lead\">This writes the same command permissions as Discord's own Server Settings \u{2192} Integrations panel, so changes made either way show up in both.</p>";
 const NO_IMAGES: &str = r#"<p class="page-lead">No images yet - the command replies with just the message until you add one.</p>"#;
-const NOT_SYNCED_HEADER: &str = r#"<p class="field-hint">Not synced yet: this module's state appears once Zayden is in the server and has synced its commands.</p></div><div class="flex flex-wrap items-center gap-2"><span class="inline-flex items-center gap-2 whitespace-nowrap"><span class="lamp-sync inline-block w-[10px] h-[10px] shrink-0 box-border rounded-(--radius-full)" aria-hidden="true"></span><span class="lamp-text">Not synced</span></span></div></div>"#;
+const NOT_SYNCED_HEADER: &str = r#"<p class="field-hint">Not synced yet: this module's state appears once the bot is in the server and has synced its commands.</p></div><div class="flex flex-wrap items-center gap-2"><span class="inline-flex items-center gap-2 whitespace-nowrap"><span class="lamp-sync inline-block w-[10px] h-[10px] shrink-0 box-border rounded-(--radius-full)" aria-hidden="true"></span><span class="lamp-text">Not synced</span></span></div></div>"#;
 
 /// The markup of the `tag` element whose `id` is `id`, through its end tag.
 fn element<'a>(html: &'a str, tag: &str, id: &str) -> Option<&'a str> {

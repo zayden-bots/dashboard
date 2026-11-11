@@ -16,6 +16,8 @@
     --coral-400: #ff7a66;
     --coral-950: #1c0a06;
     --amber-400: #f2b84b;
+    --rose-200: #d4a5bd;
+    --rose-300: #b9849f;
 
     --bg: var(--ink-950);
     --surface-1: var(--ink-900);
@@ -84,6 +86,12 @@
 
 :root[data-bot="zayden"] {
     --accent: var(--steel-200);
+}
+
+:root[data-bot="maria"] {
+    --accent: var(--rose-200);
+    --indicator: var(--rose-300);
+    --focus: var(--rose-200);
 }
 
 :root,

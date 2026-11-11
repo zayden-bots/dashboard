@@ -4,8 +4,9 @@ use std::sync::{Arc, LazyLock, Mutex, PoisonError};
 use tokio::sync::{Mutex as AsyncMutex, MutexGuard};
 use twilight_model::id::Id;
 use twilight_model::id::marker::GuildMarker;
+use zayden_app::applications::Slot as Seat;
 
-type Key = (Id<GuildMarker>, &'static str);
+type Key = (Id<GuildMarker>, Seat, &'static str);
 
 struct Slot {
     latest: u64,
@@ -22,8 +23,8 @@ pub struct Claim {
 }
 
 #[must_use]
-pub fn claim(guild_id: Id<GuildMarker>, module: &'static str) -> Claim {
-    let key = (guild_id, module);
+pub fn claim(guild_id: Id<GuildMarker>, slot: Seat, module: &'static str) -> Claim {
+    let key = (guild_id, slot, module);
 
     let mut slots = SLOTS.lock().unwrap_or_else(PoisonError::into_inner);
     let slot = slots

@@ -11,6 +11,7 @@ pub mod kofi;
 pub mod modules;
 pub mod parse;
 pub mod patreon;
+pub mod seat;
 pub mod sections;
 pub mod settings;
 pub mod support;

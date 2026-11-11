@@ -8,6 +8,7 @@ pub mod fields;
 pub mod keys;
 mod loadouts;
 mod operator;
+pub mod status;
 
 pub use access::{guild_operator_access, is_admin, is_operator};
 pub use convert::{

@@ -135,6 +135,12 @@ pub async fn nav_links(
                                 icon_name: Some(Icon::Shield),
                                 aria_current: current("/admin/servers", location, true)
                             )
+                            nav_item(
+                                href: "/admin/status",
+                                label: "Bot status",
+                                icon_name: Some(Icon::Shield),
+                                aria_current: current("/admin/status", location, true)
+                            )
                         }
                         if admin {
                             nav_item(

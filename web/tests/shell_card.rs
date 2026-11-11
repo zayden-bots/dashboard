@@ -124,7 +124,7 @@ async fn a_module_without_state_shows_the_not_synced_note_and_no_switch() {
     assert_eq!(
         canonical(&html),
         canonical(&format!(
-            r#"<li class="{RACK_ROW}"><div class="{RACK_MAIN}"><h3 class="{RACK_NAME}"><a href="/guild/7/music" class="{RACK_NAME_LINK}" data-topcoat-link="intent">Music</a></h3><p class="{RACK_DESC}">Music description</p></div><div class="{RACK_STATE}"><span class="{LAMP_STATUS}"><span class="{LAMP_SYNC}" aria-hidden="true"></span><span class="lamp-text">Not synced</span></span></div><div class="{RACK_CONTROL}"></div><p class="{RACK_NOTE}">Not synced yet: this module's state appears once Zayden is in the server and has synced its commands.</p></li>"#
+            r#"<li class="{RACK_ROW}"><div class="{RACK_MAIN}"><h3 class="{RACK_NAME}"><a href="/guild/7/music" class="{RACK_NAME_LINK}" data-topcoat-link="intent">Music</a></h3><p class="{RACK_DESC}">Music description</p></div><div class="{RACK_STATE}"><span class="{LAMP_STATUS}"><span class="{LAMP_SYNC}" aria-hidden="true"></span><span class="lamp-text">Not synced</span></span></div><div class="{RACK_CONTROL}"></div><p class="{RACK_NOTE}">Not synced yet: this module's state appears once the bot is in the server and has synced its commands.</p></li>"#
         ))
     );
 }

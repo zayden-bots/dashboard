@@ -439,10 +439,25 @@ fn subscribe() -> String {
     )
 }
 
+const SEAT_TABS: &str =
+    "inline-flex w-fit items-center gap-1 rounded-lg border border-border p-1";
+const SEAT_TAB: &str = "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background text-muted-foreground hover:bg-foreground/5 hover:text-foreground aria-[current=page]:bg-foreground/10 aria-[current=page]:text-foreground aria-[current=page]:hover:bg-foreground/10";
+const NEUTRAL_ALERT: &str = "grid w-full grid-cols-[0_1fr] items-start gap-y-1 rounded-lg border bg-background px-4 py-3 text-sm has-[>svg]:grid-cols-[1rem_1fr] has-[>svg]:gap-x-3 [&amp;>svg]:size-4 [&amp;>svg]:translate-y-0.5 border-border text-foreground";
+const SEAT_BADGE: &str = "inline-flex w-fit shrink-0 items-center justify-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap border-transparent bg-foreground/5 text-foreground";
+
+/// The bot tab and invite notice shown for a Zayden that has not joined.
+fn seats_absent() -> String {
+    format!(
+        r#"<div class="{SEAT_TABS}"><a aria-current="page" href="/guild/7" class="{SEAT_TAB}">Zayden<span class="{SEAT_BADGE}">Not in server</span></a></div><div class="{NEUTRAL_ALERT}"><p class="col-start-2 font-medium tracking-tight">Zayden isn't in this server yet</p><div class="col-start-2 text-sm text-muted-foreground">Its switches reset to the defaults when it joins.<a class="{}" href="/invite?guild=7" rel="external">Add Zayden</a></div></div>"#,
+        support::btn("secondary")
+    )
+}
+
 fn overview_header() -> String {
     format!(
-        r#"<div class="page"><div class="page-header"><div><h1>Overview</h1><p class="page-lead">Turn modules on or off for this server. A module that's off has its commands removed from the server.</p></div><a href="/guild/7/settings" class="{}">Server settings</a></div>"#,
-        support::btn("secondary")
+        r#"<div class="page"><div class="page-header"><div><h1>Overview</h1><p class="page-lead">Turn modules on or off for this server. A module that's off has its commands removed from the server.</p></div><a href="/guild/7/settings" class="{}">Server settings</a></div>{}"#,
+        support::btn("secondary"),
+        seats_absent()
     )
 }
 
@@ -553,8 +568,9 @@ async fn the_guild_list_frames_the_managed_guilds(
     let html = app.page("/guilds", Some(STAFF)).await.unwrap();
     for prefix in ["rail", "sheet"] {
         let admin = format!(
-            r#"<div class="{NAV_GROUP}"><p class="{NAV_HEADING}" id="{prefix}-admin">Admin</p><ul class="{NAV_LIST}" aria-labelledby="{prefix}-admin">{}{}</ul></div>"#,
+            r#"<div class="{NAV_GROUP}"><p class="{NAV_HEADING}" id="{prefix}-admin">Admin</p><ul class="{NAV_LIST}" aria-labelledby="{prefix}-admin">{}{}{}</ul></div>"#,
             nav_link("/admin/servers", Some(SHIELD), "All bot servers", false),
+            nav_link("/admin/status", Some(SHIELD), "Bot status", false),
             nav_link(
                 "/admin/destiny2/loadouts",
                 Some(GAMEPAD),

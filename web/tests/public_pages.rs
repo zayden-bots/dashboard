@@ -71,7 +71,7 @@ fn write_bundle() -> TestResult<PathBuf> {
     Ok(dir)
 }
 
-fn config(invite_url: Option<&str>) -> BotConfig {
+fn config(invite_url: Option<&str>, maria_id: Option<u64>) -> BotConfig {
     BotConfig {
         discord_token: SecretString::from("test-bot-token"),
         bungie_api_key: None,
@@ -87,7 +87,7 @@ fn config(invite_url: Option<&str>) -> BotConfig {
         zayden_guild: 0,
         llamad2_guild: 0,
         zayden_id: 1,
-        maria_id: None,
+        maria_id,
         auto_leave: false,
         error_log_webhook: None,
         normal_log_webhook: None,
@@ -119,9 +119,16 @@ fn config(invite_url: Option<&str>) -> BotConfig {
 /// visitors need no query, cached sessions skip it, and any other cookie
 /// makes the session lookup fail.
 async fn web_state(invite_url: Option<&str>) -> TestResult<WebState> {
+    web_state_for(invite_url, None).await
+}
+
+async fn web_state_for(
+    invite_url: Option<&str>,
+    maria_id: Option<u64>,
+) -> TestResult<WebState> {
     let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
 
-    let config = config(invite_url);
+    let config = config(invite_url, maria_id);
     let pool = PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(2))
         .connect_lazy("postgres://127.0.0.1:1/unused")?;
@@ -661,6 +668,38 @@ async fn invite_replaces_a_preselected_server_and_leaves_other_addresses_alone()
         let response = get(&router, "/invite?guild=7", None).await.unwrap();
         assert_eq!(StatusCode::SEE_OTHER, response.status(), "{other}");
         assert_eq!(other, response.headers()[header::LOCATION], "{other}");
+    }
+}
+
+#[tokio::test]
+async fn invite_for_maria_swaps_the_client_id() {
+    let router =
+        app(Some(web_state_for(Some(INVITE), Some(3)).await.unwrap())).unwrap();
+
+    let response = get(&router, "/invite?bot=maria", None).await.unwrap();
+    assert_eq!(StatusCode::SEE_OTHER, response.status());
+    assert_eq!(
+        INVITE.replace("client_id=1", "client_id=3"),
+        response.headers()[header::LOCATION]
+    );
+
+    let response = get(&router, "/invite?bot=maria&guild=7", None).await.unwrap();
+    assert_eq!(
+        format!(
+            "{}&guild_id=7&disable_guild_select=true",
+            INVITE.replace("client_id=1", "client_id=3")
+        ),
+        response.headers()[header::LOCATION]
+    );
+}
+
+#[tokio::test]
+async fn invite_for_an_unconfigured_bot_is_not_found() {
+    let router = app(Some(web_state(Some(INVITE)).await.unwrap())).unwrap();
+
+    for path in ["/invite?bot=maria", "/invite?bot=enzo"] {
+        let response = get(&router, path, None).await.unwrap();
+        assert_eq!(StatusCode::NOT_FOUND, response.status(), "{path}");
     }
 }
 

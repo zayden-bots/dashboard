@@ -14,7 +14,7 @@ use crate::app::admin::d2::loadouts::editor::{
     NEW_LOADOUT_TITLE,
     missing_loadout,
 };
-use crate::app::admin::{LOADOUTS_TITLE, SERVERS_TITLE};
+use crate::app::admin::{LOADOUTS_TITLE, SERVERS_TITLE, STATUS_TITLE};
 use crate::app::guild::guild_id::engagement::{
     GREETINGS_TITLE,
     LEVELS_TITLE,
@@ -25,6 +25,7 @@ use crate::app::public::{LANDING_TITLE, LOGIN_TITLE, PRIVACY_TITLE, TERMS_TITLE}
 use crate::components::brand::LOGO;
 use crate::error::MissingPage;
 use crate::font::font_head;
+use crate::guild::seat;
 use crate::pages::not_found::not_found_page;
 use crate::shell::{GUILDS_TITLE, OVERVIEW_TITLE, UPGRADE_TITLE};
 
@@ -77,6 +78,7 @@ pub const PAGE_TITLES: &[(&str, &str)] = &[
         "Roles and links - Support - Zayden Dashboard",
     ),
     ("/admin/servers", SERVERS_TITLE),
+    ("/admin/status", STATUS_TITLE),
     ("/admin/destiny2/loadouts", LOADOUTS_TITLE),
     ("/admin/destiny2/loadouts/new", NEW_LOADOUT_TITLE),
     ("/admin/destiny2/loadouts/{loadout_id}", EDITOR_TITLE),
@@ -155,7 +157,12 @@ pub(crate) async fn document_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View
                     },
                 )
             },
-            document(title: &title, description: description, (slot))
+            document(
+                title: &title,
+                description: description,
+                bot: Some(seat::selected_slot(cx).as_str()),
+                (slot)
+            )
         )
     })
 }
@@ -164,11 +171,12 @@ pub(crate) async fn document_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View
 async fn document(
     title: &str,
     #[default] description: Option<&str>,
+    #[default] bot: Option<&str>,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {
     Ok(view! {
         <!DOCTYPE html>
-        <html lang="en" class="dark" data-bot="zayden">
+        <html lang="en" class="dark" data-bot=(bot.unwrap_or("zayden"))>
             <head>
                 <meta charset="utf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1">

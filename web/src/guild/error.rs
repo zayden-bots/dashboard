@@ -68,6 +68,8 @@ pub enum GuildError {
     NoSettingsSwitch(String),
     #[error("{0} is switched on from its own settings page, not from this toggle.")]
     DerivedModule(&'static str),
+    #[error("{bot} doesn't offer {module}.")]
+    ModuleNotOffered { module: &'static str, bot: String },
     #[error("/{0} isn't registered for this server yet")]
     CommandNotRegistered(String),
     #[error(

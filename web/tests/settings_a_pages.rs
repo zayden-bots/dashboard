@@ -716,7 +716,7 @@ async fn every_page_renders_its_stored_settings(
     let html = app.page("/guild/7/family").await.unwrap();
     assert!(html.contains(&title("Family")), "{html}");
     let main = main_content(&html);
-    assert!(main.contains(r#"<p class="field-hint">Not synced yet: this module's state appears once Zayden is in the server and has synced its commands.</p>"#), "{main}");
+    assert!(main.contains(r#"<p class="field-hint">Not synced yet: this module's state appears once the bot is in the server and has synced its commands.</p>"#), "{main}");
     assert!(main.contains(&format!(r#"<span class="lamp-sync {LAMP_DOT}" aria-hidden="true"></span><span class="lamp-text">Not synced</span>"#)), "{main}");
     assert!(!main.contains(r#"role="switch""#), "no switch before a sync: {main}");
     assert_eq!(value(main, "family-settings-max-partners"), Some("1"));

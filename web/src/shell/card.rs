@@ -26,6 +26,7 @@ pub async fn module_card(
     module: &ModuleView,
     guild_id: &str,
     #[default] error: Option<&str>,
+    #[default] bot: Option<&str>,
 ) -> Result<impl View> {
     let href = nav::for_module(&module.id).map(|entry| entry.href(guild_id));
 
@@ -37,7 +38,8 @@ pub async fn module_card(
             description: &module.description,
             control: module_control(module),
             href: href.as_deref(),
-            error: error
+            error: error,
+            bot: bot
         )
     })
 }

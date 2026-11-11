@@ -3,14 +3,22 @@ use std::hash::BuildHasher;
 
 use topcoat::context::Cx;
 use twilight_model::id::Id;
-use zayden_app::applications::Slot;
-use zayden_app::modules::{self, Backing, MODULES, ModuleDef, ModuleStates};
+use zayden_app::applications::{ApplicationModules, ApplicationStore, Slot};
+use zayden_app::modules::{
+    self,
+    Backing,
+    MODULES,
+    ModuleDef,
+    ModuleStates,
+    PASSIVE_MODULES,
+};
 use zayden_app::state::AppState;
 
 use super::dto::ModuleView;
 use super::error::{GuildError, server_err};
 use super::form::form_args;
 use super::patreon::fetch_patreon_status;
+use super::seat;
 use super::youtube::fetch_youtube_status;
 use crate::auth::{AuthError, app_state, guild_admin_context, supersede};
 
@@ -83,35 +91,85 @@ async fn settings_flags(
     ]))
 }
 
-async fn seat_application(app: &AppState, guild_id: i64) -> Result<i64, GuildError> {
-    Ok(app
-        .serving
-        .fetch(guild_id, Slot::Zayden)
-        .await
-        .map_err(server_err)?
-        .map_or(app.zayden_id, |bot| bot.application_id)
-        .cast_signed())
-}
-
 pub async fn list_guild_modules(
     cx: &Cx,
     guild: &str,
+    slot: Slot,
 ) -> Result<Vec<ModuleView>, GuildError> {
     let ctx = guild_admin_context(cx, guild).await?;
+    let app = app_state(cx)?;
+    let seat = seat::seat(app, ctx.guild_id, slot).await?;
 
-    let (states, flags) = tokio::try_join!(
+    let (states, flags, offered) = tokio::try_join!(
         async {
-            let app = app_state(cx)?;
-            let application_id = seat_application(app, ctx.guild_id).await?;
             app.modules
-                .states(ctx.guild_id, application_id)
+                .states(ctx.guild_id, seat.application_id)
                 .await
                 .map_err(server_err)
         },
         settings_flags(cx, ctx.guild_id),
+        async {
+            ApplicationModules::list(&app.db, seat.application_id)
+                .await
+                .map_err(server_err)
+        },
     )?;
 
-    Ok(MODULES.iter().map(|m| view(m, &states, &flags)).collect())
+    Ok(MODULES
+        .iter()
+        .filter(|m| offered.is_empty() || offered.iter().any(|id| id == m.id))
+        .map(|m| view(m, &states, &flags))
+        .collect())
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Overlap {
+    pub module: &'static str,
+    pub bots: Vec<String>,
+}
+
+pub async fn passive_overlaps(
+    app: &AppState,
+    guild_id: i64,
+) -> Result<Vec<Overlap>, GuildError> {
+    let mut running: Vec<Vec<String>> = vec![Vec::new(); PASSIVE_MODULES.len()];
+
+    let mut profiles = ApplicationStore::present_in_guild(&app.db, guild_id)
+        .await
+        .map_err(server_err)?;
+    profiles.sort_by_key(|profile| {
+        Slot::ALL.iter().position(|slot| *slot == profile.slot)
+    });
+
+    for profile in profiles {
+        let offered = ApplicationModules::list(&app.db, profile.application_id)
+            .await
+            .map_err(server_err)?;
+        if offered.is_empty() {
+            continue;
+        }
+        let states = app
+            .modules
+            .states(guild_id, profile.application_id)
+            .await
+            .map_err(server_err)?;
+
+        for (passive, bots) in PASSIVE_MODULES.iter().zip(&mut running) {
+            let switched_off = modules::find(passive.id)
+                .is_some_and(|def| def.backing == Backing::Commands)
+                && states.get(passive.id) == Some(&false);
+            if offered.iter().any(|id| id == passive.id) && !switched_off {
+                bots.push(profile.name.clone());
+            }
+        }
+    }
+
+    Ok(PASSIVE_MODULES
+        .iter()
+        .zip(running)
+        .filter(|(_, bots)| bots.len() >= 2)
+        .map(|(passive, bots)| Overlap { module: passive.label, bots })
+        .collect())
 }
 
 async fn set_settings_enabled(
@@ -135,6 +193,7 @@ async fn set_settings_enabled(
 pub async fn set_module_enabled(
     cx: &Cx,
     guild: &str,
+    slot: Slot,
     module_id: &str,
     enabled: bool,
 ) -> Result<(), GuildError> {
@@ -145,8 +204,9 @@ pub async fn set_module_enabled(
     let ctx = guild_admin_context(cx, guild).await?;
     let guild_ref = Id::new_checked(ctx.guild_id.cast_unsigned())
         .ok_or(AuthError::InvalidGuildId)?;
+    let seat = seat::seat(app_state(cx)?, ctx.guild_id, slot).await?;
 
-    let claim = supersede::claim(guild_ref, module.id);
+    let claim = supersede::claim(guild_ref, slot, module.id);
     let _turn = claim.wait_for_turn().await;
 
     if claim.superseded() {
@@ -159,9 +219,17 @@ pub async fn set_module_enabled(
         },
         Backing::Commands => {
             let app = app_state(cx)?;
-            let application_id = seat_application(app, ctx.guild_id).await?;
+            let offered = ApplicationModules::list(&app.db, seat.application_id)
+                .await
+                .map_err(server_err)?;
+            if !offered.is_empty() && !offered.iter().any(|id| id == module.id) {
+                return Err(GuildError::ModuleNotOffered {
+                    module: module.label,
+                    bot: seat.name,
+                });
+            }
             app.modules
-                .set(ctx.guild_id, application_id, module.id, enabled)
+                .set(ctx.guild_id, seat.application_id, module.id, enabled)
                 .await
                 .map_err(server_err)
         },

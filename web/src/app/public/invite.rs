@@ -5,10 +5,13 @@ use topcoat::router::request::uri;
 use topcoat::router::response::{IntoResponse, Response};
 use topcoat::router::{StatusCode, route};
 use url::{Url, form_urlencoded};
+use zayden_app::applications::Slot;
 
 use crate::auth::web_state;
+use crate::guild::seat;
 
 const GUILD_PARAM: &str = "guild";
+const BOT_PARAM: &str = "bot";
 
 const AUTHORIZE_HOSTS: &[&str] = &[
     "discord.com",
@@ -43,14 +46,50 @@ fn is_authorize_path(path: &str) -> bool {
     })
 }
 
-fn preselect(address: &str, guild: u64) -> Option<String> {
-    let mut url = Url::parse(address).ok()?;
+fn requested_bot(cx: &Cx) -> Option<String> {
+    let (_, raw) = form_urlencoded::parse(uri(cx).query()?.as_bytes())
+        .find(|(key, _)| key == BOT_PARAM)?;
+
+    Some(raw.into_owned())
+}
+
+fn authorize_url(address: &str) -> Option<Url> {
+    let url = Url::parse(address).ok()?;
     let discord = url.scheme() == "https"
         && url.host_str().is_some_and(|host| AUTHORIZE_HOSTS.contains(&host))
         && is_authorize_path(url.path());
-    if !discord {
-        return None;
+
+    discord.then_some(url)
+}
+
+fn with_client_id(address: &str, application_id: u64) -> Option<String> {
+    let mut url = authorize_url(address)?;
+    let id = application_id.to_string();
+
+    let mut replaced = false;
+    let pairs: Vec<(String, String)> = url
+        .query_pairs()
+        .map(|(key, value)| {
+            if key == "client_id" {
+                replaced = true;
+                (key.into_owned(), id.clone())
+            } else {
+                (key.into_owned(), value.into_owned())
+            }
+        })
+        .collect();
+    let mut query = url.query_pairs_mut();
+    query.clear().extend_pairs(pairs);
+    if !replaced {
+        query.append_pair("client_id", &id);
     }
+    drop(query);
+
+    Some(url.into())
+}
+
+fn preselect(address: &str, guild: u64) -> Option<String> {
+    let mut url = authorize_url(address)?;
 
     let kept: Vec<(String, String)> = url
         .query_pairs()
@@ -68,12 +107,30 @@ fn preselect(address: &str, guild: u64) -> Option<String> {
 
 #[route(GET)]
 pub(crate) async fn invite(cx: &Cx) -> Result<Response> {
-    let Some(address) = web_state(cx)?.urls.invite.as_deref() else {
+    let web = web_state(cx)?;
+    let Some(configured) = web.urls.invite.as_deref() else {
         return StatusCode::NOT_FOUND.into_response(cx);
     };
+    let address = match requested_bot(cx) {
+        None => configured.to_owned(),
+        Some(raw) => match seat::parse_bot(&web.app, Some(&raw)) {
+            Ok(Slot::Zayden) => configured.to_owned(),
+            Ok(slot) => {
+                let swapped = web
+                    .app
+                    .default_application_id(slot)
+                    .and_then(|id| with_client_id(configured, id));
+                let Some(swapped) = swapped else {
+                    return StatusCode::NOT_FOUND.into_response(cx);
+                };
+                swapped
+            },
+            Err(_) => return StatusCode::NOT_FOUND.into_response(cx),
+        },
+    };
     let target = requested_guild(cx)
-        .and_then(|guild| preselect(address, guild))
-        .unwrap_or_else(|| address.to_owned());
+        .and_then(|guild| preselect(&address, guild))
+        .unwrap_or(address);
 
     see_other(target).into_response(cx)
 }

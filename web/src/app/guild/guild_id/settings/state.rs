@@ -119,6 +119,7 @@ fn field_of(error: &GuildError) -> Option<String> {
         | GuildError::UnknownModule
         | GuildError::NoSettingsSwitch(_)
         | GuildError::DerivedModule(_)
+        | GuildError::ModuleNotOffered { .. }
         | GuildError::CommandNotRegistered(_)
         | GuildError::OperatorCommandPermissions(_)
         | GuildError::PermissionUpdateRejected { .. } => return None,

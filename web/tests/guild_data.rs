@@ -61,6 +61,7 @@ use web::guild::{
 };
 use web::state::{SessionUsersCache, UserGuildsCache, WebState};
 use web::util::server_error_text;
+use zayden_app::applications::Slot;
 use zayden_app::config::BotConfig;
 use zayden_app::state::AppState as ZaydenAppState;
 
@@ -138,7 +139,7 @@ async fn forbidden_section(cx: &Cx) -> Result<String> {
 
 #[route(GET "/test/modules")]
 async fn module_cards(cx: &Cx) -> Result<String> {
-    Ok(render(modules::list_guild_modules(cx, "7").await, |cards| {
+    Ok(render(modules::list_guild_modules(cx, "7", Slot::Zayden).await, |cards| {
         cards
             .iter()
             .map(|c| format!("{}={:?}", c.id, c.enabled))
@@ -306,8 +307,14 @@ async fn save_form(
         "module" => {
             let form = modules::ModuleToggleForm::from_pairs(pairs)?;
             let enabled = form.enabled()?;
-            modules::set_module_enabled(cx, &form.guild, &form.module_id, enabled)
-                .await
+            modules::set_module_enabled(
+                cx,
+                &form.guild,
+                Slot::Zayden,
+                &form.module_id,
+                enabled,
+            )
+            .await
         },
         other => Err(GuildError::UnknownField(other.to_owned())),
     }

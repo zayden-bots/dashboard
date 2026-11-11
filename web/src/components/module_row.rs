@@ -13,7 +13,7 @@ use super::icons::{Icon, icon};
 use super::lamp::{LampState, lamp};
 use crate::nav::path_segment;
 
-pub const NOT_SYNCED_NOTE: &str = "Not synced yet: this module's state appears once Zayden is in the server and has synced its commands.";
+pub const NOT_SYNCED_NOTE: &str = "Not synced yet: this module's state appears once the bot is in the server and has synced its commands.";
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ModuleControl {
@@ -26,6 +26,11 @@ const fn lamp_state(on: bool) -> LampState {
     if on { LampState::On } else { LampState::Off }
 }
 
+fn switch_action(guild_id: &str, bot: Option<&str>) -> String {
+    let base = format!("/guild/{}", path_segment(guild_id));
+    bot.map_or_else(|| base.clone(), |bot| format!("{base}?bot={bot}"))
+}
+
 #[component]
 pub async fn module_row(
     cx: &Cx,
@@ -36,6 +41,7 @@ pub async fn module_row(
     control: ModuleControl,
     #[default] href: Option<&str>,
     #[default] error: Option<&str>,
+    #[default] bot: Option<&str>,
 ) -> Result<impl View> {
     Ok(view! {
         <li
@@ -61,11 +67,14 @@ pub async fn module_row(
                     <form
                         class="contents"
                         method="post"
-                        action=(format!("/guild/{}", path_segment(guild_id)))
+                        action=(switch_action(guild_id, bot))
                         data-pending=""
                     >
                         <input type="hidden" name="guild" value=(guild_id)>
                         <input type="hidden" name="module_id" value=(module_id)>
+                        if let Some(bot) = bot {
+                            <input type="hidden" name="bot" value=(bot)>
+                        }
                         <div class="min-w-[7rem] max-md:col-[1] max-md:row-[2]">
                             lamp(state: lamp_state(on), pending: Some("Saving\u{2026}"))
                         </div>
