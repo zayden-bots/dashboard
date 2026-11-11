@@ -12,7 +12,7 @@ dependencies = [
  "reqwest 0.13.5",
  "serenity",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tracing",
  "url",
  "zayden-core",
@@ -766,7 +766,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "zayden-core",
@@ -855,7 +855,7 @@ dependencies = [
  "secrecy",
  "serenity",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "zayden-app",
@@ -1439,7 +1439,7 @@ dependencies = [
  "moka",
  "serenity",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tracing",
  "zayden-app",
  "zayden-core",
@@ -1459,7 +1459,7 @@ dependencies = [
  "serde",
  "serenity",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "zayden-app",
@@ -2462,7 +2462,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "url",
@@ -3642,7 +3642,9 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "sqlx-core",
+ "sqlx-mysql",
  "sqlx-postgres",
+ "sqlx-sqlite",
  "syn 2.0.119",
  "thiserror 2.0.21",
  "tokio",
@@ -5163,18 +5165,18 @@ dependencies = [
 
 [[package]]
 name = "webpki-root-certs"
-version = "1.0.11"
+version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e49d0e65abc00c142e8f9428da991da9f1a250c39be97459901eb12b9b49f62a"
+checksum = "293198dcebfb821155b5092ab94b5a82ff180eddd7241df3bd6e66a4ffd1a585"
 dependencies = [
  "rustls-pki-types",
 ]
 
 [[package]]
 name = "webpki-roots"
-version = "1.0.11"
+version = "1.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5f280bbb2b287bc8e7de7e3852945a0ff50d1bbcb5ed42b6c7a568c546df171"
+checksum = "7265c9301c16a8711c992c2d8da90ee77ef54b1ed51482d6dfeb00dc756b1297"
 dependencies = [
  "rustls-pki-types",
 ]
@@ -5487,7 +5489,7 @@ dependencies = [
  "serenity",
  "sha1 0.11.0",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "url",
@@ -5501,7 +5503,7 @@ version = "1.0.0"
 dependencies = [
  "async-trait",
  "aws-lc-rs",
- "base64 0.22.1",
+ "base64 0.23.1",
  "jiff",
  "jiff-sqlx",
  "metrics",
@@ -5510,8 +5512,9 @@ dependencies = [
  "reqwest 0.13.5",
  "secrecy",
  "serde",
+ "serde_json",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "toml",
  "tracing",
@@ -5522,7 +5525,7 @@ name = "zayden-core"
 version = "1.0.0"
 dependencies = [
  "async-trait",
- "base64 0.22.1",
+ "base64 0.23.1",
  "dashmap",
  "jiff",
  "jiff-cron",
@@ -5532,7 +5535,7 @@ dependencies = [
  "serde_json",
  "serenity",
  "sqlx",
- "thiserror 1.0.69",
+ "thiserror 2.0.21",
  "tokio",
  "tracing",
  "zayden-app",
