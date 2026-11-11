@@ -440,7 +440,7 @@ async fn the_dm_checkbox_saves_and_clears_the_preference(pool: PgPool) {
 
     assert_eq!(response.status(), StatusCode::SEE_OTHER);
     assert_eq!(location(&response), Some("/account"));
-    assert!(!user_settings::dm_summaries(&pool, USER_ID).await.unwrap());
+    assert!(!user_settings::dm_target(&pool, USER_ID).await.unwrap().0);
 
     let response =
         post_form(&router, "/account/deadlock", MEMBER, "dm_summaries=on")
@@ -448,7 +448,7 @@ async fn the_dm_checkbox_saves_and_clears_the_preference(pool: PgPool) {
             .unwrap();
 
     assert_eq!(location(&response), Some("/account"));
-    assert!(user_settings::dm_summaries(&pool, USER_ID).await.unwrap());
+    assert!(user_settings::dm_target(&pool, USER_ID).await.unwrap().0);
 }
 
 #[sqlx::test(migrator = "schema::MIGRATOR")]
@@ -459,7 +459,7 @@ async fn the_briefing_checkbox_saves_independently_of_summaries(pool: PgPool) {
         .await
         .unwrap();
 
-    assert!(user_settings::dm_summaries(&pool, USER_ID).await.unwrap());
+    assert!(user_settings::dm_target(&pool, USER_ID).await.unwrap().0);
     assert!(!user_settings::patch_briefing(&pool, USER_ID).await.unwrap());
 
     post_form(
@@ -471,7 +471,7 @@ async fn the_briefing_checkbox_saves_independently_of_summaries(pool: PgPool) {
     .await
     .unwrap();
 
-    assert!(user_settings::dm_summaries(&pool, USER_ID).await.unwrap());
+    assert!(user_settings::dm_target(&pool, USER_ID).await.unwrap().0);
     assert!(user_settings::patch_briefing(&pool, USER_ID).await.unwrap());
 }
 
@@ -513,7 +513,7 @@ async fn a_signed_out_visitor_cannot_change_summary_settings(pool: PgPool) {
         assert_eq!(response.status(), StatusCode::SEE_OTHER, "{path}");
         assert_eq!(location(&response), Some("/auth/discord"), "{path}");
     }
-    assert!(user_settings::dm_summaries(&pool, USER_ID).await.unwrap());
+    assert!(user_settings::dm_target(&pool, USER_ID).await.unwrap().0);
 }
 
 #[test]

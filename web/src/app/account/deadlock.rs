@@ -7,12 +7,10 @@ use topcoat::router::error::see_other;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, attributes, component, view};
 use tracing::warn;
-use zayden_app::applications::Slot;
 
 use super::page::{PAGE, SIGN_IN_PATH};
 use crate::auth::{
     AuthError,
-    app_state,
     db_pool,
     remember_login_next,
     require_user,
@@ -78,7 +76,11 @@ async fn load_prefs(
     let pool = db_pool(cx)?;
     let allowed = allowed_guilds(cx, identity).await?;
     let (dm_summaries, patch_briefing, shared, squad) = tokio::try_join!(
-        user_settings::dm_summaries(pool, identity.user_id),
+        async {
+            user_settings::dm_target(pool, identity.user_id)
+                .await
+                .map(|(enabled, _)| enabled)
+        },
         user_settings::patch_briefing(pool, identity.user_id),
         guild_members::shared_guilds(pool, identity.user_id),
         guild_members::squad_guilds(pool, identity.user_id),
@@ -106,18 +108,12 @@ async fn allowed_guilds(
     let guilds = user_guilds(cx, identity).await?;
     let ids: Vec<i64> =
         guilds.iter().map(|guild| guild.id.get().cast_signed()).collect();
-    let enabled = modules::enabled_guilds(
-        db_pool(cx)?,
-        &ids,
-        app_state(cx)?.zayden_id.cast_signed(),
-        Slot::Zayden.as_str(),
-    )
-    .await?;
+    let enabled = modules::enabled_guilds(db_pool(cx)?, &ids).await?;
 
     let mut allowed: Vec<(i64, String)> = guilds
         .iter()
         .map(|guild| (guild.id.get().cast_signed(), guild.name.clone()))
-        .filter(|(id, _)| enabled.contains(id))
+        .filter(|(id, _)| enabled.iter().any(|(guild, _)| guild == id))
         .collect();
     allowed.sort_by_cached_key(|(_, name)| name.to_lowercase());
 
@@ -169,8 +165,8 @@ async fn save_dm_preferences(
     summaries: bool,
     briefing: bool,
 ) -> sqlx::Result<()> {
-    user_settings::set_dm_summaries(pool, user_id, summaries).await?;
-    user_settings::set_patch_briefing(pool, user_id, briefing).await
+    user_settings::set_dm_summaries(pool, user_id, summaries, None).await?;
+    user_settings::set_patch_briefing(pool, user_id, briefing, None).await
 }
 
 #[page(POST "./servers")]
