@@ -14,6 +14,7 @@ pub mod form;
 pub mod guild;
 pub mod nav;
 pub mod pages;
+pub mod rest;
 mod router;
 pub mod session_pruning;
 pub mod shell;

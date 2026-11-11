@@ -79,6 +79,11 @@ pub enum GuildError {
     OperatorCommandPermissions(String),
     #[error("Discord rejected the permission update for /{name}: {reason}")]
     PermissionUpdateRejected { name: String, reason: String },
+    #[error(
+        "Discord didn't accept the dashboard's sign-in for {bot}; turn \
+         Greetings off from the overview instead."
+    )]
+    PermissionsNotAccepted { bot: String },
 }
 
 impl GuildError {

@@ -9,7 +9,7 @@ use super::access::admin_app;
 use super::error::{GuildError, server_err};
 use super::form::form_args;
 use super::parse::{parse_flag, parse_id, parse_max_partners};
-use crate::auth::{AuthError, GuildIds, discord_client};
+use crate::auth::{AuthError, GuildIds, guild_client};
 
 form_args! {
     ChannelSettingsForm {
@@ -236,7 +236,8 @@ pub async fn create_temp_voice_creator_channel(
     let guild_ref = Id::new_checked(guild_id.cast_unsigned())
         .ok_or(AuthError::InvalidGuildId)?;
 
-    let channel = discord_client(cx)?
+    let channel = guild_client(cx, guild_id)
+        .await?
         .create_guild_channel(guild_ref, CREATOR_CHANNEL_NAME)
         .kind(ChannelType::GuildVoice)
         .parent_id(category)

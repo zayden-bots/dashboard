@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use topcoat::context::Cx;
+use twilight_http::api_error::ApiError;
 use twilight_http::error::ErrorType;
 use twilight_http::response::marker::ListBody;
 use twilight_http::{Client, Error, Response};
@@ -18,8 +19,10 @@ use twilight_model::id::marker::{
     GuildMarker,
     RoleMarker,
 };
+use zayden_app::applications::Slot;
 
 use super::error::{GuildError, server_err};
+use super::seat;
 use crate::auth::{
     AuthError,
     GuildAccess,
@@ -27,6 +30,7 @@ use crate::auth::{
     bearer_client,
     discord_client,
     guild_admin_context,
+    web_state,
 };
 
 pub const MAX_ALLOWED_CHANNELS: usize = 90;
@@ -154,6 +158,13 @@ pub struct GuildContext {
     pub http: Arc<Client>,
     pub app_id: Id<ApplicationMarker>,
     pub access: GuildAccess,
+    pub bot_name: String,
+    pub cross_app: bool,
+}
+
+#[must_use]
+pub const fn sign_in_rejected(status: u16, code: Option<u64>) -> bool {
+    matches!(status, 401 | 403) || matches!(code, Some(50001 | 50013 | 20012))
 }
 
 pub async fn guild_context(
@@ -161,15 +172,25 @@ pub async fn guild_context(
     guild: &str,
 ) -> Result<GuildContext, GuildError> {
     let ctx = guild_admin_context(cx, guild).await?;
+    let seat = seat::seat(app_state(cx)?, ctx.guild_id, Slot::Zayden).await?;
+    let app_id = Id::new_checked(seat.application_id.cast_unsigned())
+        .ok_or(GuildError::InvalidApplicationId)?;
+    let http = match web_state(cx)?.app_client(seat.application_id).await {
+        Some(http) => http,
+        None => Arc::clone(discord_client(cx)?),
+    };
+
+    let cross_app = seat.application_id.cast_unsigned() != app_state(cx)?.zayden_id;
 
     Ok(GuildContext {
         guild_id: Id::new_checked(ctx.guild_id.cast_unsigned())
             .ok_or(AuthError::InvalidGuildId)?,
         access_token: ctx.access_token,
-        http: Arc::clone(discord_client(cx)?),
-        app_id: Id::new_checked(app_state(cx)?.zayden_id)
-            .ok_or(GuildError::InvalidApplicationId)?,
+        http,
+        app_id,
         access: ctx.access,
+        bot_name: seat.name,
+        cross_app,
     })
 }
 
@@ -235,7 +256,7 @@ pub async fn fetch(
     {
         Ok(resp) => resp,
         Err(e) if unconfigured(&e) => return Ok(Vec::new()),
-        Err(e) => return Err(server_err(e)),
+        Err(e) => return Err(read_rejection(&e, &ctx.bot_name, ctx.cross_app)),
     };
 
     Ok(resp.model().await?.permissions)
@@ -256,8 +277,48 @@ pub async fn store(
         .update_command_permissions(ctx.guild_id, command, permissions)
         .await
         .map(|_resp| ())
-        .map_err(|e| GuildError::PermissionUpdateRejected {
+        .map_err(|e| write_rejection(&e, name, &ctx.bot_name, ctx.cross_app))
+}
+
+const fn cross_app_rejected(error: &Error, cross_app: bool) -> bool {
+    if !cross_app {
+        return false;
+    }
+
+    if let ErrorType::Response { status, error: api, .. } = error.kind() {
+        let code = if let ApiError::General(general) = api {
+            Some(general.code)
+        } else {
+            None
+        };
+        sign_in_rejected(status.get(), code)
+    } else {
+        matches!(error.kind(), ErrorType::Unauthorized)
+    }
+}
+
+#[must_use]
+pub fn read_rejection(error: &Error, bot: &str, cross_app: bool) -> GuildError {
+    if cross_app_rejected(error, cross_app) {
+        GuildError::PermissionsNotAccepted { bot: bot.to_owned() }
+    } else {
+        server_err(error)
+    }
+}
+
+#[must_use]
+pub fn write_rejection(
+    error: &Error,
+    name: &str,
+    bot: &str,
+    cross_app: bool,
+) -> GuildError {
+    if cross_app_rejected(error, cross_app) {
+        GuildError::PermissionsNotAccepted { bot: bot.to_owned() }
+    } else {
+        GuildError::PermissionUpdateRejected {
             name: name.to_owned(),
-            reason: e.to_string(),
-        })
+            reason: error.to_string(),
+        }
+    }
 }

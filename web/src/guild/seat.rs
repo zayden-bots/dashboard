@@ -3,7 +3,12 @@ use std::str::FromStr;
 use topcoat::context::Cx;
 use topcoat::router::request::uri;
 use url::form_urlencoded;
-use zayden_app::applications::{AppKind, ApplicationStore, Slot};
+use zayden_app::applications::{
+    AppKind,
+    ApplicationProfile,
+    ApplicationStore,
+    Slot,
+};
 use zayden_app::guilds::GuildPresence;
 use zayden_app::serving::ServingKind;
 use zayden_app::state::AppState;
@@ -110,6 +115,38 @@ pub async fn seat(
     });
 
     Ok(SeatView { slot, application_id, kind, present, name, avatar_url })
+}
+
+pub async fn trusted_in_guild(
+    app: &AppState,
+    guild_id: i64,
+) -> Result<Vec<ApplicationProfile>, GuildError> {
+    let present = ApplicationStore::present_in_guild(&app.db, guild_id)
+        .await
+        .map_err(server_err)?;
+
+    let mut trusted = Vec::new();
+    let mut customs = Vec::new();
+    for row in present {
+        match row.kind {
+            AppKind::Default => trusted.push(row),
+            AppKind::Custom => {
+                let serving = app
+                    .serving
+                    .fetch(guild_id, row.slot)
+                    .await
+                    .map_err(server_err)?;
+                if serving.is_some_and(|bot| {
+                    bot.application_id.cast_signed() == row.application_id
+                }) {
+                    customs.push(row);
+                }
+            },
+        }
+    }
+    trusted.extend(customs);
+
+    Ok(trusted)
 }
 
 pub async fn seats(

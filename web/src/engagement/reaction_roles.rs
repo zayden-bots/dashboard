@@ -20,7 +20,7 @@ use crate::auth::{
     RoleInfo,
     admin_guild_id,
     db_pool,
-    discord_client,
+    guild_client,
     list_guild_channels,
     list_guild_roles,
 };
@@ -124,7 +124,7 @@ pub async fn add_reaction_role(
 ) -> Result<(), EngagementError> {
     let guild_id = admin_guild_id(cx, &form.guild).await?;
     let pool = db_pool(cx)?;
-    let http = discord_client(cx)?;
+    let http = guild_client(cx, guild_id).await?;
 
     let channel = parse_snowflake("channel", &form.channel_id)?;
     let role = parse_snowflake("role", &form.role_id)?;
@@ -180,7 +180,7 @@ pub async fn remove_reaction_role(
 ) -> Result<(), EngagementError> {
     let guild_id = admin_guild_id(cx, &form.guild).await?;
     let pool = db_pool(cx)?;
-    let http = discord_client(cx)?;
+    let http = guild_client(cx, guild_id).await?;
 
     let channel = parse_snowflake("channel", &form.channel_id)?;
     let message = parse_snowflake("message id", &form.message_id)?;

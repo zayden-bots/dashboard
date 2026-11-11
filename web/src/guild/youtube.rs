@@ -1,5 +1,6 @@
 use topcoat::context::Cx;
 use youtube::{YoutubeAnnounceRow, YoutubeConnection};
+use zayden_app::delivery::DeliveryKind;
 use zayden_app::state::AppState as ZaydenAppState;
 
 use super::access::admin_app;
@@ -10,6 +11,7 @@ use super::announce::{
     ping_role_limit,
     refused_ping_role,
 };
+use super::delivery::{self, DeliveryChoice};
 use super::dto::YoutubeStatus;
 use super::error::{GuildError, server_err};
 use super::form::{GuildForm, form_args};
@@ -47,6 +49,7 @@ pub(crate) async fn fetch_youtube_status(
 pub async fn save_youtube_settings(
     cx: &Cx,
     form: &YoutubeSettingsForm,
+    choice: DeliveryChoice,
 ) -> Result<(), GuildError> {
     let (guild_id, app) = admin_app(cx, &form.guild).await?;
 
@@ -67,11 +70,15 @@ pub async fn save_youtube_settings(
     let message = parse_message(&form.message)?;
 
     ensure_guild_channel(cx, guild_id, channel_id).await?;
-    ensure_bot_can_post(cx, guild_id, channel_id).await?;
+    let poster =
+        delivery::poster(cx, guild_id, DeliveryKind::Youtube, choice).await?;
+    ensure_bot_can_post(cx, guild_id, channel_id, poster).await?;
 
     YoutubeAnnounceRow::upsert(&app.db, guild_id, channel_id, message)
         .await
-        .map_err(server_err)
+        .map_err(server_err)?;
+
+    delivery::apply_delivery(cx, guild_id, DeliveryKind::Youtube, choice).await
 }
 
 pub async fn add_youtube_ping_role(

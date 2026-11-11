@@ -1,5 +1,6 @@
 use patreon::{PatreonAnnounceRow, PatreonConnection};
 use topcoat::context::Cx;
+use zayden_app::delivery::DeliveryKind;
 use zayden_app::state::AppState as ZaydenAppState;
 
 use super::access::admin_app;
@@ -10,6 +11,7 @@ use super::announce::{
     ping_role_limit,
     refused_ping_role,
 };
+use super::delivery::{self, DeliveryChoice};
 use super::dto::PatreonStatus;
 use super::error::{GuildError, server_err};
 use super::form::{GuildForm, form_args};
@@ -67,6 +69,7 @@ pub async fn get_patreon_status(
 pub async fn save_patreon_settings(
     cx: &Cx,
     form: &PatreonSettingsForm,
+    choice: DeliveryChoice,
 ) -> Result<(), GuildError> {
     let (guild_id, app) = admin_app(cx, &form.guild).await?;
 
@@ -87,7 +90,9 @@ pub async fn save_patreon_settings(
     let message = parse_message(&form.message)?;
 
     ensure_guild_channel(cx, guild_id, channel_id).await?;
-    ensure_bot_can_post(cx, guild_id, channel_id).await?;
+    let poster =
+        delivery::poster(cx, guild_id, DeliveryKind::Patreon, choice).await?;
+    ensure_bot_can_post(cx, guild_id, channel_id, poster).await?;
 
     PatreonAnnounceRow::upsert(
         &app.db,
@@ -97,7 +102,9 @@ pub async fn save_patreon_settings(
         message,
     )
     .await
-    .map_err(server_err)
+    .map_err(server_err)?;
+
+    delivery::apply_delivery(cx, guild_id, DeliveryKind::Patreon, choice).await
 }
 
 pub async fn add_patreon_ping_role(

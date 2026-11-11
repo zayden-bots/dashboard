@@ -6,7 +6,10 @@
 //! `@everyone` switch, a feature's own page owns the channel entries — and an
 //! admin may have added user overrides in Discord that belong to neither.
 
+use std::io::{BufRead, BufReader, Write};
+use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
+use std::thread;
 
 use twilight_http::Client;
 use twilight_model::application::command::permissions::{
@@ -16,15 +19,19 @@ use twilight_model::application::command::permissions::{
 use twilight_model::id::Id;
 use twilight_model::id::marker::{ChannelMarker, GuildMarker};
 use web::auth::GuildAccess;
+use web::guild::GuildError;
 use web::guild::command_permissions::{
     GuildContext,
     all_channels,
     channel_allowlist,
     everyone,
     everyone_denied,
+    read_rejection,
+    sign_in_rejected,
     store,
     with_channel_allowlist,
     with_everyone_denied,
+    write_rejection,
 };
 
 /// `channel_allowlist` returns `Vec<Id<ChannelMarker>>`; this names the empty
@@ -181,6 +188,132 @@ fn the_everyone_entry_is_never_duplicated() {
     assert_eq!(out, vec![deny_everyone()]);
 }
 
+#[test]
+fn sign_in_rejections_are_recognised() {
+    assert!(sign_in_rejected(401, None));
+    assert!(sign_in_rejected(403, None));
+    assert!(sign_in_rejected(400, Some(50001)));
+    assert!(sign_in_rejected(400, Some(50013)));
+    assert!(sign_in_rejected(400, Some(20012)));
+}
+
+#[test]
+fn other_failures_are_not_sign_in_rejections() {
+    assert!(!sign_in_rejected(400, Some(50035)));
+    assert!(!sign_in_rejected(500, None));
+}
+
+#[expect(clippy::unwrap_used, reason = "test helper: a failed bind is a test error")]
+fn discord_answering(status: u16, body: &'static str) -> String {
+    let listener = TcpListener::bind("127.0.0.1:0").unwrap();
+    let addr = listener.local_addr().unwrap().to_string();
+    thread::spawn(move || {
+        for stream in listener.incoming().flatten() {
+            thread::spawn(move || {
+                let _ = answer(stream, status, body);
+            });
+        }
+    });
+    addr
+}
+
+fn answer(stream: TcpStream, status: u16, body: &str) -> std::io::Result<()> {
+    let mut reader = BufReader::new(stream.try_clone()?);
+    let mut stream = stream;
+    loop {
+        let mut line = String::new();
+        if reader.read_line(&mut line)? == 0 || line.trim().is_empty() {
+            break;
+        }
+    }
+
+    let response = format!(
+        "HTTP/1.1 {status} X\r\ncontent-type: application/json\r\n\
+         content-length: {}\r\nconnection: close\r\n\r\n{body}",
+        body.len()
+    );
+    stream.write_all(response.as_bytes())
+}
+
+#[expect(clippy::unwrap_used, reason = "test helper: the request must fail")]
+async fn refused(status: u16, body: &'static str) -> twilight_http::Error {
+    let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
+
+    let client = Client::builder()
+        .token("Bot x".to_owned())
+        .proxy(discord_answering(status, body), true)
+        .ratelimiter(None)
+        .build();
+    client.current_user().await.unwrap_err()
+}
+
+async fn refused_write(status: u16, body: &'static str) -> GuildError {
+    write_rejection(&refused(status, body).await, "good", "Zayden", true)
+}
+
+#[tokio::test]
+async fn a_missing_access_write_on_zayden_keeps_the_rejection_text() {
+    let error = write_rejection(
+        &refused(403, r#"{"message":"Missing Access","code":50001}"#).await,
+        "good",
+        "Zayden",
+        false,
+    );
+
+    assert!(matches!(error, GuildError::PermissionUpdateRejected { .. }));
+}
+
+#[tokio::test]
+async fn a_refused_cross_app_read_shows_the_fallback() {
+    let error = read_rejection(
+        &refused(403, r#"{"message":"Missing Access","code":50001}"#).await,
+        "Maria",
+        true,
+    );
+
+    assert!(matches!(error, GuildError::PermissionsNotAccepted { .. }));
+}
+
+#[tokio::test]
+async fn a_refused_read_on_zayden_stays_a_server_error() {
+    let error = read_rejection(
+        &refused(403, r#"{"message":"Missing Access","code":50001}"#).await,
+        "Zayden",
+        false,
+    );
+
+    assert!(matches!(error, GuildError::Server(_)));
+}
+
+#[tokio::test]
+async fn a_missing_access_write_shows_the_fallback() {
+    let error =
+        refused_write(403, r#"{"message":"Missing Access","code":50001}"#).await;
+
+    assert!(matches!(error, GuildError::PermissionsNotAccepted { .. }));
+    assert!(
+        error
+            .to_string()
+            .contains("Discord didn't accept the dashboard's sign-in for Zayden")
+    );
+}
+
+#[tokio::test]
+async fn an_unauthorized_write_shows_the_fallback() {
+    let error =
+        refused_write(401, r#"{"message":"401: Unauthorized","code":0}"#).await;
+
+    assert!(matches!(error, GuildError::PermissionsNotAccepted { .. }));
+}
+
+#[tokio::test]
+async fn an_invalid_body_keeps_the_rejection_text() {
+    let error =
+        refused_write(400, r#"{"message":"Invalid Form Body","code":50035}"#).await;
+
+    assert!(matches!(error, GuildError::PermissionUpdateRejected { .. }));
+}
+
 #[tokio::test]
 async fn operator_access_cannot_write_command_permissions() {
     let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
@@ -191,6 +324,8 @@ async fn operator_access_cannot_write_command_permissions() {
         http: Arc::new(Client::new(String::new())),
         app_id: Id::new(1),
         access: GuildAccess::Operator,
+        bot_name: "Zayden".to_owned(),
+        cross_app: false,
     };
 
     let error = store(&ctx, Id::new(5), "good", &[]).await.unwrap_err();

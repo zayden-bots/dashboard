@@ -2,6 +2,7 @@ use deadlock::db::announce::PatchAnnounceRow;
 use deadlock::db::{squad_channel, summary_channel};
 use sqlx::PgPool;
 use topcoat::context::Cx;
+use twilight_http::Client;
 use zayden_app::state::AppState as ZaydenAppState;
 
 use super::access::admin_app;
@@ -26,7 +27,7 @@ use super::parse::opt_str;
 use super::patreon::fetch_patreon_status;
 use super::support::{fetch_helper_links, fetch_support_roles};
 use super::youtube::fetch_youtube_status;
-use crate::auth::{db_pool, web_state};
+use crate::auth::{db_pool, guild_client, web_state};
 use crate::state::DiscordState;
 use crate::util::server_error_text;
 
@@ -209,11 +210,12 @@ async fn wiki_section(
 async fn support_roles_section(
     pool: &PgPool,
     discord: &DiscordState,
+    http: &Client,
     guild_id: i64,
 ) -> SupportRolesSection {
     let (support_roles, helper_links) = tokio::join!(
         fetch_support_roles(pool, guild_id),
-        fetch_helper_links(pool, discord, guild_id),
+        fetch_helper_links(pool, discord, http, guild_id),
     );
 
     SupportRolesSection {
@@ -261,8 +263,9 @@ pub async fn get_section_settings(
         "support-roles" => {
             let pool = db_pool(cx)?;
             let discord = &web_state(cx)?.discord;
+            let http = guild_client(cx, guild_id).await?;
             support(SupportSection::Roles(
-                support_roles_section(pool, discord, guild_id).await,
+                support_roles_section(pool, discord, &http, guild_id).await,
             ))
         },
         _ => SectionSettings::General(general_section(app, guild_id).await?),

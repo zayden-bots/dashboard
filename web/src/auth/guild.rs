@@ -8,6 +8,7 @@ use twilight_http::Client;
 use twilight_model::guild::Permissions;
 use twilight_model::id::Id;
 use twilight_model::user::CurrentUserGuild;
+use zayden_app::applications::ApplicationStore;
 
 use super::context::{cookie_jar, db_pool, try_web_state};
 use super::cookie::SESSION_COOKIE;
@@ -93,8 +94,21 @@ pub async fn user_guilds(
     lookup_user_guilds(cache, identity).await
 }
 
-async fn bot_is_in_guild(discord: Option<&Client>, guild_id: u64) -> bool {
-    let (Some(http), Some(id)) = (discord, Id::new_checked(guild_id)) else {
+async fn bot_is_in_guild(
+    pool: &PgPool,
+    discord: Option<&Client>,
+    guild_id: i64,
+) -> bool {
+    if ApplicationStore::present_in_guild(pool, guild_id)
+        .await
+        .is_ok_and(|present| !present.is_empty())
+    {
+        return true;
+    }
+
+    let (Some(http), Some(id)) =
+        (discord, Id::new_checked(guild_id.cast_unsigned()))
+    else {
         return false;
     };
 
@@ -130,7 +144,7 @@ pub async fn guild_admin_for(
         return Err(AuthError::Forbidden);
     }
 
-    if !bot_is_in_guild(discord, guild_id_u64).await {
+    if !bot_is_in_guild(pool, discord, guild_id).await {
         return Err(AuthError::BotNotInGuild);
     }
 

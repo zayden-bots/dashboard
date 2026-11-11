@@ -219,7 +219,22 @@ async fn harness(pool: &PgPool, maria_id: Option<u64>) -> TestResult<Harness> {
         .user_guilds
         .insert(41, Arc::from([guild(7, "Guild 7", Permissions::MANAGE_GUILD)]))
         .await;
-    seed_users(&state.discord.users, &[41]).await;
+    state
+        .sessions
+        .insert("operator-token".to_owned(), SessionIdentity {
+            user_id: 44,
+            access_token: "operator-token-access".to_owned(),
+        })
+        .await;
+    state.discord.user_guilds.insert(44, Arc::from([])).await;
+    seed_users(&state.discord.users, &[41, 44]).await;
+    sqlx::query!(
+        "INSERT INTO web_user_roles (discord_user_id, role) VALUES ($1, $2)",
+        44_i64,
+        "operator"
+    )
+    .execute(pool)
+    .await?;
 
     let router = web::router()
         .assets(AssetBundle::load_dir(bundle_dir()?)?)
@@ -484,6 +499,27 @@ async fn an_absent_default_bot_shows_its_invite(
     assert!(html.contains(r#"href="/invite?guild=7&amp;bot=maria""#), "{html}");
     assert!(html.contains(">Add Maria<"), "{html}");
     assert_eq!(html.matches("Not in server").count(), 1, "{html}");
+
+    pool.close().await;
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn an_operator_sees_the_seat_name_when_no_bot_is_present(
+    options: PgPoolOptions,
+    connect: PgConnectOptions,
+) {
+    let pool = test_pool(options, connect).await.unwrap();
+    register(&pool, 1, Slot::Zayden, "Zayden").await.unwrap();
+    register(&pool, 3, Slot::Maria, "Maria").await.unwrap();
+    let app = harness(&pool, Some(3)).await.unwrap();
+
+    let request = Request::get("/guild/7?bot=maria")
+        .header(header::COOKIE, "session=operator-token");
+    let response = app.router.handle(request.body(Body::empty()).unwrap()).await;
+    let html = body_text(response).await.unwrap();
+
+    assert!(html.contains("Maria isn't in this server yet"), "{html}");
+    assert!(html.contains(r#"href="/invite?guild=7&amp;bot=maria""#), "{html}");
 
     pool.close().await;
 }

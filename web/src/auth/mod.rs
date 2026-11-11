@@ -13,7 +13,7 @@ mod session;
 pub mod supersede;
 
 pub(crate) use context::cookie_jar;
-pub use context::{app_state, db_pool, discord_client, web_state};
+pub use context::{app_state, db_pool, discord_client, guild_client, web_state};
 pub use cookie::{
     LOGIN_NEXT_COOKIE,
     OAUTH_STATE_COOKIE,

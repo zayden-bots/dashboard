@@ -122,7 +122,8 @@ fn field_of(error: &GuildError) -> Option<String> {
         | GuildError::ModuleNotOffered { .. }
         | GuildError::CommandNotRegistered(_)
         | GuildError::OperatorCommandPermissions(_)
-        | GuildError::PermissionUpdateRejected { .. } => return None,
+        | GuildError::PermissionUpdateRejected { .. }
+        | GuildError::PermissionsNotAccepted { .. } => return None,
     };
     Some(field.to_owned())
 }

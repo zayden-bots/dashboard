@@ -196,7 +196,7 @@ enum Loaded {
         overlaps: Vec<Overlap>,
     },
     Problem {
-        title: &'static str,
+        title: String,
         message: String,
         actions: Vec<ErrorAction>,
     },
@@ -221,45 +221,49 @@ async fn load(cx: &Cx, guild_id: &str, slot: Seat) -> Result<Loaded> {
 
     Ok(if error == GuildError::Auth(AuthError::BotNotInGuild) {
         let name = server_name(cx, guild_id).await;
-        let invite = format!("/invite?guild={}", path_segment(guild_id));
+        let bot = seat_name(cx, guild_id, slot).await;
+        let mut invite = format!("/invite?guild={}", path_segment(guild_id));
+        if let Some(param) = seat::bot_param(slot) {
+            invite.push_str("&bot=");
+            invite.push_str(param);
+        }
         let (message, action) = name.as_deref().map_or_else(
             || {
                 (
-                    "Add Zayden to this server to turn its modules on or off here."
-                        .to_owned(),
-                    "Add Zayden to this server".to_owned(),
+                    format!(
+                        "Add {bot} to this server to turn its modules on or off here."
+                    ),
+                    format!("Add {bot} to this server"),
                 )
             },
             |name| {
                 (
-                    format!(
-                        "Add Zayden to {name} to turn its modules on or off here."
-                    ),
-                    format!("Add Zayden to {name}"),
+                    format!("Add {bot} to {name} to turn its modules on or off here."),
+                    format!("Add {bot} to {name}"),
                 )
             },
         );
         Loaded::Problem {
-            title: "Zayden isn't in this server yet",
+            title: format!("{bot} isn't in this server yet"),
             message,
             actions: vec![ErrorAction::new(&action, &invite).external(), back],
         }
     } else if error == GuildError::Auth(AuthError::InvalidGuildId) {
         Loaded::Problem {
-            title: "Server not found",
+            title: "Server not found".to_owned(),
             message: "That address doesn't name a Discord server.".to_owned(),
             actions: vec![back],
         }
     } else if error.is_denied() {
         Loaded::Problem {
-            title: "You can't manage this server",
+            title: "You can't manage this server".to_owned(),
             message: "You need Manage Server in this server to change its modules."
                 .to_owned(),
             actions: vec![back],
         }
     } else {
         Loaded::Problem {
-            title: "Couldn't load this server's modules",
+            title: "Couldn't load this server's modules".to_owned(),
             message: plain(&error.to_string()).to_owned(),
             actions: vec![
                 ErrorAction::new("Try again", &seat::overview_href(guild_id, slot)),
@@ -293,6 +297,19 @@ fn join_names(names: &[String]) -> String {
     }
 }
 
+async fn seat_name(cx: &Cx, guild_id: &str, slot: Seat) -> String {
+    let Ok(app) = app_state(cx) else {
+        return slot.name().to_owned();
+    };
+    let Ok(id) = guild_id.parse::<i64>() else {
+        return slot.name().to_owned();
+    };
+
+    seat::seat(app, id, slot)
+        .await
+        .map_or_else(|_| slot.name().to_owned(), |seat| seat.name)
+}
+
 async fn server_name(cx: &Cx, guild_id: &str) -> Option<String> {
     list_manageable_guilds(cx)
         .await
@@ -314,7 +331,7 @@ async fn overview(
         <div class="page">
             match loaded {
                 Loaded::Problem { title, message, actions } => error_panel(
-                    title: title,
+                    title: &title,
                     message: &message,
                     actions: &actions
                 ),

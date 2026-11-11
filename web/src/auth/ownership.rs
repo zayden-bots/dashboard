@@ -4,7 +4,7 @@ use topcoat::context::Cx;
 use twilight_http::Client;
 use twilight_model::id::Id;
 
-use super::context::discord_client;
+use super::context::guild_client;
 use super::discord::{fetch_guild_channels, fetch_guild_roles};
 use super::error::{AuthError, ForeignIdError};
 
@@ -65,13 +65,13 @@ impl GuildIds {
             return Ok(());
         }
 
-        let http = discord_client(cx)?;
+        let http = guild_client(cx, guild_id).await?;
         let guild_id = guild_id.cast_unsigned();
 
         let (channels, roles, threads) = tokio::join!(
-            ensure_channels(http, guild_id, &self.channels, &self.forum_tags),
-            ensure_roles(http, guild_id, &self.roles),
-            ensure_threads(http, guild_id, &self.threads),
+            ensure_channels(&http, guild_id, &self.channels, &self.forum_tags),
+            ensure_roles(&http, guild_id, &self.roles),
+            ensure_threads(&http, guild_id, &self.threads),
         );
 
         channels.and(roles).and(threads)

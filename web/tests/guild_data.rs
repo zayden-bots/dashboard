@@ -24,6 +24,7 @@ use twilight_model::id::Id;
 use twilight_model::user::CurrentUserGuild;
 use web::auth::SessionUser;
 use web::guild::deadlock::{DeadlockSettingsForm, save_deadlock_settings};
+use web::guild::delivery::DeliveryChoice;
 use web::guild::dto::{
     AiSection,
     DeadlockSection,
@@ -104,6 +105,13 @@ async fn server_tier_zero(cx: &Cx) -> Result<String> {
 async fn command_context(cx: &Cx) -> Result<String> {
     Ok(render(command_permissions::guild_context(cx, "7").await, |ctx| {
         format!("{:?} {}", ctx.access, ctx.app_id)
+    }))
+}
+
+#[route(GET "/test/guild-context-bot")]
+async fn command_context_bot(cx: &Cx) -> Result<String> {
+    Ok(render(command_permissions::guild_context(cx, "7").await, |ctx| {
+        format!("{} {}", ctx.app_id, ctx.bot_name)
     }))
 }
 
@@ -281,6 +289,7 @@ async fn save_form(
             patreon::save_patreon_settings(
                 cx,
                 &patreon::PatreonSettingsForm::from_pairs(pairs)?,
+                DeliveryChoice::Keep,
             )
             .await
         },
@@ -291,6 +300,7 @@ async fn save_form(
             youtube::save_youtube_settings(
                 cx,
                 &youtube::YoutubeSettingsForm::from_pairs(pairs)?,
+                DeliveryChoice::Keep,
             )
             .await
         },
@@ -298,8 +308,12 @@ async fn save_form(
             youtube::disconnect_youtube(cx, &GuildForm::from_pairs(pairs)?).await
         },
         "deadlock" => {
-            save_deadlock_settings(cx, &DeadlockSettingsForm::from_pairs(pairs)?)
-                .await
+            save_deadlock_settings(
+                cx,
+                &DeadlockSettingsForm::from_pairs(pairs)?,
+                DeliveryChoice::Keep,
+            )
+            .await
         },
         "kofi" => {
             kofi::link_kofi_email(cx, &kofi::KofiEmailForm::from_pairs(pairs)?).await
@@ -452,7 +466,8 @@ async fn harness_for(pool: PgPool, zayden_id: u64) -> TestResult<Harness> {
         .route(save)
         .route(uncalled)
         .route(server_tier_zero)
-        .route(command_context);
+        .route(command_context)
+        .route(command_context_bot);
 
     Ok(Harness { router: base.build(), pool, app })
 }
@@ -1170,6 +1185,16 @@ async fn a_zero_application_id_is_refused(pool: PgPool) {
     assert_eq!(
         app.text("/test/guild-context", Some(ADMIN)).await.unwrap(),
         shown("invalid application id")
+    );
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR", fixtures("custom_seat"))]
+async fn guild_context_targets_the_custom_seat(pool: PgPool) {
+    let app = harness(pool).await.unwrap();
+
+    assert_eq!(
+        app.text("/test/guild-context-bot", Some(ADMIN)).await.unwrap(),
+        "2000 Custom"
     );
 }
 

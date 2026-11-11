@@ -15,13 +15,16 @@ use oauth2::{
 };
 use patreon::oauth::PatreonApp;
 use secrecy::{ExposeSecret, SecretString};
+use twilight_http::Client;
 use twilight_model::user::CurrentUserGuild;
 use youtube::{YoutubeApp, YoutubeRuntime};
+use zayden_app::applications::Slot;
 use zayden_app::config::BotConfig;
 use zayden_app::state::AppState as ZaydenAppState;
 
 use crate::auth::SessionUser;
 use crate::error::StartupError;
+use crate::rest::RestClients;
 
 const DISCORD_OAUTH_AUTH_URL: &str = "https://discord.com/oauth2/authorize";
 const DISCORD_OAUTH_TOKEN_URL: &str = "https://discord.com/api/oauth2/token";
@@ -54,7 +57,7 @@ pub struct OAuthState {
 }
 
 pub struct DiscordState {
-    pub http: Arc<twilight_http::Client>,
+    pub http: Arc<Client>,
     pub user_guilds: UserGuildsCache,
     pub users: SessionUsersCache,
     pub member_names: MemberNamesCache,
@@ -79,6 +82,7 @@ pub struct WebState {
     pub sessions: SessionCache,
     pub oauth: OAuthState,
     pub discord: DiscordState,
+    pub rest: RestClients,
     pub integrations: IntegrationsState,
     pub urls: SiteUrls,
 }
@@ -92,15 +96,18 @@ impl WebState {
             .discord_client_secret
             .as_ref()
             .ok_or(StartupError::MissingConfig("DISCORD_CLIENT_SECRET"))?;
+        let rest =
+            RestClients::new(app.keyring.clone(), RestClients::default_builder());
         Ok(Self {
             app,
+            rest,
             sessions: cache(CACHE_TTL),
             oauth: OAuthState {
                 client: build_oauth_client(config, client_secret)?,
                 http: oauth2::reqwest::Client::new(),
             },
             discord: DiscordState {
-                http: Arc::new(twilight_http::Client::new(
+                http: Arc::new(Client::new(
                     config.discord_token.expose_secret().to_owned(),
                 )),
                 user_guilds: cache(CACHE_TTL),
@@ -146,6 +153,47 @@ impl WebState {
                 dashboard: config.dashboard_url.clone(),
             },
         })
+    }
+
+    pub async fn app_client(&self, application_id: i64) -> Option<Arc<Client>> {
+        if application_id == self.app.zayden_id.cast_signed() {
+            return Some(Arc::clone(&self.discord.http));
+        }
+
+        self.rest.client(&self.app.db, application_id).await
+    }
+
+    pub async fn guild_client(&self, guild_id: i64) -> Arc<Client> {
+        match self.app.serving.fetch(guild_id, Slot::Zayden).await {
+            Ok(Some(bot)) if bot.present => {
+                if let Some(client) =
+                    self.app_client(bot.application_id.cast_signed()).await
+                {
+                    return client;
+                }
+            },
+            Ok(_) => {},
+            Err(e) => {
+                tracing::warn!(guild_id, error = %e, "failed to resolve the serving bot");
+            },
+        }
+
+        match crate::guild::seat::trusted_in_guild(&self.app, guild_id).await {
+            Ok(present) => {
+                for profile in present {
+                    if let Some(client) =
+                        self.app_client(profile.application_id).await
+                    {
+                        return client;
+                    }
+                }
+            },
+            Err(e) => {
+                tracing::warn!(guild_id, error = %e, "failed to list the bots in the guild");
+            },
+        }
+
+        Arc::clone(&self.discord.http)
     }
 }
 

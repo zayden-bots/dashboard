@@ -7,10 +7,10 @@ use crate::auth::{
     AuthError,
     admin_guild_id,
     current_session_identity,
-    discord_client,
     fetch_guild_channels,
     fetch_guild_roles,
     find_user_guild,
+    guild_client,
     manages_guild,
     user_guilds,
 };
@@ -46,7 +46,7 @@ async fn user_guild_info(cx: &Cx, guild: &str, guild_id: u64) -> Option<GuildInf
 }
 
 async fn bot_guild_info(cx: &Cx, guild: &str, guild_id: u64) -> Option<GuildInfo> {
-    let http = discord_client(cx).ok()?;
+    let http = guild_client(cx, guild_id.cast_signed()).await.ok()?;
     let found =
         http.guild(Id::new_checked(guild_id)?).await.ok()?.model().await.ok()?;
 
@@ -79,12 +79,12 @@ pub async fn get_guild_directory(
     guild: &str,
 ) -> Result<GuildDirectory, GuildError> {
     let guild_id = admin_guild_id(cx, guild).await?;
-    let http = discord_client(cx)?;
+    let http = guild_client(cx, guild_id).await?;
     let discord_guild_id = guild_id.cast_unsigned();
 
     let (channels, roles) = tokio::join!(
-        fetch_guild_channels(http, discord_guild_id),
-        fetch_guild_roles(http, discord_guild_id),
+        fetch_guild_channels(&http, discord_guild_id),
+        fetch_guild_roles(&http, discord_guild_id),
     );
 
     Ok(GuildDirectory {

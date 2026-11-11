@@ -7,7 +7,7 @@ use twilight_model::channel::permission_overwrite::PermissionOverwrite;
 use twilight_model::guild::Permissions;
 use twilight_model::id::Id;
 
-use super::context::discord_client;
+use super::context::{guild_client, web_state};
 use super::dto::{ChannelInfo, ForumTagInfo, RoleInfo};
 use super::error::{AuthError, ForeignIdError};
 use super::guild::admin_guild_id;
@@ -21,12 +21,12 @@ pub fn bearer_client(access_token: &str) -> Client {
     Client::builder().token(format!("Bearer {access_token}")).build()
 }
 
-async fn admin_discord<'a>(
-    cx: &'a Cx,
+async fn admin_discord(
+    cx: &Cx,
     guild: &str,
-) -> Result<(u64, &'a Arc<Client>), AuthError> {
+) -> Result<(u64, Arc<Client>), AuthError> {
     let guild_id = admin_guild_id(cx, guild).await?;
-    Ok((guild_id.cast_unsigned(), discord_client(cx)?))
+    Ok((guild_id.cast_unsigned(), guild_client(cx, guild_id).await?))
 }
 
 pub async fn list_guild_channels(
@@ -34,7 +34,7 @@ pub async fn list_guild_channels(
     guild: &str,
 ) -> Result<Vec<ChannelInfo>, AuthError> {
     let (guild_id, http) = admin_discord(cx, guild).await?;
-    fetch_guild_channels(http, guild_id).await
+    fetch_guild_channels(&http, guild_id).await
 }
 
 pub async fn list_guild_roles(
@@ -42,7 +42,7 @@ pub async fn list_guild_roles(
     guild: &str,
 ) -> Result<Vec<RoleInfo>, AuthError> {
     let (guild_id, http) = admin_discord(cx, guild).await?;
-    fetch_guild_roles(http, guild_id).await
+    fetch_guild_roles(&http, guild_id).await
 }
 
 pub(crate) async fn fetch_guild_channels(
@@ -146,8 +146,17 @@ pub async fn ensure_bot_can_post(
     cx: &Cx,
     guild_id: i64,
     channel_id: i64,
+    application_id: i64,
 ) -> Result<(), AuthError> {
-    let http = discord_client(cx)?;
+    let Some(http) = web_state(cx)?.app_client(application_id).await else {
+        tracing::warn!(
+            guild_id,
+            channel_id,
+            application_id,
+            "cannot check the delivery bot's permissions: its token is not available"
+        );
+        return Ok(());
+    };
     let guild = Id::new_checked(guild_id.cast_unsigned())
         .ok_or(AuthError::InvalidGuildId)?;
     let channel_ref = Id::new_checked(channel_id.cast_unsigned())

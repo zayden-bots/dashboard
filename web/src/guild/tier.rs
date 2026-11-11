@@ -7,7 +7,7 @@ use crate::auth::{
     AuthError,
     app_state,
     current_session_identity,
-    discord_client,
+    guild_client,
     web_state,
 };
 
@@ -16,7 +16,13 @@ pub async fn guild_server_tier(cx: &Cx, guild_id: u64) -> Result<Tier, GuildErro
 
     let guild = Id::new_checked(guild_id).ok_or(AuthError::InvalidGuildId)?;
 
-    let owner = discord_client(cx)?.guild(guild).await?.model().await?.owner_id;
+    let owner = guild_client(cx, guild_id.cast_signed())
+        .await?
+        .guild(guild)
+        .await?
+        .model()
+        .await?
+        .owner_id;
 
     let tier = app.entitlements.server_tier(guild_id, owner.get()).await;
 

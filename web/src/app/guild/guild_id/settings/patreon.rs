@@ -4,6 +4,7 @@ use topcoat::context::Cx;
 use topcoat::router::content::Form;
 use topcoat::router::{page, path_param};
 use topcoat::view::{View, ViewExt, component, view};
+use zayden_app::delivery::DeliveryKind;
 
 use super::announce::{
     ADD_PING_ROLE,
@@ -18,6 +19,7 @@ use super::{Lists, Page, TEXT_KINDS, ensure_path_guild, settings_page};
 use crate::app::guild::guild_id::GuildId;
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 use crate::components::confirm::confirm_button;
+use crate::components::delivery::delivery_fields;
 use crate::components::field_row::{
     form_summary,
     select_row,
@@ -27,6 +29,7 @@ use crate::components::field_row::{
 use crate::components::placeholder_legend::placeholder_legend;
 use crate::components::save_bar::save_bar;
 use crate::guild::announce::PingRoleForm;
+use crate::guild::delivery::{DeliveryView, delivery_view, take_delivery_choice};
 use crate::guild::dto::patreon::OUTCOME_PARAM;
 use crate::guild::dto::{PatreonOutcome, PatreonStatus};
 use crate::guild::patreon::{
@@ -139,11 +142,12 @@ async fn remove_ping_role(
 async fn save_settings(
     cx: &Cx,
     guild_id: &str,
-    pairs: Vec<(String, String)>,
+    mut pairs: Vec<(String, String)>,
 ) -> std::result::Result<(), GuildError> {
+    let choice = take_delivery_choice(&mut pairs)?;
     let form = PatreonSettingsForm::from_pairs(pairs)?;
     ensure_path_guild(&form.guild, guild_id)?;
-    save_patreon_settings(cx, &form).await
+    save_patreon_settings(cx, &form, choice).await
 }
 
 async fn drop_connection(
@@ -193,13 +197,31 @@ pub(super) async fn tab(
     .boxed())
 }
 
+async fn delivery(
+    cx: &Cx,
+    guild_id: &str,
+    channel: Option<&str>,
+) -> Option<DeliveryView> {
+    let id = guild_id.parse::<i64>().ok()?;
+    let channel = channel.and_then(|c| c.parse::<i64>().ok()).filter(|c| *c != 0);
+    match delivery_view(cx, id, DeliveryKind::Patreon, channel).await {
+        Ok(view) => Some(view),
+        Err(e) => {
+            tracing::warn!(guild_id, error = %e, "failed to load the delivery settings");
+            None
+        },
+    }
+}
+
 #[component]
 async fn panel(
+    cx: &Cx,
     guild_id: &str,
     status: &PatreonStatus,
     lists: &Lists,
     state: &PageState,
 ) -> Result<impl View> {
+    let delivery = delivery(cx, guild_id, status.channel_id.as_deref()).await;
     let connect_href = format!("/patreon/connect?guild={}", path_segment(guild_id));
     let page = PAGE.href(guild_id);
     let disconnect_action = format!("{page}/disconnect");
@@ -293,6 +315,9 @@ async fn panel(
                         ),
                         error: sent.error("channel_id")
                     )
+                    if let Some(delivery) = &delivery {
+                        delivery_fields(form: FORM, view: delivery)
+                    }
                     toggle_row(
                         form: FORM,
                         name: "public_only",

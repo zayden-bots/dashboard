@@ -33,6 +33,13 @@ pub fn discord_client(cx: &Cx) -> Result<&Arc<twilight_http::Client>, AuthError>
         .ok_or(AuthError::MissingContext("missing Discord client"))
 }
 
+pub async fn guild_client(
+    cx: &Cx,
+    guild_id: i64,
+) -> Result<Arc<twilight_http::Client>, AuthError> {
+    Ok(web_state(cx)?.guild_client(guild_id).await)
+}
+
 pub(crate) fn cookie_jar(cx: &Cx) -> Result<&CookieJar, AuthError> {
     if try_request_context::<CookieJarCell>(cx).is_none() {
         return Err(AuthError::MissingContext("missing cookie jar"));

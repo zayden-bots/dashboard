@@ -6,6 +6,7 @@ pub mod checkbox;
 pub mod confirm;
 pub mod confirm_dialog;
 pub mod data_table;
+pub mod delivery;
 pub mod empty_state;
 pub mod error_panel;
 pub mod field;

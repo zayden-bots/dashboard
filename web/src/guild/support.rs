@@ -2,6 +2,7 @@ use sqlx::PgPool;
 use suggestions::ReviewThresholds;
 use ticket::{GuildId, HelperLinks, RoleId, SupportRoles, UserId};
 use topcoat::context::Cx;
+use twilight_http::Client;
 use twilight_model::id::Id;
 
 use super::access::admin_app;
@@ -17,7 +18,7 @@ use super::parse::{
     parse_role,
     parse_user,
 };
-use crate::auth::{GuildIds, admin_guild_id, db_pool, web_state};
+use crate::auth::{GuildIds, admin_guild_id, db_pool, guild_client, web_state};
 use crate::state::DiscordState;
 
 form_args! {
@@ -201,6 +202,7 @@ pub async fn remove_support_role(
 pub(crate) async fn fetch_helper_links(
     pool: &PgPool,
     discord: &DiscordState,
+    http: &Client,
     guild_id: i64,
 ) -> Result<Vec<HelperLinkInfo>, GuildError> {
     let links = HelperLinks::list(pool, ticket_guild(guild_id)).await?;
@@ -209,7 +211,8 @@ pub(crate) async fn fetch_helper_links(
 
     for l in links {
         let user_id = l.user_id.get();
-        let name = display_name(discord, guild_id.cast_unsigned(), user_id).await;
+        let name =
+            display_name(discord, http, guild_id.cast_unsigned(), user_id).await;
 
         out.push(HelperLinkInfo {
             user_id: user_id.to_string(),
@@ -228,11 +231,13 @@ pub async fn list_helper_links(
     let guild_id = admin_guild_id(cx, guild).await?;
     let pool = db_pool(cx)?;
     let discord = &web_state(cx)?.discord;
-    fetch_helper_links(pool, discord, guild_id).await
+    let http = guild_client(cx, guild_id).await?;
+    fetch_helper_links(pool, discord, &http, guild_id).await
 }
 
 async fn display_name(
     discord: &DiscordState,
+    http: &Client,
     guild_id: u64,
     user_id: u64,
 ) -> String {
@@ -242,8 +247,7 @@ async fn display_name(
     }
 
     let member = async {
-        let resp = discord
-            .http
+        let resp = http
             .guild_member(Id::new_checked(guild_id)?, Id::new_checked(user_id)?)
             .await
             .ok()?;

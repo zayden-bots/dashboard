@@ -62,13 +62,13 @@ async fn an_empty_submission_needs_no_discord_lookup() {
 }
 
 #[tokio::test]
-async fn a_submission_without_a_discord_client_fails() {
+async fn a_submission_without_app_state_fails() {
     let cx = CxTestBuilder::new().build();
 
     let error =
         GuildIds::default().channel(Some(5)).ensure_in(&cx, 1).await.unwrap_err();
 
-    assert_eq!(error.to_string(), "missing Discord client");
+    assert_eq!(error.to_string(), "missing app state");
 }
 
 const GUILD: u64 = 100;

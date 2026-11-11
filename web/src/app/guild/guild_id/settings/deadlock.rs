@@ -4,6 +4,7 @@ use topcoat::context::Cx;
 use topcoat::router::content::Form;
 use topcoat::router::{page, path_param};
 use topcoat::view::{View, ViewExt, component, view};
+use zayden_app::delivery::DeliveryKind;
 
 use super::announce::{
     ADD_PING_ROLE,
@@ -16,6 +17,7 @@ use super::header::switch_module;
 use super::state::{Done, PageState, settle};
 use super::{Lists, Page, TEXT_KINDS, ensure_path_guild, settings_page};
 use crate::app::guild::guild_id::GuildId;
+use crate::components::delivery::delivery_fields;
 use crate::components::field_row::{
     form_summary,
     select_row,
@@ -36,6 +38,7 @@ use crate::guild::deadlock::{
     save_deadlock_squad,
     save_deadlock_summaries,
 };
+use crate::guild::delivery::{DeliveryView, delivery_view, take_delivery_choice};
 use crate::guild::dto::DeadlockSection;
 
 const PAGE: Page = Page::Deadlock;
@@ -89,14 +92,15 @@ async fn switch(
 #[page(POST "./summaries")]
 async fn save_summaries(
     cx: &Cx,
-    Form(pairs): Form<Vec<(String, String)>>,
+    Form(mut pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
     let guild_id: &str = path_param::<GuildId>(cx);
     let values = pairs.clone();
     let result = async {
+        let choice = take_delivery_choice(&mut pairs)?;
         let form = DeadlockSummariesForm::from_pairs(pairs)?;
         ensure_path_guild(&form.guild, guild_id)?;
-        save_deadlock_summaries(cx, &form).await
+        save_deadlock_summaries(cx, &form, choice).await
     }
     .await;
     let failure = settle(cx, SUMMARIES_FORM, values, result, &Done {
@@ -115,14 +119,15 @@ async fn save_summaries(
 #[page(POST "./squad")]
 async fn save_squad(
     cx: &Cx,
-    Form(pairs): Form<Vec<(String, String)>>,
+    Form(mut pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
     let guild_id: &str = path_param::<GuildId>(cx);
     let values = pairs.clone();
     let result = async {
+        let choice = take_delivery_choice(&mut pairs)?;
         let form = DeadlockSquadForm::from_pairs(pairs)?;
         ensure_path_guild(&form.guild, guild_id)?;
-        save_deadlock_squad(cx, &form).await
+        save_deadlock_squad(cx, &form, choice).await
     }
     .await;
     let failure = settle(cx, SQUAD_FORM, values, result, &Done {
@@ -184,20 +189,60 @@ async fn remove_ping_role(
 async fn save_settings(
     cx: &Cx,
     guild_id: &str,
-    pairs: Vec<(String, String)>,
+    mut pairs: Vec<(String, String)>,
 ) -> std::result::Result<(), GuildError> {
+    let choice = take_delivery_choice(&mut pairs)?;
     let form = DeadlockSettingsForm::from_pairs(pairs)?;
     ensure_path_guild(&form.guild, guild_id)?;
-    save_deadlock_settings(cx, &form).await
+    save_deadlock_settings(cx, &form, choice).await
+}
+
+async fn delivery(
+    cx: &Cx,
+    guild_id: &str,
+    kind: DeliveryKind,
+    channel: Option<&str>,
+) -> Option<DeliveryView> {
+    let id = guild_id.parse::<i64>().ok()?;
+    let channel = channel.and_then(|c| c.parse::<i64>().ok()).filter(|c| *c != 0);
+    match delivery_view(cx, id, kind, channel).await {
+        Ok(view) => Some(view),
+        Err(e) => {
+            tracing::warn!(guild_id, error = %e, "failed to load the delivery settings");
+            None
+        },
+    }
 }
 
 #[component]
 pub(super) async fn tab(
+    cx: &Cx,
     guild_id: &str,
     settings: &DeadlockSection,
     lists: &Lists,
     state: &PageState,
 ) -> Result<impl View> {
+    let patch_delivery = delivery(
+        cx,
+        guild_id,
+        DeliveryKind::DeadlockPatch,
+        settings.channel_id.as_deref(),
+    )
+    .await;
+    let summaries_delivery = delivery(
+        cx,
+        guild_id,
+        DeliveryKind::DeadlockSummary,
+        settings.summary_channel_id.as_deref(),
+    )
+    .await;
+    let squad_delivery = delivery(
+        cx,
+        guild_id,
+        DeliveryKind::DeadlockSquad,
+        settings.squad_channel_id.as_deref(),
+    )
+    .await;
     let page = PAGE.href(guild_id);
     let sent = state.sent(FORM);
     let summaries_sent = state.sent(SUMMARIES_FORM);
@@ -235,6 +280,9 @@ pub(super) async fn tab(
                     ),
                     error: sent.error("channel_id")
                 )
+                if let Some(delivery) = &patch_delivery {
+                    delivery_fields(form: FORM, view: delivery)
+                }
                 textarea_row(
                     form: FORM,
                     name: "message",
@@ -284,6 +332,9 @@ pub(super) async fn tab(
                     help: Some("Leave unset to stop posting summaries here."),
                     error: summaries_sent.error("summary_channel_id")
                 )
+                if let Some(delivery) = &summaries_delivery {
+                    delivery_fields(form: SUMMARIES_FORM, view: delivery)
+                }
             </fieldset>
             save_bar(notice: state.notice_for(SUMMARIES_FORM))
         </form>
@@ -315,6 +366,9 @@ pub(super) async fn tab(
                     help: Some("Leave unset to stop posting squad updates here."),
                     error: squad_sent.error("squad_channel_id")
                 )
+                if let Some(delivery) = &squad_delivery {
+                    delivery_fields(form: SQUAD_FORM, view: delivery)
+                }
                 toggle_row(
                     form: SQUAD_FORM,
                     name: "squad_leaderboard",

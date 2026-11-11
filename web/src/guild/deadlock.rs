@@ -1,6 +1,7 @@
 use deadlock::db::announce::PatchAnnounceRow;
 use deadlock::db::{squad_channel, summary_channel};
 use topcoat::context::Cx;
+use zayden_app::delivery::DeliveryKind;
 
 use super::access::admin_app;
 use super::announce::{
@@ -10,6 +11,7 @@ use super::announce::{
     ping_role_limit,
     refused_ping_role,
 };
+use super::delivery::{self, DeliveryChoice};
 use super::error::{GuildError, server_err};
 use super::form::form_args;
 use super::parse::{parse_flag, parse_role};
@@ -30,6 +32,7 @@ form_args! {
 pub async fn save_deadlock_settings(
     cx: &Cx,
     form: &DeadlockSettingsForm,
+    choice: DeliveryChoice,
 ) -> Result<(), GuildError> {
     let (guild_id, app) = admin_app(cx, &form.guild).await?;
 
@@ -50,16 +53,21 @@ pub async fn save_deadlock_settings(
     let message = parse_message(&form.message)?;
 
     ensure_guild_channel(cx, guild_id, channel_id).await?;
-    ensure_bot_can_post(cx, guild_id, channel_id).await?;
+    let poster =
+        delivery::poster(cx, guild_id, DeliveryKind::DeadlockPatch, choice).await?;
+    ensure_bot_can_post(cx, guild_id, channel_id, poster).await?;
 
     PatchAnnounceRow::upsert(&app.db, guild_id, channel_id, message)
         .await
-        .map_err(server_err)
+        .map_err(server_err)?;
+
+    delivery::apply_delivery(cx, guild_id, DeliveryKind::DeadlockPatch, choice).await
 }
 
 pub async fn save_deadlock_summaries(
     cx: &Cx,
     form: &DeadlockSummariesForm,
+    choice: DeliveryChoice,
 ) -> Result<(), GuildError> {
     let (guild_id, app) = admin_app(cx, &form.guild).await?;
 
@@ -79,14 +87,23 @@ pub async fn save_deadlock_summaries(
     };
 
     ensure_guild_channel(cx, guild_id, channel_id).await?;
-    ensure_bot_can_post(cx, guild_id, channel_id).await?;
+    let poster =
+        delivery::poster(cx, guild_id, DeliveryKind::DeadlockSummary, choice)
+            .await?;
+    ensure_bot_can_post(cx, guild_id, channel_id, poster).await?;
 
-    summary_channel::upsert(&app.db, guild_id, channel_id).await.map_err(server_err)
+    summary_channel::upsert(&app.db, guild_id, channel_id)
+        .await
+        .map_err(server_err)?;
+
+    delivery::apply_delivery(cx, guild_id, DeliveryKind::DeadlockSummary, choice)
+        .await
 }
 
 pub async fn save_deadlock_squad(
     cx: &Cx,
     form: &DeadlockSquadForm,
+    choice: DeliveryChoice,
 ) -> Result<(), GuildError> {
     let (guild_id, app) = admin_app(cx, &form.guild).await?;
 
@@ -106,7 +123,9 @@ pub async fn save_deadlock_squad(
     };
 
     ensure_guild_channel(cx, guild_id, channel_id).await?;
-    ensure_bot_can_post(cx, guild_id, channel_id).await?;
+    let poster =
+        delivery::poster(cx, guild_id, DeliveryKind::DeadlockSquad, choice).await?;
+    ensure_bot_can_post(cx, guild_id, channel_id, poster).await?;
 
     squad_channel::upsert(
         &app.db,
@@ -115,7 +134,9 @@ pub async fn save_deadlock_squad(
         parse_flag(&form.squad_leaderboard),
     )
     .await
-    .map_err(server_err)
+    .map_err(server_err)?;
+
+    delivery::apply_delivery(cx, guild_id, DeliveryKind::DeadlockSquad, choice).await
 }
 
 pub async fn add_deadlock_ping_role(
