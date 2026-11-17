@@ -5,10 +5,12 @@
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::page;
 use topcoat::runtime::{Event, expr, link_attrs, prefetch_mode, signal};
 use topcoat::view::{View, ViewExt, attributes, component, view};
 
+use super::SERVERS_TITLE;
 use super::gate::{Gate, closed, gate};
 use crate::admin::{AdminError, list_bot_guilds, parse_guild_id};
 use crate::auth::WebRole;
@@ -30,8 +32,8 @@ fn matching(names: &str, needle: &str) -> f64 {
     f64::from(u32::try_from(count).unwrap_or(u32::MAX))
 }
 
-#[page]
-pub(super) async fn servers(cx: &Cx) -> Result<impl View> {
+#[page(with(Metadata::new().title(SERVERS_TITLE)))]
+pub(crate) async fn servers(cx: &Cx) -> Result<impl View> {
     let access = gate(cx, WebRole::Operator).await?;
     if access != Gate::Open {
         return Ok(view! { closed(role: WebRole::Operator, gate: access) }.boxed());

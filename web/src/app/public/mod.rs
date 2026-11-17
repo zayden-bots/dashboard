@@ -1,6 +1,6 @@
 use topcoat::router::segment;
 mod invite;
-mod landing;
+pub(crate) mod landing;
 pub mod layout;
 mod legal;
 mod login;

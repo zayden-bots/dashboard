@@ -1,13 +1,12 @@
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::error::not_found;
-use topcoat::router::{StatusCode, page, segment};
+use topcoat::router::{StatusCode, href, page, segment};
 use topcoat::view::{View, view};
 
 use super::guild_id;
 use crate::components::error_panel::{ErrorAction, error_panel};
 use crate::guild::list_manageable_guilds;
-use crate::nav::path_segment;
 
 segment!(kind: Group);
 
@@ -27,11 +26,10 @@ pub(super) async fn guild_not_found(cx: &Cx) -> Result<impl View> {
     let Some(guild) = guilds.iter().find(|guild| guild.id == guild_id) else {
         return Err(not_found().into());
     };
+    let overview = href!(super::overview::guild_overview, super::guild_id: guild_id)
+        .resolve(cx);
     let actions = [
-        ErrorAction::new(
-            &format!("Back to {}", guild.name),
-            &format!("/guild/{}", path_segment(guild_id)),
-        ),
+        ErrorAction::new(&format!("Back to {}", guild.name), &overview),
         ErrorAction::new("Back to servers", "/guilds"),
     ];
 

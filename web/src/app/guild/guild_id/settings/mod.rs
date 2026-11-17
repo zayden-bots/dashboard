@@ -34,7 +34,6 @@ use crate::components::error_panel::ErrorAction;
 use crate::components::field_row::form_summary;
 use crate::components::flash::flash;
 use crate::components::pickers::{Channel, Role};
-use crate::document::PAGE_TITLES;
 use crate::guild::dto::{GuildDirectory, SectionSettings};
 use crate::guild::{GuildError, get_guild_directory, get_section_settings};
 use crate::nav::{self, ModuleNav};
@@ -47,8 +46,6 @@ const TEXT_KINDS: &[ChannelType] = &[
     ChannelType::GuildForum,
 ];
 
-const GUILD_PREFIX: &str = "/guild/{guild_id}/";
-
 const TITLE_SUFFIX: &str = " - Zayden Dashboard";
 
 const ROLE_ORDER_NOTE: &str = "Zayden's role must be above the roles it \
@@ -58,22 +55,6 @@ const ROLE_ORDER_NOTE: &str = "Zayden's role must be above the roles it \
 #[must_use]
 pub fn title(entry: &ModuleNav) -> String {
     format!("{}{TITLE_SUFFIX}", entry.label)
-}
-
-#[must_use]
-pub fn route_title(_cx: &Cx, pattern: &str) -> Option<String> {
-    let feature = pattern.strip_prefix(GUILD_PREFIX)?.split('/').next()?;
-    nav::settings_entry(feature)?;
-
-    let mut candidate = pattern;
-    loop {
-        if let Some((_, title)) =
-            PAGE_TITLES.iter().find(|(route, _)| *route == candidate)
-        {
-            return Some((*title).to_owned());
-        }
-        candidate = candidate.rsplit_once('/')?.0;
-    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

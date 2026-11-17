@@ -5,9 +5,14 @@
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::router::href;
 use topcoat::runtime::{link_attrs, prefetch_mode};
 use topcoat::view::{Child, View, ViewExt, class, component, view};
 
+use crate::app::account::page::account;
+use crate::app::guilds;
+use crate::app::public::landing::landing;
+use crate::app::upgrade::upgrade;
 use crate::auth::{SessionUser, check_session, current_session_user};
 use crate::components::badge::{BadgeVariant, badge_variants};
 use crate::components::brand::brand_mark;
@@ -110,7 +115,11 @@ async fn topbar(
     show_plate: bool,
     #[default] guilds: &[GuildInfo],
 ) -> Result<impl View> {
-    let home = if viewer.session == Some(true) { "/guilds" } else { "/" };
+    let home = if viewer.session == Some(true) {
+        href!(guilds::guilds).resolve(cx)
+    } else {
+        href!(landing).resolve(cx)
+    };
 
     Ok(view! {
         <div
@@ -126,7 +135,7 @@ async fn topbar(
             >
                 icon(name: Icon::Menu)
             </button>
-            <a class="brand" (link_attrs(cx, home, prefetch_mode(cx)))>
+            <a class="brand" (link_attrs(cx, home.as_str(), prefetch_mode(cx)))>
                 brand_mark()
                 <span class="max-md:hidden">"Zayden"</span>
             </a>
@@ -168,7 +177,7 @@ async fn plan_chip(cx: &Cx, tier: Option<Tier>) -> Result<impl View> {
                         "max-md:hidden hover:bg-foreground/5",
                     ))
                     aria-label="Upgrade, current plan: Free"
-                    (link_attrs(cx, "/upgrade", prefetch_mode(cx)))
+                    (link_attrs(cx, href!(upgrade), prefetch_mode(cx)))
                 >
                     "Upgrade"
                 </a>
@@ -178,7 +187,7 @@ async fn plan_chip(cx: &Cx, tier: Option<Tier>) -> Result<impl View> {
                         badge_variants(BadgeVariant::Outline),
                         "max-md:hidden hover:bg-foreground/5",
                     ))
-                    (link_attrs(cx, "/upgrade", prefetch_mode(cx)))
+                    (link_attrs(cx, href!(upgrade), prefetch_mode(cx)))
                 >
                     "Your plan: "
                     (tier.label())
@@ -216,11 +225,14 @@ async fn account_menu(cx: &Cx, name: &str) -> Result<impl View> {
             <p class="menu-label"><strong>"Signed in with Discord"</strong></p>
             <a
                 class="menu-item menu-plan"
-                (link_attrs(cx, "/upgrade", prefetch_mode(cx)))
+                (link_attrs(cx, href!(upgrade), prefetch_mode(cx)))
             >
                 "Plans"
             </a>
-            <a class="menu-item" (link_attrs(cx, "/account", prefetch_mode(cx)))>
+            <a
+                class="menu-item"
+                (link_attrs(cx, href!(account), prefetch_mode(cx)))
+            >
                 "Linked accounts"
             </a>
             <a href="/logout" rel="external" class="menu-item">

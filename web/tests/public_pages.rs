@@ -147,7 +147,7 @@ async fn web_state_for(
 }
 
 fn builder() -> TestResult<RouterBuilder> {
-    Ok(Router::builder().assets(AssetBundle::load_dir(bundle_dir()?)?))
+    Ok(web::router().assets(AssetBundle::load_dir(bundle_dir()?)?))
 }
 
 fn app(state: Option<WebState>) -> TestResult<Router> {
@@ -473,7 +473,7 @@ async fn header_slot_is_empty_when_the_session_lookup_fails() {
     assert!(!html.contains("Sign in"));
     assert!(!html.contains("Open dashboard"));
     assert!(canonical(&html).contains(&canonical(
-        r#"<a href="/upgrade" class="public-nav-link" data-topcoat-link="intent">Pricing</a>"#
+        r#"<a href="/upgrade" class="public-nav-link" data-topcoat-link="never">Pricing</a>"#
     )));
 }
 
@@ -484,7 +484,7 @@ async fn header_slot_offers_login_when_signed_out() {
         .unwrap();
 
     assert!(canonical(&html).contains(&canonical(&format!(
-        r#"<a href="/upgrade" class="public-nav-link" data-topcoat-link="intent">Pricing</a><a href="/auth/discord" rel="external" class="{}">Sign in</a>"#,
+        r#"<a href="/upgrade" class="public-nav-link" data-topcoat-link="never">Pricing</a><a href="/auth/discord" rel="external" class="{}">Sign in</a>"#,
         support::btn("secondary")
     ))));
     assert!(!html.contains("Open dashboard"));
@@ -497,7 +497,7 @@ async fn header_slot_offers_the_dashboard_when_signed_in() {
         .unwrap();
 
     assert!(canonical(&html).contains(&canonical(&format!(
-        r#"<a href="/guilds" class="{}" data-topcoat-link="intent">Open dashboard</a>"#,
+        r#"<a href="/guilds" class="{}" data-topcoat-link="never">Open dashboard</a>"#,
         support::btn("primary")
     ))));
     assert!(!html.contains(">Sign in<"));

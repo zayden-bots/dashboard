@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, component, view};
@@ -25,7 +26,7 @@ use crate::guild::settings::{HoneypotSettingsForm, save_honeypot_settings};
 const PAGE: Page = Page::Honeypot;
 const FORM: &str = "honeypot-settings";
 
-#[page]
+#[page(with(Metadata::new().title("Honeypot - Zayden Dashboard")))]
 async fn honeypot(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -33,7 +34,7 @@ async fn honeypot(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title("Honeypot - Zayden Dashboard")))]
 async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -54,7 +55,7 @@ async fn save(
     })
 }
 
-#[page(POST "./module")]
+#[page(POST "./module", with(Metadata::new().title("Honeypot - Zayden Dashboard")))]
 async fn switch(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

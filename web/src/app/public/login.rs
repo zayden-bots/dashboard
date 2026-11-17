@@ -1,11 +1,13 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::error::see_other;
 use topcoat::router::page;
 use topcoat::router::request::uri;
 use topcoat::view::{View, attributes, class, component, view};
 use url::form_urlencoded;
 
+use super::LOGIN_TITLE;
 use super::layout::public_layout;
 use crate::auth;
 use crate::components::alert::{AlertVariant, alert, alert_title};
@@ -13,6 +15,9 @@ use crate::components::brand::brand_mark;
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 
 const SIGNED_IN_PATH: &str = "/guilds";
+
+const DESCRIPTION: &str =
+    "Sign in with Discord to manage Zayden in the servers you run.";
 
 const AUTH_FAILED: &str = "auth_failed";
 
@@ -24,7 +29,7 @@ fn sign_in_failed(cx: &Cx) -> bool {
         .any(|(key, value)| key == "error" && value == AUTH_FAILED)
 }
 
-#[page]
+#[page(with(Metadata::new().title(LOGIN_TITLE).description(DESCRIPTION)))]
 pub(crate) async fn login(cx: &Cx) -> Result<impl View> {
     if matches!(auth::check_session(cx).await, Ok(true)) {
         return Err(see_other(SIGNED_IN_PATH).into());

@@ -33,6 +33,8 @@ use twilight_model::user::CurrentUserGuild;
 use web::app::guild::guild_id::guild_id;
 use web::auth::{SessionUser, WebRole, has_role};
 use web::components::brand::LOGO;
+use web::components::nav_sheet::SHEET_ID;
+use web::components::server_plate::{FILTER_THRESHOLD, PANEL_ID};
 use web::document::{PENDING_SUBMIT, STYLESHEET};
 use web::nav::{GENERAL, MODULES};
 use web::state::{DiscordState, SessionIdentity, SessionUsersCache, WebState};
@@ -604,6 +606,94 @@ async fn the_guild_list_frames_the_managed_guilds(
     assert_eq!(location(&response), Some("/login"));
     let response = app.get("/guilds", Some("session=unknown")).await.unwrap();
     assert_eq!(response.status(), StatusCode::SEE_OTHER);
+
+    pool.close().await;
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn the_rail_and_sheet_mark_a_settings_page_current_and_label_their_groups(
+    options: PgPoolOptions,
+    connect: PgConnectOptions,
+) {
+    let pool = test_pool(options, connect).await.unwrap();
+    let app = harness(&pool, Some(UPGRADE_URL)).await.unwrap();
+
+    let html = app.page("/guild/7/music", Some(MEMBER)).await.unwrap();
+
+    assert_eq!(
+        count(&html, &format!(r#"<nav class="{NAV}" aria-label="Dashboard">"#)),
+        2,
+        "{html}"
+    );
+    assert_eq!(
+        count(
+            &canonical(&html),
+            &canonical(&nav_link("/guild/7/music", None, "Music", true))
+        ),
+        2,
+        "{html}"
+    );
+    assert_eq!(
+        count(&canonical(&html), r#"aria-current="page" class="nav-link""#),
+        2,
+        "{html}"
+    );
+    for prefix in ["rail", "sheet"] {
+        assert!(html.contains(&format!(
+            r#"<p class="{NAV_HEADING}" id="{prefix}-voice---games">Voice &amp; games</p><ul class="{NAV_LIST}" aria-labelledby="{prefix}-voice---games">"#
+        )), "{prefix}: {html}");
+    }
+    assert!(html.contains(&format!(
+        r#"<div id="{SHEET_ID}" popover="" class="sheet-panel" role="dialog" aria-label="Menu">"#
+    )), "{html}");
+    assert!(html.contains(&format!(
+        r#"popovertarget="{SHEET_ID}" popovertargetaction="hide" aria-label="Close menu""#
+    )), "{html}");
+    assert!(!html.contains("operator-badge"), "{html}");
+
+    pool.close().await;
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn the_server_plate_opens_a_filterable_menu_keeping_the_page(
+    options: PgPoolOptions,
+    connect: PgConnectOptions,
+) {
+    let pool = test_pool(options, connect).await.unwrap();
+    let (state, zayden) = web_state(pool.clone(), Some(UPGRADE_URL)).await.unwrap();
+    let guilds = (1..=FILTER_THRESHOLD as u64 + 1)
+        .map(|id| guild(id, &format!("Guild {id}"), None, Permissions::MANAGE_GUILD))
+        .collect::<TestResult<Vec<_>>>()
+        .unwrap();
+    state.discord.user_guilds.insert(41, Arc::from(guilds)).await;
+    let app = Harness { router: app_router(state).unwrap(), app: zayden };
+
+    let html = app.page("/guild/2/support", Some(MEMBER)).await.unwrap();
+
+    assert!(html.contains(&format!(
+        r#"<button type="button" class="topbar-button plate" popovertarget="{PANEL_ID}" aria-controls="{PANEL_ID}" aria-expanded="false" aria-label="Switch server, current: Guild 2">"#
+    )), "{html}");
+    assert!(html.contains(r#"data-filter="" data-filter-noun="servers""#), "{html}");
+    assert!(canonical(&html).contains(&canonical(&format!(
+        r#"<label class="visually-hidden" for="server-filter">Filter servers</label><input class="{INPUT}" id="server-filter" type="search" autofocus="" autocomplete="off" data-filter-input="" placeholder="Filter servers">"#
+    ))), "{html}");
+    assert!(
+        html.contains(
+            r#"<p class="menu-count" role="status" data-filter-count=""></p>"#
+        ),
+        "{html}"
+    );
+    let sorted = canonical(&html);
+    assert!(sorted.contains(&canonical(
+        r#"<a href="/guild/2/support" class="menu-item" aria-current="page" data-filter-item="">"#
+    )), "{html}");
+    assert!(
+        sorted.contains(&canonical(
+            r#"<a href="/guild/9/support" class="menu-item" data-filter-item="">"#
+        )),
+        "{html}"
+    );
+    assert_eq!(count(&html, "data-filter-item"), FILTER_THRESHOLD + 1, "{html}");
 
     pool.close().await;
 }

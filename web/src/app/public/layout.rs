@@ -5,10 +5,12 @@
 
 use topcoat::Result;
 use topcoat::context::Cx;
-use topcoat::router::request::uri;
+use topcoat::router::href;
 use topcoat::runtime::{link_attrs, prefetch_mode};
 use topcoat::view::{Child, View, component, view};
 
+use crate::app::guilds;
+use crate::app::upgrade::upgrade;
 use crate::auth::{self, AuthError};
 use crate::components::brand::brand_mark;
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
@@ -40,11 +42,10 @@ pub async fn public_layout(
     #[default] child: Child<'_>,
 ) -> Result<impl View> {
     let session = SessionSlot::from(auth::check_session(cx).await);
-    let location = uri(cx).path();
 
     Ok(view! {
         <div class="flex flex-col min-h-screen">
-            public_nav(session: session, location: location)
+            public_nav(session: session)
             <main id="main" class="public-main" tabindex="-1">(child)</main>
             footer(session: session)
         </div>
@@ -52,11 +53,7 @@ pub async fn public_layout(
 }
 
 #[component]
-pub async fn public_nav(
-    cx: &Cx,
-    session: SessionSlot,
-    #[default("/")] location: &str,
-) -> Result<impl View> {
+pub async fn public_nav(cx: &Cx, session: SessionSlot) -> Result<impl View> {
     Ok(view! {
         <header
             class="sticky top-0 z-100 flex items-center justify-center h-(--topbar-h) py-0 px-4 bg-bg border-b border-solid border-b-rule"
@@ -69,7 +66,7 @@ pub async fn public_nav(
                     <span class="max-md:hidden">"Zayden"</span>
                 </a>
                 <nav class="flex items-center gap-2 max-md:hidden" aria-label="Main">
-                    public_links(session: session, location: location)
+                    public_links(session: session)
                 </nav>
                 <button
                     type="button"
@@ -103,7 +100,7 @@ pub async fn public_nav(
                     </button>
                 </div>
                 <nav class="sheet-body" aria-label="Main">
-                    public_links(session: session, location: location)
+                    public_links(session: session)
                 </nav>
             </div>
             progress_bar()
@@ -112,19 +109,15 @@ pub async fn public_nav(
 }
 
 #[component]
-async fn public_links(
-    cx: &Cx,
-    session: SessionSlot,
-    location: &str,
-) -> Result<impl View> {
-    let pricing = (location == "/upgrade").then_some("page");
+async fn public_links(cx: &Cx, session: SessionSlot) -> Result<impl View> {
+    let pricing = href!(upgrade).is_current(cx).then_some("page");
 
     Ok(view! {
         <a href="/#features" rel="external" class="public-nav-link">"Features"</a>
         <a
             class="public-nav-link"
             aria-current=(pricing)
-            (link_attrs(cx, "/upgrade", prefetch_mode(cx)))
+            (link_attrs(cx, href!(upgrade), prefetch_mode(cx)))
         >
             "Pricing"
         </a>
@@ -144,7 +137,7 @@ async fn public_links(
             SessionSlot::SignedIn => {
                 <a
                     class=(button_variants(ButtonVariant::Primary, ButtonSize::Md))
-                    (link_attrs(cx, "/guilds", prefetch_mode(cx)))
+                    (link_attrs(cx, href!(guilds::guilds), prefetch_mode(cx)))
                 >
                     "Open dashboard"
                 </a>
@@ -173,7 +166,7 @@ async fn footer(cx: &Cx, session: SessionSlot) -> Result<impl View> {
                     </a>
                     <a
                         class="inline-flex items-center min-h-(--target-min) text-text-2 hover:text-text max-md:min-h-[44px]"
-                        (link_attrs(cx, "/upgrade", prefetch_mode(cx)))
+                        (link_attrs(cx, href!(upgrade), prefetch_mode(cx)))
                     >
                         "Pricing"
                     </a>
@@ -181,7 +174,7 @@ async fn footer(cx: &Cx, session: SessionSlot) -> Result<impl View> {
                         SessionSlot::SignedIn => {
                             <a
                                 class="inline-flex items-center min-h-(--target-min) text-text-2 hover:text-text max-md:min-h-[44px]"
-                                (link_attrs(cx, "/guilds", prefetch_mode(cx)))
+                                (link_attrs(cx, href!(guilds::guilds), prefetch_mode(cx)))
                             >
                                 "Dashboard"
                             </a>

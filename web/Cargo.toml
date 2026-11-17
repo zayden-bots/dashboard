@@ -49,6 +49,7 @@ topcoat = { workspace = true, features = [
   "discover",
   "font",
   "icon",
+  "metadata",
   "router",
   "runtime",
   "serve",

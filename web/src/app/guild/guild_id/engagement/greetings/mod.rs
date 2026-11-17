@@ -5,6 +5,7 @@ mod messages;
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::error::not_found;
 use topcoat::router::{page, path_param};
@@ -14,6 +15,7 @@ pub use self::channels::channel_section;
 use self::cooldowns::cooldown_section;
 use self::images::image_section;
 use self::messages::messages_section;
+use super::GREETINGS_TITLE;
 use super::action::{FormAction, form_action, not_saved, page_href};
 use super::fields::{load_error, load_problem};
 use super::header::{MODULE_FORM, page_header, switch_module};
@@ -138,7 +140,7 @@ pub(in crate::app::guild::guild_id::engagement) fn action_names() -> Vec<&'stati
     GreetingAction::ALL.iter().map(|action| action.name()).collect()
 }
 
-#[page]
+#[page(with(Metadata::new().title(GREETINGS_TITLE)))]
 pub(super) async fn show(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -149,7 +151,7 @@ pub(super) async fn show(cx: &Cx) -> Result<impl View> {
     })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title(GREETINGS_TITLE)))]
 pub(super) async fn legacy_submit(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     not_saved(cx, guild_id, PAGE)?;

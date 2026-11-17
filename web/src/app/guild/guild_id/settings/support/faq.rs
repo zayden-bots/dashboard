@@ -1,7 +1,8 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
-use topcoat::router::{StatusCode, page, path_param};
+use topcoat::router::{StatusCode, href, page, path_param};
 use topcoat::runtime::{link_attrs, prefetch_mode};
 use topcoat::view::{View, ViewExt, component, suspense, view};
 
@@ -45,8 +46,13 @@ const ARTICLE_FORM: &str = "faq-article";
 const DELETE_FORM: &str = "faq-delete";
 const ARTICLES_SECTION: &str = "faq-articles";
 
-fn article_href(guild_id: &str, id: impl std::fmt::Display) -> String {
-    format!("{}/{id}", PAGE.href(guild_id))
+fn article_href(cx: &Cx, guild_id: &str, id: impl std::fmt::Display) -> String {
+    href!(
+        edit_article,
+        guild_id: guild_id,
+        article_id: id.to_string()
+    )
+    .resolve(cx)
 }
 
 fn article_failure(
@@ -68,7 +74,7 @@ fn article_failure(
     })
 }
 
-#[page]
+#[page(with(Metadata::new().title("FAQ articles - Support - Zayden Dashboard")))]
 async fn article_index(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -139,7 +145,7 @@ async fn article_list(cx: &Cx, guild_id: &str) -> Result<impl View> {
                                         <a
                                             (link_attrs(
                                                 cx,
-                                                article_href(guild_id, &article.id),
+                                                article_href(cx, guild_id, &article.id),
                                                 prefetch_mode(cx),
                                             ))
                                         >
@@ -171,7 +177,7 @@ async fn source(cx: &Cx, article: &FaqArticleInfo) -> Result<impl View> {
     })
 }
 
-#[page("./new")]
+#[page("./new", with(Metadata::new().title("New FAQ article - Support - Zayden Dashboard")))]
 async fn new_article_page(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -186,7 +192,7 @@ async fn new_article_page(cx: &Cx) -> Result<impl View> {
     })
 }
 
-#[page(POST "./new")]
+#[page(POST "./new", with(Metadata::new().title("New FAQ article - Support - Zayden Dashboard")))]
 async fn create_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -197,7 +203,7 @@ async fn create_article(
     let failure = match result {
         Ok(id) => {
             return Err(succeed(cx, &Done {
-                page: article_href(guild_id, id),
+                page: article_href(cx, guild_id, id),
                 section: Some(ARTICLE_FORM),
                 message: "Article created.",
             }));
@@ -237,7 +243,7 @@ fn requested_id(cx: &Cx) -> Option<i32> {
     parse_article_id(article_id(cx))
 }
 
-#[page("./{article_id}")]
+#[page("./{article_id}", with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard")))]
 async fn edit_article(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let id = requested_id(cx);
@@ -253,7 +259,7 @@ async fn edit_article(cx: &Cx) -> Result<impl View> {
     })
 }
 
-#[page(POST "./{article_id}")]
+#[page(POST "./{article_id}", with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard")))]
 async fn update_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -268,7 +274,7 @@ async fn update_article(
     let failure = match result {
         Ok(id) => {
             return Err(succeed(cx, &Done {
-                page: article_href(guild_id, id),
+                page: article_href(cx, guild_id, id),
                 section: Some(ARTICLE_FORM),
                 message: "Article saved.",
             }));
@@ -288,7 +294,7 @@ async fn update_article(
     })
 }
 
-#[page(POST "./{article_id}/delete")]
+#[page(POST "./{article_id}/delete", with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard")))]
 async fn delete_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -401,7 +407,7 @@ async fn article_form(
     let content = sent.value("content", article.map(|a| a.content.as_str()));
     let action = article.map_or_else(
         || format!("{}/new", PAGE.href(guild_id)),
-        |article| article_href(guild_id, &article.id),
+        |article| article_href(cx, guild_id, &article.id),
     );
     let (legend, save_label) = match article {
         Some(_) => ("Article", "Save article"),
@@ -487,7 +493,12 @@ async fn delete_section(
     article: &FaqArticleInfo,
     state: &PageState,
 ) -> Result<impl View> {
-    let action = format!("{}/delete", article_href(guild_id, &article.id));
+    let action = href!(
+        delete_article,
+        guild_id: guild_id,
+        article_id: &article.id
+    )
+    .resolve(cx);
     let confirm_object = format!("\u{201c}{}\u{201d}", article.title);
     let failed = state.sent(DELETE_FORM).summary();
 

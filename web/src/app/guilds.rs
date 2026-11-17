@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::page;
 use topcoat::view::{View, view};
 
@@ -9,10 +10,10 @@ use crate::components::empty_state::empty_state;
 use crate::components::error_panel::{ErrorAction, error_panel};
 use crate::components::guild_grid::{GuildCard, guild_grid};
 use crate::guild::list_manageable_guilds;
-use crate::shell::app_shell;
+use crate::shell::{GUILDS_TITLE, app_shell};
 
-#[page]
-pub(super) async fn guilds(cx: &Cx) -> Result<impl View> {
+#[page(with(Metadata::new().title(GUILDS_TITLE)))]
+pub(crate) async fn guilds(cx: &Cx) -> Result<impl View> {
     let guilds = match list_manageable_guilds(cx).await {
         Ok(guilds) => Ok(guilds.iter().map(GuildCard::from).collect::<Vec<_>>()),
         Err(e) => Err(format!(

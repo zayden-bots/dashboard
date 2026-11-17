@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::error::see_other;
 use topcoat::router::{StatusCode, page, segment};
@@ -34,7 +35,7 @@ use crate::guild::modules::{
 use crate::guild::seat::{self, SeatView};
 use crate::guild::{GuildError, list_manageable_guilds};
 use crate::nav::{self, path_segment};
-use crate::shell::module_card;
+use crate::shell::{OVERVIEW_TITLE, module_card};
 use crate::util::server_error_text;
 
 segment!(kind: Group);
@@ -95,8 +96,8 @@ struct ToggleFailure {
     message: String,
 }
 
-#[page]
-pub(super) async fn guild_overview(cx: &Cx) -> Result<impl View> {
+#[page(with(Metadata::new().title(OVERVIEW_TITLE)))]
+pub(crate) async fn guild_overview(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let notice = take_flash(cx);
     let slot = seat::selected_slot(cx);
@@ -107,7 +108,7 @@ pub(super) async fn guild_overview(cx: &Cx) -> Result<impl View> {
     )
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title(OVERVIEW_TITLE)))]
 pub(super) async fn toggle_module(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

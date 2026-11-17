@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, component, view};
@@ -27,7 +28,7 @@ const CREATE: &str = "temp-voice-create";
 const CATEGORIES: &[ChannelType] = &[ChannelType::GuildCategory];
 const VOICE: &[ChannelType] = &[ChannelType::GuildVoice];
 
-#[page]
+#[page(with(Metadata::new().title("Temp voice - Zayden Dashboard")))]
 async fn temp_voice(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -35,7 +36,7 @@ async fn temp_voice(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title("Temp voice - Zayden Dashboard")))]
 async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -56,7 +57,7 @@ async fn save(
     })
 }
 
-#[page(POST "./create")]
+#[page(POST "./create", with(Metadata::new().title("Temp voice - Zayden Dashboard")))]
 async fn create(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

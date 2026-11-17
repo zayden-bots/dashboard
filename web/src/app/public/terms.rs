@@ -1,12 +1,17 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::page;
 use topcoat::view::{View, component, view};
 
+use super::TERMS_TITLE;
 use super::legal::{contact_email, legal_document};
 use super::privacy::legal_contents;
 
 const UPDATED: &str = "26 September 2026";
+
+const DESCRIPTION: &str =
+    "The terms for using the Zayden Discord bot, its dashboard and its paid plans.";
 
 const CONTENTS: &[(&str, &str)] = &[
     ("acceptance", "Acceptance"),
@@ -20,7 +25,7 @@ const CONTENTS: &[(&str, &str)] = &[
     ("governing-law", "Governing law"),
 ];
 
-#[page]
+#[page(with(Metadata::new().title(TERMS_TITLE).description(DESCRIPTION)))]
 pub(crate) async fn terms(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         legal_document(

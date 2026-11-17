@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::{page, segment};
 use topcoat::view::{View, ViewExt, component, view};
@@ -51,7 +52,7 @@ const KEY_FORM: &str = "wiki-key";
 
 const IDLE_RANGE: Range = Range { min: 3_600, max: Some(2_592_000) };
 
-#[page]
+#[page(with(Metadata::new().title("Support - Zayden Dashboard")))]
 async fn tickets_page(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -59,7 +60,7 @@ async fn tickets_page(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: TICKETS, state: &state) })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title("Support - Zayden Dashboard")))]
 async fn save_tickets(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -85,7 +86,7 @@ async fn save_tickets(
     })
 }
 
-#[page("./suggestions")]
+#[page("./suggestions", with(Metadata::new().title("Suggestions - Support - Zayden Dashboard")))]
 async fn suggestions_page(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -93,7 +94,7 @@ async fn suggestions_page(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: SUGGESTIONS, state: &state) })
 }
 
-#[page(POST "./suggestions")]
+#[page(POST "./suggestions", with(Metadata::new().title("Suggestions - Support - Zayden Dashboard")))]
 async fn save_suggestions(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -119,7 +120,7 @@ async fn save_suggestions(
     })
 }
 
-#[page("./wiki")]
+#[page("./wiki", with(Metadata::new().title("Wiki - Support - Zayden Dashboard")))]
 async fn wiki_page(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -127,7 +128,7 @@ async fn wiki_page(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: WIKI, state: &state) })
 }
 
-#[page(POST "./wiki")]
+#[page(POST "./wiki", with(Metadata::new().title("Wiki - Support - Zayden Dashboard")))]
 async fn save_wiki(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -167,7 +168,7 @@ fn key_change(pairs: &[(String, String)]) -> &'static str {
     }
 }
 
-#[page(POST "./wiki/wiki-key")]
+#[page(POST "./wiki/wiki-key", with(Metadata::new().title("Wiki - Support - Zayden Dashboard")))]
 async fn save_key(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

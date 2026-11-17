@@ -7,11 +7,13 @@ use accounts::links::AccountLink;
 use accounts::provider::Provider as AccountProvider;
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::error::see_other;
-use topcoat::router::{page, path_param, segment};
+use topcoat::router::{href, page, path_param, segment};
 use topcoat::view::{View, attributes, component, view};
 use tracing::warn;
 
+use super::ACCOUNT_TITLE;
 use super::deadlock::{DeadlockPrefs, deadlock_section, load as load_deadlock};
 use crate::app::public::layout::public_layout;
 use crate::auth::{
@@ -33,8 +35,8 @@ path_param!(provider);
 pub(super) const PAGE: &str = "/account";
 pub(super) const SIGN_IN_PATH: &str = "/auth/discord";
 
-#[page]
-pub(super) async fn account(cx: &Cx) -> Result<impl View> {
+#[page(with(Metadata::new().title(ACCOUNT_TITLE)))]
+pub(crate) async fn account(cx: &Cx) -> Result<impl View> {
     let notice = take_flash(cx);
 
     let (links, summaries) = match require_user(cx).await {
@@ -177,7 +179,7 @@ async fn provider_row(
         );
         (account_id, id64, link.linked_at.strftime("%Y-%m-%d").to_string())
     });
-    let unlink_action = format!("/account/unlink/{}", provider.as_str());
+    let unlink_action = href!(unlink, provider: provider.as_str()).resolve(cx);
     let link_href = format!("/account/link/{}", provider.as_str());
     let link_label = format!("Link {}", provider.label());
 

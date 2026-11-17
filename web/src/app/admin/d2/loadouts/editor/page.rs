@@ -2,14 +2,16 @@ use serde::Serialize;
 use topcoat::Result;
 use topcoat::asset::Asset;
 use topcoat::context::Cx;
-use topcoat::router::{StatusCode, page, segment};
+use topcoat::metadata::Metadata;
+use topcoat::router::{StatusCode, href, page, segment};
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::index::{draft_key, editor_id};
 use super::view::editor;
-use super::{LOADOUT_EDITOR_JS, loadout_id};
+use super::{EDITOR_TITLE, LOADOUT_EDITOR_JS, NEW_LOADOUT_TITLE, loadout_id};
 use crate::admin::dto::{LoadoutCatalog, LoadoutForm};
 use crate::admin::{AdminError, get_loadout, loadout_catalog};
+use crate::app::admin::d2::loadouts;
 use crate::app::admin::gate::{Gate, closed, gate};
 use crate::auth::WebRole;
 use crate::components::error_panel::{ErrorAction, error_panel};
@@ -17,8 +19,6 @@ use crate::error::MissingPage;
 use crate::shell::app_shell;
 
 segment!(kind: Group);
-
-const LIST_PATH: &str = "/admin/destiny2/loadouts";
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -45,8 +45,8 @@ async fn load(
     Ok((catalog, form))
 }
 
-#[page("./new")]
-pub(super) async fn new_loadout(cx: &Cx) -> Result<impl View> {
+#[page("./new", with(Metadata::new().title(NEW_LOADOUT_TITLE)))]
+pub(crate) async fn new_loadout(cx: &Cx) -> Result<impl View> {
     let access = gate(cx, WebRole::Admin).await?;
     if access != Gate::Open {
         return Ok(view! { closed(role: WebRole::Admin, gate: access) }.boxed());
@@ -55,8 +55,8 @@ pub(super) async fn new_loadout(cx: &Cx) -> Result<impl View> {
     Ok(view! { editor_page(id: None) }.boxed())
 }
 
-#[page("./{loadout_id}")]
-pub(super) async fn edit_loadout(cx: &Cx) -> Result<impl View> {
+#[page("./{loadout_id}", with(Metadata::new().title(EDITOR_TITLE)))]
+pub(crate) async fn edit_loadout(cx: &Cx) -> Result<impl View> {
     let access = gate(cx, WebRole::Admin).await?;
     if access != Gate::Open {
         return Ok(view! { closed(role: WebRole::Admin, gate: access) }.boxed());
@@ -95,9 +95,10 @@ async fn editor_page(cx: &Cx, id: Option<i32>) -> Result<impl View> {
     };
     let script: Asset = LOADOUT_EDITOR_JS;
     let retry = id.map_or_else(
-        || format!("{LIST_PATH}/new"),
-        |id| format!("{LIST_PATH}/{id}"),
+        || href!(new_loadout).resolve(cx),
+        |id| href!(edit_loadout, loadout_id: id.to_string()).resolve(cx),
     );
+    let list = href!(loadouts::loadouts_page).resolve(cx);
 
     Ok(match loaded {
         Loaded::Missing => return Err(MissingPage::Loadout.into()),
@@ -108,7 +109,7 @@ async fn editor_page(cx: &Cx, id: Option<i32>) -> Result<impl View> {
             let message = format!("Something went wrong: {reason}");
             let actions = [
                 ErrorAction::new("Try again", &retry),
-                ErrorAction::new("Back to loadouts", LIST_PATH),
+                ErrorAction::new("Back to loadouts", &list),
             ];
             view! {
                 app_shell(
@@ -141,7 +142,8 @@ async fn editor_page(cx: &Cx, id: Option<i32>) -> Result<impl View> {
 
 #[component]
 pub(crate) async fn missing_loadout(cx: &Cx) -> Result<impl View> {
-    let back = [ErrorAction::new("Back to loadouts", LIST_PATH)];
+    let list = href!(loadouts::loadouts_page).resolve(cx);
+    let back = [ErrorAction::new("Back to loadouts", &list)];
 
     Ok(view! {
         (StatusCode::NOT_FOUND)

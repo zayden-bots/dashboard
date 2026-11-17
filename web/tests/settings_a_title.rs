@@ -1,6 +1,5 @@
 use web::app::guild::guild_id::settings::title;
-use web::document::PAGE_TITLES;
-use web::nav::{Dest, MODULES, section};
+use web::nav::section;
 
 #[test]
 fn section_titles_name_the_page() {
@@ -28,41 +27,6 @@ fn missing_and_unknown_sections_title_as_server_settings() {
             title(section(slug)),
             "Server settings - Zayden Dashboard",
             "{slug}"
-        );
-    }
-}
-
-/// The title table and the navigation label agree for every settings page.
-#[test]
-fn every_settings_page_has_its_navigation_label_as_title() {
-    for entry in MODULES {
-        let Dest::Section { path, .. } = entry.dest else { continue };
-        let pattern = format!("/guild/{{guild_id}}/{path}");
-        let row = PAGE_TITLES.iter().find(|(route, _)| *route == pattern);
-
-        assert_eq!(
-            row.map(|(_, t)| (*t).to_owned()),
-            Some(title(entry)),
-            "{pattern}"
-        );
-    }
-}
-
-#[test]
-fn every_support_sub_page_has_a_title() {
-    for (pattern, expected) in [
-        ("/guild/{guild_id}/support/suggestions", "Suggestions - Support"),
-        ("/guild/{guild_id}/support/faq", "FAQ articles - Support"),
-        ("/guild/{guild_id}/support/faq/new", "New FAQ article - Support"),
-        ("/guild/{guild_id}/support/faq/{article_id}", "Edit FAQ article - Support"),
-        ("/guild/{guild_id}/support/wiki", "Wiki - Support"),
-        ("/guild/{guild_id}/support/roles", "Roles and links - Support"),
-    ] {
-        let row = PAGE_TITLES.iter().find(|(route, _)| *route == pattern);
-        assert_eq!(
-            row.map(|(_, t)| *t),
-            Some(format!("{expected} - Zayden Dashboard").as_str()),
-            "{pattern}"
         );
     }
 }

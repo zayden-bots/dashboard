@@ -1,11 +1,15 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::page;
 use topcoat::view::{View, component, view};
 
+use super::PRIVACY_TITLE;
 use super::legal::{contact_email, legal_document};
 
 const UPDATED: &str = "26 September 2026";
+
+const DESCRIPTION: &str = "What data Zayden and its dashboard collect, why, how long it is kept, and how to have it removed.";
 
 const CONTENTS: &[(&str, &str)] = &[
     ("discord", "Information from Discord"),
@@ -24,7 +28,7 @@ const CONTENTS: &[(&str, &str)] = &[
     ("changes", "Changes to this policy"),
 ];
 
-#[page]
+#[page(with(Metadata::new().title(PRIVACY_TITLE).description(DESCRIPTION)))]
 pub(crate) async fn privacy(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         legal_document(

@@ -1,10 +1,12 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::error::not_found;
 use topcoat::router::{page, path_param};
 use topcoat::view::{View, ViewExt, component, view};
 
+use super::REACTION_ROLES_TITLE;
 use super::action::{FormAction, form_action, not_saved, page_href};
 use super::fields::{load_error, load_problem};
 use super::header::page_header;
@@ -91,7 +93,7 @@ pub(super) fn action_names() -> Vec<&'static str> {
     RoleAction::ALL.iter().map(|action| action.name()).collect()
 }
 
-#[page]
+#[page(with(Metadata::new().title(REACTION_ROLES_TITLE)))]
 pub(super) async fn show(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -103,7 +105,7 @@ pub(super) async fn show(cx: &Cx) -> Result<impl View> {
 }
 
 /// A post from before the action paths: nothing is applied.
-#[page(POST)]
+#[page(POST, with(Metadata::new().title(REACTION_ROLES_TITLE)))]
 pub(super) async fn legacy_submit(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     not_saved(cx, guild_id, PAGE)?;

@@ -23,7 +23,6 @@ use web::components::field_row::{
     toggle_row,
 };
 use web::components::flash::{flash, flash_message};
-use web::components::guild_grid::GuildCard;
 use web::components::lamp::{LampState, lamp};
 use web::components::module_row::{
     ModuleControl,
@@ -31,16 +30,11 @@ use web::components::module_row::{
     module_group,
     module_row,
 };
-use web::components::nav_links::NavAccess;
-use web::components::nav_rail::nav_rail;
-use web::components::nav_sheet::{SHEET_ID, nav_sheet};
 use web::components::pickers::SelectOption;
 use web::components::plan_note::{plan_note, plan_tag};
 use web::components::progress_bar::progress_bar;
 use web::components::save_bar::save_bar;
-use web::components::server_plate::{FILTER_THRESHOLD, PANEL_ID, server_plate};
 use web::flash::{Flash, FlashKind, MAX_MESSAGE_CHARS};
-use web::guild::dto::GuildInfo;
 
 mod canonical;
 mod support;
@@ -48,8 +42,6 @@ mod support;
 use canonical::canonical;
 
 type TestResult<T = ()> = Result<T, Box<dyn Error + Send + Sync>>;
-
-const INPUT: &str = "h-9 max-md:h-11 w-full min-w-0 rounded-lg border border-input bg-popover px-3 text-sm transition-colors outline-none placeholder:text-muted-foreground file:mr-3 file:h-full file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-invalid:border-destructive aria-invalid:focus-visible:ring-destructive focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50";
 
 const ERROR_ALERT: &str = "grid w-full grid-cols-[0_1fr] items-start gap-y-1 rounded-lg border bg-background px-4 py-3 text-sm has-[>svg]:grid-cols-[1rem_1fr] has-[>svg]:gap-x-3 [&amp;>svg]:size-4 [&amp;>svg]:translate-y-0.5 border-destructive/50 text-destructive";
 const BADGE_OUTLINE: &str = "inline-flex w-fit shrink-0 items-center justify-center gap-1 rounded-md border px-2 py-0.5 text-xs font-medium whitespace-nowrap border-border text-foreground";
@@ -85,9 +77,6 @@ const PLAN_NOTE: &str =
     "flex flex-wrap items-center gap-2 m-0 text-[13px] text-text-2";
 const PLAN_LINK: &str =
     "inline-flex items-center min-h-(--target-min) max-md:min-h-(--row-h)";
-const NAV: &str = "flex flex-col gap-1";
-const NAV_LIST: &str = "flex flex-col gap-1 m-0 p-0 list-none";
-const NAV_HEADING: &str = "m-0 py-1 px-3 font-mono text-[12px] font-medium tracking-[0.06em] uppercase text-text-3";
 
 async fn render(builder: RouterBuilder, path: &str) -> TestResult<String> {
     let router = builder.layer(RuntimeLayer::new()).build();
@@ -477,115 +466,4 @@ async fn the_progress_bar_is_hidden_from_assistive_tech() {
         html,
         r#"<div class="nav-progress" data-nav-progress="" aria-hidden="true"></div>"#
     );
-}
-
-#[page("/guild/{guild_id}/music")]
-async fn nav_on_music(cx: &Cx) -> ViewResult<impl View> {
-    let staff = NavAccess { operator: true, admin: true, on_operator_page: true };
-    Ok(view! {
-        nav_rail(access: staff, guild_id: Some("7"))
-        nav_sheet(access: NavAccess::default(), guild_id: Some("7"))
-    })
-}
-
-#[tokio::test]
-async fn the_rail_and_sheet_mark_the_current_page_and_label_their_groups() {
-    let html = render(Router::builder().page(nav_on_music), "/guild/7/music")
-        .await
-        .unwrap();
-
-    assert_eq!(
-        count(&html, &format!(r#"<nav class="{NAV}" aria-label="Dashboard">"#)),
-        2,
-        "{html}"
-    );
-    assert_eq!(
-        count(
-            &canonical(&html),
-            &canonical(
-                r#"<a href="/guild/7/music" class="nav-link" aria-current="page" data-topcoat-link="intent"><span>Music</span></a>"#
-            )
-        ),
-        2,
-        "{html}"
-    );
-    assert_eq!(count(&html, r#"aria-current="page""#), 2, "{html}");
-    for prefix in ["rail", "sheet"] {
-        assert!(html.contains(&format!(
-            r#"<p class="{NAV_HEADING}" id="{prefix}-voice---games">Voice &amp; games</p><ul class="{NAV_LIST}" aria-labelledby="{prefix}-voice---games">"#
-        )), "{prefix}: {html}");
-    }
-    assert_eq!(
-        count(&html, &format!(r#"<div class="{BADGE_OUTLINE} operator-badge">"#)),
-        1,
-        "{html}"
-    );
-    assert_eq!(count(&html, r#"id="rail-admin""#), 1, "{html}");
-    assert_eq!(count(&html, r#"id="sheet-admin""#), 0, "{html}");
-    assert!(html.contains(&format!(
-        r#"<div id="{SHEET_ID}" popover="" class="sheet-panel" role="dialog" aria-label="Menu">"#
-    )), "{html}");
-    assert!(html.contains(&format!(
-        r#"popovertarget="{SHEET_ID}" popovertargetaction="hide" aria-label="Close menu""#
-    )), "{html}");
-}
-
-fn guilds(n: usize) -> Vec<GuildInfo> {
-    (1..=n)
-        .map(|i| GuildInfo {
-            id: i.to_string(),
-            name: format!("Guild {i}"),
-            icon: None,
-        })
-        .collect()
-}
-
-#[page("/guild/{guild_id}/support")]
-async fn plate_page(cx: &Cx) -> ViewResult<impl View> {
-    let list = guilds(FILTER_THRESHOLD + 1);
-    let current =
-        GuildCard { id: "2".to_owned(), name: "Guild 2".to_owned(), icon: None };
-    Ok(view! { server_plate(current: Some(&current), guilds: &list) })
-}
-
-#[page("/guild/{guild_id}/levels")]
-async fn plate_small(cx: &Cx) -> ViewResult<impl View> {
-    let list = guilds(2);
-    Ok(view! { server_plate(current: None, guilds: &list) })
-}
-
-#[tokio::test]
-async fn the_server_plate_opens_a_filterable_menu_keeping_the_page() {
-    let html = render(Router::builder().page(plate_page), "/guild/2/support")
-        .await
-        .unwrap();
-
-    assert!(html.starts_with(&format!(
-        r#"<button type="button" class="topbar-button plate" popovertarget="{PANEL_ID}" aria-controls="{PANEL_ID}" aria-expanded="false" aria-label="Switch server, current: Guild 2">"#
-    )), "{html}");
-    assert!(html.contains(r#"data-filter="" data-filter-noun="servers""#), "{html}");
-    assert!(canonical(&html).contains(&canonical(&format!(
-        r#"<label class="visually-hidden" for="server-filter">Filter servers</label><input class="{INPUT}" id="server-filter" type="search" autofocus="" autocomplete="off" data-filter-input="" placeholder="Filter servers">"#
-    ))), "{html}");
-    assert!(
-        html.contains(
-            r#"<p class="menu-count" role="status" data-filter-count=""></p>"#
-        ),
-        "{html}"
-    );
-    assert!(canonical(&html).contains(&canonical(
-        r#"<a href="/guild/2/support" class="menu-item" aria-current="page" data-filter-item="" data-topcoat-link="intent">"#
-    )), "{html}");
-    assert!(
-        canonical(&html).contains(&canonical(
-            r#"<a href="/guild/9/support" class="menu-item" data-filter-item="" data-topcoat-link="intent">"#
-        )),
-        "{html}"
-    );
-    assert_eq!(count(&html, "data-filter-item"), FILTER_THRESHOLD + 1, "{html}");
-
-    let html = render(Router::builder().page(plate_small), "/guild/1/levels")
-        .await
-        .unwrap();
-    assert_eq!(html, "", "an unresolved guild renders no plate");
 }

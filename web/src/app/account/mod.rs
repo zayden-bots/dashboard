@@ -1,5 +1,5 @@
 pub mod deadlock;
-mod page;
+pub(crate) mod page;
 mod steam;
 
 pub const ACCOUNT_TITLE: &str = "Linked accounts - Zayden";

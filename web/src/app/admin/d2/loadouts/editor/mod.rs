@@ -5,7 +5,7 @@
 
 mod endpoints;
 mod index;
-mod page;
+pub(crate) mod page;
 mod view;
 
 pub use endpoints::{NewEmoji, Reply};

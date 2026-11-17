@@ -5,6 +5,7 @@
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::router::href;
 use topcoat::router::request::uri;
 use topcoat::runtime::{PrefetchMode, link_attrs};
 use topcoat::view::{View, ViewExt, class, component, view};
@@ -12,7 +13,14 @@ use topcoat::view::{View, ViewExt, class, component, view};
 use super::badge::{BadgeVariant, badge_variants};
 use super::icons::{Icon, icon};
 use crate::admin::{guild_operator_access, is_admin, is_operator};
-use crate::nav::{GENERAL, GROUPS, ModuleNav, path_segment};
+use crate::app::admin::d2::loadouts::loadouts_page;
+use crate::app::admin::servers::servers;
+use crate::app::admin::status::status;
+use crate::app::guild::guild_id;
+use crate::app::guild::guild_id::overview::guild_overview;
+use crate::app::guilds::guilds;
+use crate::app::upgrade::upgrade;
+use crate::nav::{GENERAL, GROUPS, ModuleNav};
 use crate::shell::link::is_active_for;
 
 const OVERVIEW: &str = "Overview";
@@ -56,8 +64,23 @@ pub async fn nav_links(
     let location = uri(cx).path();
     let NavAccess { operator, admin, on_operator_page } = access;
     let overview =
-        guild_id.map(|guild_id| format!("/guild/{}", path_segment(guild_id)));
+        guild_id.map(|guild_id| href!(guild_overview, guild_id::guild_id: guild_id));
+    let overview_current = overview
+        .as_ref()
+        .and_then(|overview| overview.is_current(cx).then_some("page"));
+    let overview = overview.map(|overview| overview.resolve(cx));
     let settings = guild_id.map(|guild_id| GENERAL.href(guild_id));
+    let all_servers = href!(guilds);
+    let all_servers_current = all_servers.is_current(cx).then_some("page");
+    let all_servers = all_servers.resolve(cx);
+    let plans = href!(upgrade).resolve(cx);
+    let bot_servers = href!(servers);
+    let bot_servers_current = bot_servers.is_current(cx).then_some("page");
+    let bot_servers = bot_servers.resolve(cx);
+    let bot_status = href!(status);
+    let bot_status_current = bot_status.is_current(cx).then_some("page");
+    let bot_status = bot_status.resolve(cx);
+    let loadouts = href!(loadouts_page).resolve(cx);
 
     Ok(view! {
         <nav class="flex flex-col gap-1" aria-label="Dashboard">
@@ -79,7 +102,7 @@ pub async fn nav_links(
                         href: overview,
                         label: OVERVIEW,
                         icon_name: Some(Icon::Grid),
-                        aria_current: current(overview, location, true)
+                        aria_current: overview_current
                     )
                     nav_item(
                         href: settings,
@@ -101,19 +124,19 @@ pub async fn nav_links(
             } else {
                 <ul class="flex flex-col gap-1 m-0 p-0 list-none">
                     nav_item(
-                        href: "/guilds",
+                        href: &all_servers,
                         label: ALL_SERVERS,
                         icon_name: Some(Icon::Server),
-                        aria_current: current("/guilds", location, true)
+                        aria_current: all_servers_current
                     )
                 </ul>
             }
             <ul class="flex flex-col gap-1 m-0 mt-4 p-0 list-none">
                 nav_item(
-                    href: "/upgrade",
+                    href: &plans,
                     label: PLANS,
                     icon_name: Some(Icon::Zap),
-                    aria_current: current("/upgrade", location, false)
+                    aria_current: current(&plans, location, false)
                 )
             </ul>
             if operator || admin {
@@ -130,28 +153,24 @@ pub async fn nav_links(
                     >
                         if operator {
                             nav_item(
-                                href: "/admin/servers",
+                                href: &bot_servers,
                                 label: "All bot servers",
                                 icon_name: Some(Icon::Shield),
-                                aria_current: current("/admin/servers", location, true)
+                                aria_current: bot_servers_current
                             )
                             nav_item(
-                                href: "/admin/status",
+                                href: &bot_status,
                                 label: "Bot status",
                                 icon_name: Some(Icon::Shield),
-                                aria_current: current("/admin/status", location, true)
+                                aria_current: bot_status_current
                             )
                         }
                         if admin {
                             nav_item(
-                                href: "/admin/destiny2/loadouts",
+                                href: &loadouts,
                                 label: "Loadout builder",
                                 icon_name: Some(Icon::Gamepad),
-                                aria_current: current(
-                                    "/admin/destiny2/loadouts",
-                                    location,
-                                    false,
-                                )
+                                aria_current: current(&loadouts, location, false)
                             )
                         }
                     </ul>

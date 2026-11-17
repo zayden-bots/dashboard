@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, attributes, component, view};
@@ -49,7 +50,7 @@ const REMOVE_ROLE: &str = "remove-role";
 const ADD_LINK: &str = "add-link";
 const REMOVE_LINK: &str = "remove-link";
 
-#[page]
+#[page(with(Metadata::new().title("Roles and links - Support - Zayden Dashboard")))]
 async fn roles_page(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -73,7 +74,7 @@ fn act(
     })
 }
 
-#[page(POST "./add-role")]
+#[page(POST "./add-role", with(Metadata::new().title("Roles and links - Support - Zayden Dashboard")))]
 async fn add_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -96,7 +97,7 @@ async fn add_role(
     })
 }
 
-#[page(POST "./remove-role")]
+#[page(POST "./remove-role", with(Metadata::new().title("Roles and links - Support - Zayden Dashboard")))]
 async fn remove_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -125,7 +126,7 @@ async fn remove_role(
     })
 }
 
-#[page(POST "./add-link")]
+#[page(POST "./add-link", with(Metadata::new().title("Roles and links - Support - Zayden Dashboard")))]
 async fn add_link(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -148,7 +149,7 @@ async fn add_link(
     })
 }
 
-#[page(POST "./remove-link")]
+#[page(POST "./remove-link", with(Metadata::new().title("Roles and links - Support - Zayden Dashboard")))]
 async fn remove_link(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

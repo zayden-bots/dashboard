@@ -1,15 +1,19 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::{page, segment};
 use topcoat::runtime::{link_attrs, prefetch_mode};
 use topcoat::view::{View, component, view};
 
+use super::LANDING_TITLE;
 use super::layout::public_layout;
 use crate::auth;
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 use crate::components::icons::{Icon, icon, module_icon, module_tint};
 
 segment!(kind: Group);
+
+const DESCRIPTION: &str = "Zayden is a Discord bot for music, economy, family trees, Palworld, support tickets and more, configured per server from a web dashboard.";
 
 struct Feature {
     id: &'static str,
@@ -50,7 +54,7 @@ const FEATURES: &[Feature] = &[
     },
 ];
 
-#[page]
+#[page(with(Metadata::new().title(LANDING_TITLE).description(DESCRIPTION)))]
 pub(crate) async fn landing(cx: &Cx) -> Result<impl View> {
     let signed_in = matches!(auth::check_session(cx).await, Ok(true));
 

@@ -5,6 +5,7 @@
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::router::href;
 use topcoat::router::request::uri;
 use topcoat::runtime::{PrefetchMode, link_attrs};
 use topcoat::view::{View, ViewExt, attributes, component, view};
@@ -12,6 +13,7 @@ use topcoat::view::{View, ViewExt, attributes, component, view};
 use super::guild_grid::GuildCard;
 use super::icons::{Icon, icon};
 use super::input::input;
+use crate::app::guilds;
 use crate::guild::dto::GuildInfo;
 use crate::shell::link::switch_href;
 
@@ -86,7 +88,10 @@ pub async fn server_plate(
                         </a>
                     }
                 </div>
-                <a class="menu-item" (link_attrs(cx, "/guilds", PrefetchMode::Intent))>
+                <a
+                    class="menu-item"
+                    (link_attrs(cx, href!(guilds::guilds), PrefetchMode::Intent))
+                >
                     icon(name: Icon::Server)
                     <span class="plate-name">"All servers"</span>
                 </a>

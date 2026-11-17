@@ -7,9 +7,10 @@ pub mod editor;
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::error::see_other;
-use topcoat::router::{StatusCode, page};
+use topcoat::router::{StatusCode, href, page};
 use topcoat::runtime::{Event, Signal, expr, link_attrs, prefetch_mode, signal};
 use topcoat::view::{View, ViewExt, attributes, component, suspense, view};
 
@@ -19,6 +20,7 @@ use crate::admin::{
     delete_loadout,
     list_loadouts,
 };
+use crate::app::admin::LOADOUTS_TITLE;
 use crate::app::admin::error::DeleteError;
 use crate::app::admin::gate::{Gate, closed, gate};
 use crate::auth::WebRole;
@@ -34,15 +36,13 @@ use crate::form::fold;
 use crate::shell::app_shell;
 use crate::util::server_error_text;
 
-const LIST_PATH: &str = "/admin/destiny2/loadouts";
-const NEW_PATH: &str = "/admin/destiny2/loadouts/new";
 const DELETED: &str = "Loadout deleted.";
 const DELETE_PROMPT: &str = "This removes the build from /destiny2 builds for everyone. It cannot be undone.";
 const CLASSES: [&str; 3] = ["Hunter", "Titan", "Warlock"];
 const SEPARATOR: &str = "\n";
 
-#[page]
-pub(super) async fn loadouts_page(cx: &Cx) -> Result<impl View> {
+#[page(with(Metadata::new().title(LOADOUTS_TITLE)))]
+pub(crate) async fn loadouts_page(cx: &Cx) -> Result<impl View> {
     let access = gate(cx, WebRole::Admin).await?;
     if access != Gate::Open {
         return Ok(view! { closed(role: WebRole::Admin, gate: access) }.boxed());
@@ -52,7 +52,7 @@ pub(super) async fn loadouts_page(cx: &Cx) -> Result<impl View> {
     Ok(view! { app_shell(loadout_list_page(notice: notice.as_ref())) }.boxed())
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title(LOADOUTS_TITLE)))]
 pub(super) async fn delete(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -63,7 +63,7 @@ pub(super) async fn delete(
     }
     let Err(error) = remove(cx, pairs).await else {
         set_flash(cx, FlashKind::Success, DELETED)?;
-        return Err(see_other(LIST_PATH).into());
+        return Err(see_other(href!(loadouts_page).resolve(cx)).into());
     };
     let failure = error.to_string();
 
@@ -105,7 +105,7 @@ pub async fn loadout_list_page(
                 </div>
                 <a
                     class=(button_variants(ButtonVariant::Primary, ButtonSize::Md))
-                    (link_attrs(cx, NEW_PATH, prefetch_mode(cx)))
+                    (link_attrs(cx, href!(editor::page::new_loadout), prefetch_mode(cx)))
                 >
                     "New loadout"
                 </a>
@@ -237,7 +237,10 @@ async fn loadout_row(
     loadout: &LoadoutSummary,
     class: &Signal<String>,
 ) -> Result<impl View> {
-    let href = format!("{LIST_PATH}/{}", loadout.id);
+    let href = href!(
+        editor::page::edit_loadout,
+        editor::loadout_id: loadout.id.to_string()
+    );
     let own_class = loadout.class.clone();
     let delete_title = format!("Delete loadout \u{201c}{}\u{201d}?", loadout.name);
     let delete_label = format!("Delete loadout {}", loadout.name);
@@ -251,7 +254,7 @@ async fn loadout_row(
                 header: true,
                 <a
                     class="loadout-name"
-                    (link_attrs(cx, href.as_str(), prefetch_mode(cx)))
+                    (link_attrs(cx, href, prefetch_mode(cx)))
                 >
                     (loadout.name.as_str())
                 </a>
@@ -262,7 +265,7 @@ async fn loadout_row(
             data_cell(label: "Author", (loadout.author.as_str()))
             data_cell(
                 label: "Action",
-                <form method="post" action=(LIST_PATH) data-pending="">
+                <form method="post" action=(href!(loadouts_page)) data-pending="">
                     <input type="hidden" name="id" value=(loadout.id.to_string())>
                     confirm_dialog(
                         trigger: "Delete",

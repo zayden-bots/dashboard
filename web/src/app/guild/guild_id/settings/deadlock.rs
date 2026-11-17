@@ -1,6 +1,7 @@
 use ::deadlock::announce::{DEFAULT_MESSAGE, PLACEHOLDERS};
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, component, view};
@@ -46,7 +47,7 @@ const FORM: &str = "deadlock-settings";
 const SUMMARIES_FORM: &str = "deadlock-summaries";
 const SQUAD_FORM: &str = "deadlock-squad";
 
-#[page]
+#[page(with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
 async fn deadlock(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -54,7 +55,7 @@ async fn deadlock(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
 async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -75,7 +76,7 @@ async fn save(
     })
 }
 
-#[page(POST "./module")]
+#[page(POST "./module", with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
 async fn switch(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -89,7 +90,7 @@ async fn switch(
     })
 }
 
-#[page(POST "./summaries")]
+#[page(POST "./summaries", with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
 async fn save_summaries(
     cx: &Cx,
     Form(mut pairs): Form<Vec<(String, String)>>,
@@ -116,7 +117,7 @@ async fn save_summaries(
     })
 }
 
-#[page(POST "./squad")]
+#[page(POST "./squad", with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
 async fn save_squad(
     cx: &Cx,
     Form(mut pairs): Form<Vec<(String, String)>>,
@@ -143,7 +144,7 @@ async fn save_squad(
     })
 }
 
-#[page(POST "./add-ping-role")]
+#[page(POST "./add-ping-role", with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
 async fn add_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -164,7 +165,7 @@ async fn add_ping_role(
     })
 }
 
-#[page(POST "./remove-ping-role")]
+#[page(POST "./remove-ping-role", with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
 async fn remove_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

@@ -1,9 +1,11 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::page;
 use topcoat::runtime::{PrefetchMode, link_attrs};
 use topcoat::view::{View, ViewExt, attributes, component, suspense, view};
 
+use super::LEVELS_TITLE;
 use super::action::path_segment;
 use super::fields::{load_error, load_problem};
 use super::header::page_header;
@@ -27,7 +29,7 @@ use crate::engagement::{LeaderboardEntry, LeaderboardView};
 
 const COLUMNS: &[&str] = &["Rank", "Member", "Level", "XP", "Messages"];
 
-#[page]
+#[page(with(Metadata::new().title(LEVELS_TITLE)))]
 pub(super) async fn levels(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let board = LeaderboardView::from_request(cx);

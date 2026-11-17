@@ -11,9 +11,21 @@ use topcoat::router::request::Request;
 use topcoat::router::response::Response;
 use topcoat::router::{Body, Method, Router, StatusCode, header, page};
 use topcoat::view::{View, view};
+use web::app::account::ACCOUNT_TITLE;
+use web::app::admin::d2::loadouts::editor::{EDITOR_TITLE, NEW_LOADOUT_TITLE};
+use web::app::admin::{LOADOUTS_TITLE, SERVERS_TITLE, STATUS_TITLE};
+use web::app::guild::guild_id::engagement::{
+    GREETINGS_TITLE,
+    LEVELS_TITLE,
+    REACTION_ROLES_TITLE,
+};
+use web::app::guild::guild_id::settings::title;
+use web::app::public::{LANDING_TITLE, LOGIN_TITLE, PRIVACY_TITLE, TERMS_TITLE};
 use web::components::brand::LOGO;
-use web::document::{NOT_FOUND_TITLE, PAGE_TITLES, PENDING_SUBMIT, STYLESHEET};
+use web::document::{NOT_FOUND_TITLE, PENDING_SUBMIT, STYLESHEET};
+use web::nav::{Dest, MODULES};
 use web::router;
+use web::shell::{GUILDS_TITLE, OVERVIEW_TITLE, UPGRADE_TITLE};
 
 mod canonical;
 mod support;
@@ -32,6 +44,55 @@ const HEADER: &str = "sticky top-0 z-100 flex items-center justify-center h-(--t
 const BRAND_MARK: &str = "flex-none w-[28px] h-[28px] rounded-(--radius-full)";
 const FOOTER: &str =
     "border-t border-solid border-t-rule py-6 px-4 text-text-2 text-[13px]";
+
+const PAGE_TITLES: &[(&str, &str)] = &[
+    ("/{*rest}", NOT_FOUND_TITLE),
+    ("/", LANDING_TITLE),
+    ("/login", LOGIN_TITLE),
+    ("/privacy", PRIVACY_TITLE),
+    ("/terms", TERMS_TITLE),
+    ("/guilds", GUILDS_TITLE),
+    ("/guild/{guild_id}", OVERVIEW_TITLE),
+    ("/upgrade", UPGRADE_TITLE),
+    ("/account", ACCOUNT_TITLE),
+    ("/guild/{guild_id}/levels", LEVELS_TITLE),
+    ("/guild/{guild_id}/reaction-roles", REACTION_ROLES_TITLE),
+    ("/guild/{guild_id}/greetings", GREETINGS_TITLE),
+    ("/guild/{guild_id}/settings", "Server settings - Zayden Dashboard"),
+    ("/guild/{guild_id}/ai", "AI Chat - Zayden Dashboard"),
+    ("/guild/{guild_id}/family", "Family - Zayden Dashboard"),
+    ("/guild/{guild_id}/honeypot", "Honeypot - Zayden Dashboard"),
+    ("/guild/{guild_id}/lfg", "LFG - Zayden Dashboard"),
+    ("/guild/{guild_id}/music", "Music - Zayden Dashboard"),
+    ("/guild/{guild_id}/temp-voice", "Temp voice - Zayden Dashboard"),
+    ("/guild/{guild_id}/patreon", "Patreon - Zayden Dashboard"),
+    ("/guild/{guild_id}/youtube", "YouTube - Zayden Dashboard"),
+    ("/guild/{guild_id}/deadlock", "Deadlock - Zayden Dashboard"),
+    ("/guild/{guild_id}/support", "Support - Zayden Dashboard"),
+    (
+        "/guild/{guild_id}/support/suggestions",
+        "Suggestions - Support - Zayden Dashboard",
+    ),
+    ("/guild/{guild_id}/support/faq", "FAQ articles - Support - Zayden Dashboard"),
+    (
+        "/guild/{guild_id}/support/faq/new",
+        "New FAQ article - Support - Zayden Dashboard",
+    ),
+    (
+        "/guild/{guild_id}/support/faq/{article_id}",
+        "Edit FAQ article - Support - Zayden Dashboard",
+    ),
+    ("/guild/{guild_id}/support/wiki", "Wiki - Support - Zayden Dashboard"),
+    (
+        "/guild/{guild_id}/support/roles",
+        "Roles and links - Support - Zayden Dashboard",
+    ),
+    ("/admin/servers", SERVERS_TITLE),
+    ("/admin/status", STATUS_TITLE),
+    ("/admin/destiny2/loadouts", LOADOUTS_TITLE),
+    ("/admin/destiny2/loadouts/new", NEW_LOADOUT_TITLE),
+    ("/admin/destiny2/loadouts/{loadout_id}", EDITOR_TITLE),
+];
 
 type TestResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 
@@ -194,6 +255,31 @@ async fn every_page_title_is_rendered() {
         let html = body_text(response).await.unwrap();
         assert!(html.contains(&format!("<title>{title}</title>")), "{route}");
     }
+}
+
+#[tokio::test]
+async fn every_settings_section_title_is_its_navigation_label() {
+    for entry in MODULES {
+        let Dest::Section { path, .. } = entry.dest else { continue };
+        let response = send(Method::GET, &format!("/guild/1/{path}")).await.unwrap();
+        let html = body_text(response).await.unwrap();
+        assert!(
+            html.contains(&format!("<title>{}</title>", title(entry))),
+            "{path}"
+        );
+    }
+}
+
+#[tokio::test]
+async fn login_describes_itself_and_guilds_does_not() {
+    let login = body_text(send(Method::GET, "/login").await.unwrap()).await.unwrap();
+    assert!(login.contains(
+        "<meta name=\"description\" content=\"Sign in with Discord to manage Zayden in the servers you run.\">"
+    ));
+
+    let guilds =
+        body_text(send(Method::GET, "/guilds").await.unwrap()).await.unwrap();
+    assert!(!guilds.contains("name=\"description\""));
 }
 
 #[tokio::test]

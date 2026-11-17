@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::{page, segment};
 use topcoat::view::{View, ViewExt, component, view};
@@ -26,7 +27,7 @@ segment!(rename: "settings");
 const PAGE: Page = Page::Server;
 const FORM: &str = "server-settings";
 
-#[page]
+#[page(with(Metadata::new().title("Server settings - Zayden Dashboard")))]
 async fn server_settings(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -34,7 +35,7 @@ async fn server_settings(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title("Server settings - Zayden Dashboard")))]
 async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

@@ -4,6 +4,7 @@ mod settings;
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::page;
 use topcoat::runtime::{PrefetchMode, link_attrs};
@@ -52,7 +53,7 @@ impl Pane {
     }
 }
 
-#[page(POST "./module")]
+#[page(POST "./module", with(Metadata::new().title("Support - Zayden Dashboard")))]
 async fn switch(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

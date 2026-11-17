@@ -1,33 +1,20 @@
-use std::borrow::Cow;
-
 use topcoat::Result;
 use topcoat::asset::{Asset, asset};
 use topcoat::context::Cx;
+use topcoat::metadata::{Metadata, metadata, tag};
 use topcoat::router::error::NotFoundError;
-use topcoat::router::{Slot, StatusCode, try_endpoint};
+use topcoat::router::{Slot, StatusCode};
 use topcoat::view::{Child, View, component, error_boundary, view};
 
-use crate::app::account::ACCOUNT_TITLE;
 use crate::app::admin::d2::loadouts::editor::{
-    EDITOR_TITLE,
     LOADOUT_NOT_FOUND_TITLE,
-    NEW_LOADOUT_TITLE,
     missing_loadout,
 };
-use crate::app::admin::{LOADOUTS_TITLE, SERVERS_TITLE, STATUS_TITLE};
-use crate::app::guild::guild_id::engagement::{
-    GREETINGS_TITLE,
-    LEVELS_TITLE,
-    REACTION_ROLES_TITLE,
-};
-use crate::app::guild::guild_id::settings::route_title;
-use crate::app::public::{LANDING_TITLE, LOGIN_TITLE, PRIVACY_TITLE, TERMS_TITLE};
 use crate::components::brand::LOGO;
 use crate::error::MissingPage;
 use crate::font::font_head;
 use crate::guild::seat;
 use crate::pages::not_found::not_found_page;
-use crate::shell::{GUILDS_TITLE, OVERVIEW_TITLE, UPGRADE_TITLE};
 
 pub const STYLESHEET: Asset = asset!("{out_dir}/tailwind.css");
 
@@ -35,108 +22,8 @@ pub const PENDING_SUBMIT: Asset = asset!("../assets/pending-submit.js");
 
 pub const NOT_FOUND_TITLE: &str = "Not found - Zayden";
 
-pub const PAGE_TITLES: &[(&str, &str)] = &[
-    ("/{*rest}", NOT_FOUND_TITLE),
-    ("/", LANDING_TITLE),
-    ("/login", LOGIN_TITLE),
-    ("/privacy", PRIVACY_TITLE),
-    ("/terms", TERMS_TITLE),
-    ("/guilds", GUILDS_TITLE),
-    ("/guild/{guild_id}", OVERVIEW_TITLE),
-    ("/upgrade", UPGRADE_TITLE),
-    ("/account", ACCOUNT_TITLE),
-    ("/guild/{guild_id}/levels", LEVELS_TITLE),
-    ("/guild/{guild_id}/reaction-roles", REACTION_ROLES_TITLE),
-    ("/guild/{guild_id}/greetings", GREETINGS_TITLE),
-    ("/guild/{guild_id}/settings", "Server settings - Zayden Dashboard"),
-    ("/guild/{guild_id}/ai", "AI Chat - Zayden Dashboard"),
-    ("/guild/{guild_id}/family", "Family - Zayden Dashboard"),
-    ("/guild/{guild_id}/honeypot", "Honeypot - Zayden Dashboard"),
-    ("/guild/{guild_id}/lfg", "LFG - Zayden Dashboard"),
-    ("/guild/{guild_id}/music", "Music - Zayden Dashboard"),
-    ("/guild/{guild_id}/temp-voice", "Temp voice - Zayden Dashboard"),
-    ("/guild/{guild_id}/patreon", "Patreon - Zayden Dashboard"),
-    ("/guild/{guild_id}/youtube", "YouTube - Zayden Dashboard"),
-    ("/guild/{guild_id}/deadlock", "Deadlock - Zayden Dashboard"),
-    ("/guild/{guild_id}/support", "Support - Zayden Dashboard"),
-    (
-        "/guild/{guild_id}/support/suggestions",
-        "Suggestions - Support - Zayden Dashboard",
-    ),
-    ("/guild/{guild_id}/support/faq", "FAQ articles - Support - Zayden Dashboard"),
-    (
-        "/guild/{guild_id}/support/faq/new",
-        "New FAQ article - Support - Zayden Dashboard",
-    ),
-    (
-        "/guild/{guild_id}/support/faq/{article_id}",
-        "Edit FAQ article - Support - Zayden Dashboard",
-    ),
-    ("/guild/{guild_id}/support/wiki", "Wiki - Support - Zayden Dashboard"),
-    (
-        "/guild/{guild_id}/support/roles",
-        "Roles and links - Support - Zayden Dashboard",
-    ),
-    ("/admin/servers", SERVERS_TITLE),
-    ("/admin/status", STATUS_TITLE),
-    ("/admin/destiny2/loadouts", LOADOUTS_TITLE),
-    ("/admin/destiny2/loadouts/new", NEW_LOADOUT_TITLE),
-    ("/admin/destiny2/loadouts/{loadout_id}", EDITOR_TITLE),
-];
-
-pub const PAGE_DESCRIPTIONS: &[(&str, &str)] = &[
-    (
-        "/",
-        "Zayden is a Discord bot for music, economy, family trees, Palworld, support tickets and more, configured per server from a web dashboard.",
-    ),
-    ("/login", "Sign in with Discord to manage Zayden in the servers you run."),
-    (
-        "/upgrade",
-        "Zayden's paid plans, what each one adds, and how to subscribe through Ko-fi or Discord.",
-    ),
-    (
-        "/privacy",
-        "What data Zayden and its dashboard collect, why, how long it is kept, and how to have it removed.",
-    ),
-    (
-        "/terms",
-        "The terms for using the Zayden Discord bot, its dashboard and its paid plans.",
-    ),
-];
-
-#[must_use]
-pub fn page_title(cx: &Cx) -> Cow<'static, str> {
-    let Some(endpoint) = try_endpoint(cx) else {
-        return Cow::Borrowed(NOT_FOUND_TITLE);
-    };
-    let pattern = endpoint.path().to_matchit_path();
-    let pattern: &str = &pattern;
-
-    route_title(cx, pattern).map_or_else(
-        || Cow::Borrowed(title_for(pattern).unwrap_or(NOT_FOUND_TITLE)),
-        Cow::Owned,
-    )
-}
-
-fn title_for(pattern: &str) -> Option<&'static str> {
-    lookup(PAGE_TITLES, pattern)
-}
-
-#[must_use]
-pub fn page_description(cx: &Cx) -> Option<&'static str> {
-    lookup(PAGE_DESCRIPTIONS, &try_endpoint(cx)?.path().to_matchit_path())
-}
-
-fn lookup(table: &[(&str, &'static str)], pattern: &str) -> Option<&'static str> {
-    let pattern = if pattern.is_empty() { "/" } else { pattern };
-    table.iter().find(|(route, _)| *route == pattern).map(|(_, text)| *text)
-}
-
 #[component]
 pub(crate) async fn document_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
-    let title = page_title(cx);
-    let description = page_description(cx);
-
     Ok(view! {
         error_boundary(
             fallback: |error| {
@@ -148,49 +35,56 @@ pub(crate) async fn document_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View
                 Ok(
                     view! {
                         (StatusCode::NOT_FOUND)
-                        match missing {
-                            Some(MissingPage::Loadout) => {
-                                document(title: LOADOUT_NOT_FOUND_TITLE, missing_loadout())
-                            }
-                            None => document(title: NOT_FOUND_TITLE, not_found_page()),
-                        }
+                        missing_document(missing: missing)
                     },
                 )
             },
-            document(
-                title: &title,
-                description: description,
-                bot: Some(seat::selected_slot(cx).as_str()),
-                (slot)
-            )
+            document(bot: Some(seat::selected_slot(cx).as_str()), (slot))
         )
+    })
+}
+
+#[component]
+async fn missing_document(
+    cx: &Cx,
+    missing: Option<MissingPage>,
+) -> Result<impl View> {
+    let title = match missing {
+        Some(MissingPage::Loadout) => LOADOUT_NOT_FOUND_TITLE,
+        None => NOT_FOUND_TITLE,
+    };
+    let cx = cx.with(Metadata::new().title(title).no_description());
+
+    Ok(view! {
+        match missing {
+            Some(MissingPage::Loadout) => document(missing_loadout()),
+            None => document(not_found_page()),
+        }
     })
 }
 
 #[component]
 async fn document(
     cx: &Cx,
-    title: &str,
-    #[default] description: Option<&str>,
     #[default] bot: Option<&str>,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {
+    let page = metadata(cx).await?;
+
     Ok(view! {
         <!DOCTYPE html>
         <html lang="en" class="dark" data-bot=(bot.unwrap_or("zayden"))>
             <head>
-                <meta charset="utf-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1">
+                tag::charset()
+                tag::viewport(metadata: page)
                 <meta name="color-scheme" content="dark">
-                if let Some(description) = description {
-                    <meta name="description" content=(description)>
-                }
+                tag::description(metadata: page)
                 font_head()
                 <link rel="icon" type="image/png" href=(LOGO)>
                 <link rel="stylesheet" href=(STYLESHEET)>
                 topcoat::runtime::script()
                 <script type="module" src=(PENDING_SUBMIT)></script>
-                <title>(title)</title>
+                tag::title(metadata: page)
             </head>
             <body>
                 <a class="skip-link" href="#main">"Skip to main content"</a>

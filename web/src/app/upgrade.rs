@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::error::see_other;
 use topcoat::router::{StatusCode, page};
@@ -23,6 +24,9 @@ use crate::guild::GuildError;
 use crate::guild::dto::Tier;
 use crate::guild::kofi::{KofiEmailForm, link_kofi_email};
 use crate::guild::tier::get_user_tier;
+use crate::shell::UPGRADE_TITLE;
+
+const DESCRIPTION: &str = "Zayden's paid plans, what each one adds, and how to subscribe through Ko-fi or Discord.";
 
 const PAGE: &str = "/upgrade";
 const KOFI_SECTION: &str = "kofi";
@@ -52,14 +56,14 @@ impl KofiFailure {
     }
 }
 
-#[page]
-pub(super) async fn upgrade(cx: &Cx) -> Result<impl View> {
+#[page(with(Metadata::new().title(UPGRADE_TITLE).description(DESCRIPTION)))]
+pub(crate) async fn upgrade(cx: &Cx) -> Result<impl View> {
     let notice = take_flash(cx);
 
     Ok(view! { public_layout(upgrade_page(notice: notice.as_ref())) })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title(UPGRADE_TITLE).description(DESCRIPTION)))]
 pub(super) async fn link_kofi(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

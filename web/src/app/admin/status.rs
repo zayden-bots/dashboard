@@ -5,9 +5,11 @@
 
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, attributes, component, view};
 
+use super::STATUS_TITLE;
 use super::gate::{Gate, closed, gate};
 use crate::admin::AdminError;
 use crate::admin::status::{ProcessView, process_status};
@@ -24,8 +26,8 @@ use crate::components::table::{
 };
 use crate::shell::app_shell;
 
-#[page]
-pub(super) async fn status(cx: &Cx) -> Result<impl View> {
+#[page(with(Metadata::new().title(STATUS_TITLE)))]
+pub(crate) async fn status(cx: &Cx) -> Result<impl View> {
     let access = gate(cx, WebRole::Operator).await?;
     if access != Gate::Open {
         return Ok(view! { closed(role: WebRole::Operator, gate: access) }.boxed());

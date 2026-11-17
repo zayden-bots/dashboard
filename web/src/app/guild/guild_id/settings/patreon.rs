@@ -1,6 +1,7 @@
 use ::patreon::embeds::PLACEHOLDERS;
 use topcoat::Result;
 use topcoat::context::Cx;
+use topcoat::metadata::Metadata;
 use topcoat::router::content::Form;
 use topcoat::router::page;
 use topcoat::view::{View, ViewExt, component, view};
@@ -46,7 +47,7 @@ const PAGE: Page = Page::Patreon;
 const FORM: &str = "patreon-settings";
 const DISCONNECT: &str = "patreon-disconnect";
 
-#[page]
+#[page(with(Metadata::new().title("Patreon - Zayden Dashboard")))]
 async fn patreon(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -54,7 +55,7 @@ async fn patreon(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
 }
 
-#[page(POST)]
+#[page(POST, with(Metadata::new().title("Patreon - Zayden Dashboard")))]
 async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -75,7 +76,7 @@ async fn save(
     })
 }
 
-#[page(POST "./disconnect")]
+#[page(POST "./disconnect", with(Metadata::new().title("Patreon - Zayden Dashboard")))]
 async fn disconnect(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -96,7 +97,7 @@ async fn disconnect(
     })
 }
 
-#[page(POST "./add-ping-role")]
+#[page(POST "./add-ping-role", with(Metadata::new().title("Patreon - Zayden Dashboard")))]
 async fn add_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -117,7 +118,7 @@ async fn add_ping_role(
     })
 }
 
-#[page(POST "./remove-ping-role")]
+#[page(POST "./remove-ping-role", with(Metadata::new().title("Patreon - Zayden Dashboard")))]
 async fn remove_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
