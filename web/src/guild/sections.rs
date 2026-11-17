@@ -130,6 +130,7 @@ async fn deadlock_section(
             .flat_map(|a| &a.ping_role_ids)
             .map(ToString::to_string)
             .collect(),
+        include_news: announce.as_ref().is_some_and(|a| a.include_news),
         summary_channel_id: opt_str(summary_channel_id),
         squad_channel_id: opt_str(squad.map(|row| row.channel_id)),
         squad_leaderboard: squad.is_some_and(|row| row.leaderboard),

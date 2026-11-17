@@ -978,6 +978,7 @@ async fn deadlock_starts_without_an_announcement(pool: PgPool) {
             channel_id: None,
             message: None,
             ping_role_ids: Vec::new(),
+            include_news: false,
             summary_channel_id: None,
             squad_channel_id: None,
             squad_leaderboard: false,
@@ -990,17 +991,31 @@ async fn deadlock_channel_clears_or_must_parse(pool: PgPool) {
     let app = harness(pool).await.unwrap();
 
     assert_eq!(
-        app.admin_save("deadlock", "guild=7&channel_id=&message=").await.unwrap(),
+        app.admin_save(
+            "deadlock",
+            "guild=7&channel_id=&message=&include_news=false"
+        )
+        .await
+        .unwrap(),
         "ok"
     );
     assert_eq!(
-        app.admin_save("deadlock", "guild=7&channel_id=abc&message=").await.unwrap(),
+        app.admin_save(
+            "deadlock",
+            "guild=7&channel_id=abc&message=&include_news=false"
+        )
+        .await
+        .unwrap(),
         shown("invalid channel id")
     );
     assert_eq!(
-        app.save("deadlock", "guild=7&channel_id=&message=", Some(MEMBER))
-            .await
-            .unwrap(),
+        app.save(
+            "deadlock",
+            "guild=7&channel_id=&message=&include_news=false",
+            Some(MEMBER)
+        )
+        .await
+        .unwrap(),
         shown("forbidden")
     );
 }

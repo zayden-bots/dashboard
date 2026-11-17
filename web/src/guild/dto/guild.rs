@@ -92,6 +92,7 @@ pub struct DeadlockSection {
     pub channel_id: Option<String>,
     pub message: Option<String>,
     pub ping_role_ids: Vec<String>,
+    pub include_news: bool,
     pub summary_channel_id: Option<String>,
     pub squad_channel_id: Option<String>,
     pub squad_leaderboard: bool,

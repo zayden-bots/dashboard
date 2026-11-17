@@ -760,7 +760,7 @@ async fn the_deadlock_squad_form_binds_its_own_table(
 ) {
     let pool = test_pool(options, connect).await.unwrap();
     both_bots(&pool).await.unwrap();
-    PatchAnnounceRow::upsert(&pool, 7, 101, None).await.unwrap();
+    PatchAnnounceRow::upsert(&pool, 7, 101, None, false).await.unwrap();
     summary_channel::upsert(&pool, 7, 101).await.unwrap();
     squad_channel::upsert(&pool, 7, 101, false).await.unwrap();
     let app = harness(&pool).await.unwrap();

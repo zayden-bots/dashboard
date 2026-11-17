@@ -18,7 +18,7 @@ use super::parse::{parse_flag, parse_role};
 use crate::auth::{ensure_bot_can_post, ensure_guild_channel};
 
 form_args! {
-    DeadlockSettingsForm { guild, channel_id, message }
+    DeadlockSettingsForm { guild, channel_id, message, include_news }
 }
 
 form_args! {
@@ -57,9 +57,15 @@ pub async fn save_deadlock_settings(
         delivery::poster(cx, guild_id, DeliveryKind::DeadlockPatch, choice).await?;
     ensure_bot_can_post(cx, guild_id, channel_id, poster).await?;
 
-    PatchAnnounceRow::upsert(&app.db, guild_id, channel_id, message)
-        .await
-        .map_err(server_err)?;
+    PatchAnnounceRow::upsert(
+        &app.db,
+        guild_id,
+        channel_id,
+        message,
+        parse_flag(&form.include_news),
+    )
+    .await
+    .map_err(server_err)?;
 
     delivery::apply_delivery(cx, guild_id, DeliveryKind::DeadlockPatch, choice).await
 }

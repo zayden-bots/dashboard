@@ -1067,7 +1067,7 @@ async fn deadlock_keeps_a_message_and_ping_roles(
     let html = app
         .redirected(
             page,
-            "guild=7&channel_id=101&message=%7Broles%7D+Patch%3A+%7Btitle%7D",
+            "guild=7&channel_id=101&message=%7Broles%7D+Patch%3A+%7Btitle%7D&include_news=false",
             "/guild/7/deadlock#deadlock-settings",
         )
         .await
@@ -1075,12 +1075,33 @@ async fn deadlock_keeps_a_message_and_ping_roles(
     let row = PatchAnnounceRow::select(db, 7).await.unwrap().unwrap();
     assert_eq!(row.channel_id, 101);
     assert_eq!(row.message.as_deref(), Some("{roles} Patch: {title}"));
+    assert!(!row.include_news);
     assert!(
         element(&html, "textarea", "deadlock-settings-message")
             .unwrap()
             .contains("{roles} Patch: {title}</textarea>"),
         "{html}"
     );
+
+    let html = app
+        .redirected(
+            page,
+            "guild=7&channel_id=101&message=&include_news=true",
+            "/guild/7/deadlock#deadlock-settings",
+        )
+        .await
+        .unwrap();
+    let row = PatchAnnounceRow::select(db, 7).await.unwrap().unwrap();
+    assert!(row.include_news);
+    assert_eq!(selected(&html, "deadlock-settings-include-news"), Some("true"));
+
+    app.redirected(
+        page,
+        "guild=7&channel_id=101&message=%7Broles%7D+Patch%3A+%7Btitle%7D&include_news=false",
+        "/guild/7/deadlock#deadlock-settings",
+    )
+    .await
+    .unwrap();
 
     let add = format!("{page}/add-ping-role");
     let remove = format!("{page}/remove-ping-role");
@@ -1104,7 +1125,7 @@ async fn deadlock_keeps_a_message_and_ping_roles(
 
     app.redirected(
         page,
-        "guild=7&channel_id=&message=",
+        "guild=7&channel_id=&message=&include_news=false",
         "/guild/7/deadlock#deadlock-settings",
     )
     .await

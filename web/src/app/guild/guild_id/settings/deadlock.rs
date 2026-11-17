@@ -1,4 +1,4 @@
-use ::deadlock::announce::{DEFAULT_MESSAGE, PLACEHOLDERS};
+use ::deadlock::announce::{DEFAULT_MESSAGE, DEFAULT_NEWS_MESSAGE, PLACEHOLDERS};
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::metadata::Metadata;
@@ -252,6 +252,9 @@ pub(super) async fn tab(
         "Leave empty for the default: {}",
         DEFAULT_MESSAGE.replace('\n', " then ")
     );
+    let news_help = format!(
+        "Events, cosmetics and other Steam posts that are not patches. Without a custom message they use: {DEFAULT_NEWS_MESSAGE}"
+    );
 
     Ok(view! {
         <form
@@ -268,7 +271,7 @@ pub(super) async fn tab(
             <fieldset class="settings-section">
                 <legend>"Patch notes"</legend>
                 <p class="page-lead">
-                    "When the official patch notes are posted, Zayden announces them here with the hero and item changes found between the old and new game builds."
+                    "When a Deadlock patch is posted on the forum or Steam, Zayden announces it here with the hero and item changes found between the old and new game builds."
                 </p>
                 select_row(
                     form: FORM,
@@ -294,6 +297,14 @@ pub(super) async fn tab(
                     error: sent.error("message")
                 )
                 placeholder_legend(entries: PLACEHOLDERS)
+                toggle_row(
+                    form: FORM,
+                    name: "include_news",
+                    label: "Also announce Steam news",
+                    value: sent.flag("include_news", settings.include_news),
+                    help: Some(&news_help),
+                    error: sent.error("include_news")
+                )
             </fieldset>
             save_bar(notice: state.notice_for(FORM))
         </form>
