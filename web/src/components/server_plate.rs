@@ -97,7 +97,7 @@ pub async fn server_plate(
 }
 
 #[component]
-async fn plate_avatar(guild: &GuildCard) -> Result<impl View> {
+async fn plate_avatar(cx: &Cx, guild: &GuildCard) -> Result<impl View> {
     Ok(view! {
         match guild.icon_url() {
             Some(url) => <img

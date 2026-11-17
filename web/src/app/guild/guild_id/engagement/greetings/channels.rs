@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, ViewExt, attributes, component, view};
 
 use super::{ADD_CHANNEL, CHANNELS, GreetingAction, PAGE, REMOVE_CHANNEL};
@@ -21,6 +22,7 @@ use crate::flash::Flash;
 
 #[component]
 pub async fn channel_section(
+    cx: &Cx,
     guild_id: &str,
     allowed: Option<&[String]>,
     channels: &[ChannelInfo],
@@ -169,6 +171,7 @@ pub async fn channel_section(
 
 #[component]
 async fn channel_row(
+    cx: &Cx,
     guild_id: &str,
     label: String,
     id: &str,

@@ -24,11 +24,10 @@ use sqlx::postgres::{PgListener, PgPoolOptions};
 use topcoat::asset::{AssetBundle, RouterBuilderAssetExt};
 use topcoat::router::request::Request;
 use topcoat::router::response::Response;
-use topcoat::router::{Body, Method, OriginPolicy, Router, StatusCode, header};
+use topcoat::router::{Body, Method, Router, StatusCode, header};
 use twilight_model::guild::Permissions;
 use twilight_model::id::Id;
 use twilight_model::user::CurrentUserGuild;
-use web::app::providers;
 use web::auth::SessionUser;
 use web::components::brand::LOGO;
 use web::document::STYLESHEET;
@@ -135,25 +134,17 @@ struct App {
     router: Router,
 }
 
-/// The application routes with the given cross-site policy.
-async fn providers_app(
-    pool: PgPool,
-    connectable: bool,
-    policy: OriginPolicy,
-) -> TestResult<App> {
-    let router = web::router()
-        .app_context(state(pool, connectable).await?)
-        .origin_policy(policy)
-        .build();
+async fn providers_app(pool: PgPool, connectable: bool) -> TestResult<App> {
+    let router = web::router().with(state(pool, connectable).await?).build();
     Ok(App { router })
 }
 
 async fn standard(pool: PgPool) -> TestResult<App> {
-    providers_app(pool, true, providers::origin_policy()).await
+    providers_app(pool, true).await
 }
 
 async fn unconfigured(pool: PgPool) -> TestResult<App> {
-    providers_app(pool, false, providers::origin_policy()).await
+    providers_app(pool, false).await
 }
 
 /// The application router, built the way the server builds it. Its database
@@ -163,8 +154,7 @@ async fn application() -> TestResult<App> {
         .acquire_timeout(Duration::from_secs(2))
         .connect_lazy("postgres://127.0.0.1:1/unused")?;
     let bundle = AssetBundle::load_dir(bundle_dir()?)?;
-    let router =
-        web::router().assets(bundle).app_context(state(pool, true).await?).build();
+    let router = web::router().assets(bundle).with(state(pool, true).await?).build();
     Ok(App { router })
 }
 
@@ -513,25 +503,6 @@ async fn the_application_router_exempts_only_the_webhooks_from_the_origin_check(
     let response = app.get("/patreon/connect?guild=7", None).await.unwrap();
     assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
     assert_eq!(text(response).await.unwrap(), "");
-}
-
-#[tokio::test]
-async fn the_provider_policy_exempts_only_the_webhooks_from_the_origin_check() {
-    let pool = PgPoolOptions::new()
-        .acquire_timeout(Duration::from_secs(2))
-        .connect_lazy("postgres://127.0.0.1:1/unused")
-        .unwrap();
-    let app =
-        providers_app(pool.clone(), true, providers::origin_policy()).await.unwrap();
-
-    assert_origin_policy(&app, "providers router").await.unwrap();
-    assert_eq!(providers::WEBHOOK_PATHS, WEBHOOKS);
-
-    let strict = providers_app(pool, true, OriginPolicy::new()).await.unwrap();
-    for path in WEBHOOKS {
-        let response = strict.post(path, &CROSS_SITE, "data=x").await.unwrap();
-        assert_eq!(response.status(), StatusCode::FORBIDDEN, "{path}");
-    }
 }
 
 const CAMPAIGN: &str = "campaign-1";

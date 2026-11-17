@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{
     Attributes,
     Child,
@@ -138,6 +139,7 @@ pub const fn button_variants(
 /// ```
 #[component]
 pub async fn button(
+    cx: &Cx,
     #[default] variant: ButtonVariant,
     #[default] size: ButtonSize,
     #[default] mut attrs: Attributes,

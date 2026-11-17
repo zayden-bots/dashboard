@@ -1,3 +1,8 @@
+#![expect(
+    clippy::empty_enums,
+    reason = "path_param! expands to a variantless marker enum"
+)]
+
 use accounts::links::AccountLink;
 use accounts::provider::Provider as AccountProvider;
 use topcoat::Result;
@@ -21,7 +26,7 @@ use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 use crate::components::flash::flash;
 use crate::flash::{Flash, FlashKind, set as set_flash, take as take_flash};
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 path_param!(provider);
 
@@ -69,8 +74,7 @@ pub(super) async fn account(cx: &Cx) -> Result<impl View> {
 
 #[page(POST "./unlink/{provider}")]
 pub(super) async fn unlink(cx: &Cx) -> Result<impl View> {
-    let provider: &str = path_param::<Provider>(cx);
-    unlink_provider(cx, provider).await?;
+    unlink_provider(cx, provider(cx)).await?;
 
     Err::<(), _>(see_other(PAGE).into())
 }
@@ -117,6 +121,7 @@ async fn unlink_provider(cx: &Cx, provider: &str) -> Result<()> {
 
 #[component]
 async fn account_page(
+    cx: &Cx,
     notice: Option<&Flash>,
     links: Option<&[AccountLink]>,
     summaries: Option<&DeadlockPrefs>,
@@ -161,6 +166,7 @@ async fn account_page(
 
 #[component]
 async fn provider_row(
+    cx: &Cx,
     provider: AccountProvider,
     link: Option<&AccountLink>,
 ) -> Result<impl View> {

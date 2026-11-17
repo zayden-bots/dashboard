@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{
     Attributes,
     Child,
@@ -88,6 +89,7 @@ pub const fn badge_variants(
 /// ```
 #[component]
 pub async fn badge(
+    cx: &Cx,
     #[default] variant: BadgeVariant,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,

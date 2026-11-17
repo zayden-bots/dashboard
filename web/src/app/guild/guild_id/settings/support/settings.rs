@@ -1,11 +1,11 @@
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::content::Form;
-use topcoat::router::{page, path_param, segment};
+use topcoat::router::{page, segment};
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::Pane;
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::app::guild::guild_id::settings::fields::{channels, forum_tags};
 use crate::app::guild::guild_id::settings::state::{Done, PageState, settle};
 use crate::app::guild::guild_id::settings::{
@@ -38,7 +38,7 @@ use crate::guild::support::{
     save_ticket_settings,
 };
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const TICKETS: Page = Page::Support(Pane::Tickets);
 const SUGGESTIONS: Page = Page::Support(Pane::Suggestions);
@@ -53,7 +53,7 @@ const IDLE_RANGE: Range = Range { min: 3_600, max: Some(2_592_000) };
 
 #[page]
 async fn tickets_page(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! { settings_page(guild_id: guild_id, page: TICKETS, state: &state) })
@@ -64,7 +64,7 @@ async fn save_tickets(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = TicketSettingsForm::from_pairs(pairs)?;
@@ -87,7 +87,7 @@ async fn save_tickets(
 
 #[page("./suggestions")]
 async fn suggestions_page(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! { settings_page(guild_id: guild_id, page: SUGGESTIONS, state: &state) })
@@ -98,7 +98,7 @@ async fn save_suggestions(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = SuggestionsSettingsForm::from_pairs(pairs)?;
@@ -121,7 +121,7 @@ async fn save_suggestions(
 
 #[page("./wiki")]
 async fn wiki_page(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! { settings_page(guild_id: guild_id, page: WIKI, state: &state) })
@@ -132,7 +132,7 @@ async fn save_wiki(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = WikiSettingsForm::from_pairs(pairs)?;
@@ -172,7 +172,7 @@ async fn save_key(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let message = key_change(&pairs);
     let values: Vec<(String, String)> =
         pairs.iter().filter(|(name, _)| name != "wiki_api_key").cloned().collect();
@@ -197,6 +197,7 @@ async fn save_key(
 
 #[component]
 pub(super) async fn tickets(
+    cx: &Cx,
     guild_id: &str,
     settings: &TicketsSection,
     lists: &Lists,
@@ -358,6 +359,7 @@ pub(super) async fn tickets(
 
 #[component]
 pub(super) async fn suggestions(
+    cx: &Cx,
     guild_id: &str,
     settings: &SuggestionsSection,
     lists: &Lists,
@@ -434,6 +436,7 @@ pub(super) async fn suggestions(
 
 #[component]
 pub(super) async fn wiki(
+    cx: &Cx,
     guild_id: &str,
     settings: &FaqSection,
     state: &PageState,

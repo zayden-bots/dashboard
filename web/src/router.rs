@@ -1,17 +1,16 @@
-use topcoat::cookie::RouterBuilderCookieExt;
+use topcoat::cookie::CookieLayer;
 use topcoat::font::RouterBuilderFontExt;
 use topcoat::router::RouterBuilder;
-use topcoat::runtime::{PrefetchMode, RouterBuilderRuntimeExt};
+use topcoat::runtime::{PrefetchMode, RuntimeLayer};
 
-use crate::app::{self, providers};
+use crate::app;
 use crate::font::GEIST;
 
 #[must_use]
 pub fn router() -> RouterBuilder {
     app::routes()
         .font(GEIST)
-        .origin_policy(providers::origin_policy())
-        .runtime()
-        .prefetch(PrefetchMode::Never)
-        .cookies()
+        .with(PrefetchMode::Never)
+        .layer(RuntimeLayer::new())
+        .layer(CookieLayer::new())
 }

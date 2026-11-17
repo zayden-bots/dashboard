@@ -1,5 +1,6 @@
 use greetings::MAX_MESSAGE_LEN;
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::{GreetingAction, MESSAGES, PAGE};
@@ -19,6 +20,7 @@ const LEGEND: &[(&str, &str)] = &[
 
 #[component]
 pub(super) async fn messages_section(
+    cx: &Cx,
     guild_id: &str,
     morning: &str,
     night: &str,

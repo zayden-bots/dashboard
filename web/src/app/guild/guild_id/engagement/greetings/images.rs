@@ -1,6 +1,7 @@
 use greetings::GreetingImage;
 use greetings::images::MAX_URL_LEN;
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, ViewExt, component, view};
 use url::Url;
 
@@ -23,6 +24,7 @@ const LINK_HELP: &str = "Links must start with https:// and point straight at an
 
 #[component]
 pub(super) async fn image_section(
+    cx: &Cx,
     guild_id: &str,
     morning: &[GreetingImageInfo],
     night: &[GreetingImageInfo],
@@ -71,6 +73,7 @@ pub(super) async fn image_section(
 
 #[component]
 async fn image_list(
+    cx: &Cx,
     guild_id: &str,
     kind: &str,
     title: &str,
@@ -152,6 +155,7 @@ fn host_of(url: &str) -> String {
 
 #[component]
 async fn image_card(
+    cx: &Cx,
     guild_id: &str,
     noun: &str,
     image: &GreetingImageInfo,

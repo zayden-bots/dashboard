@@ -43,6 +43,7 @@ pub(super) async fn servers(cx: &Cx) -> Result<impl View> {
 
 #[component]
 pub async fn servers_page(
+    cx: &Cx,
     guilds: std::result::Result<Vec<GuildCard>, AdminError>,
 ) -> Result<impl View> {
     let guilds = guilds

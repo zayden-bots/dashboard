@@ -21,7 +21,7 @@ pub(super) struct Banner {
 }
 
 #[component]
-pub(super) async fn banner(line: Option<&Banner>) -> Result<impl View> {
+pub(super) async fn banner(cx: &Cx, line: Option<&Banner>) -> Result<impl View> {
     Ok(view! {
         if let Some(line) = line {
             alert(
@@ -39,6 +39,7 @@ pub(super) async fn banner(line: Option<&Banner>) -> Result<impl View> {
 
 #[component]
 pub(super) async fn status_unknown(
+    cx: &Cx,
     provider: &str,
     reason: &str,
     advice: &str,

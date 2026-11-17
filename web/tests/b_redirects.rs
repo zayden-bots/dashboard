@@ -132,9 +132,8 @@ fn router() -> TestResult<Router> {
         .connect_lazy("postgres://127.0.0.1:1/unused")?;
     let app = Arc::new(ZaydenAppState::new(pool, &config));
     let state = WebState::new(app, &config)?;
-    let base = web::router()
-        .assets(AssetBundle::load_dir(bundle_dir()?)?)
-        .app_context(state);
+    let base =
+        web::router().assets(AssetBundle::load_dir(bundle_dir()?)?).with(state);
     Ok(base.build())
 }
 

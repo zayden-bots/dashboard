@@ -2,9 +2,10 @@ use std::error::Error;
 
 use http_body_util::BodyExt;
 use topcoat::Result as ViewResult;
+use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::{Body, Router, RouterBuilder, page};
-use topcoat::runtime::RouterBuilderRuntimeExt;
+use topcoat::runtime::RuntimeLayer;
 use topcoat::view::{View, view};
 use twilight_model::channel::ChannelType;
 use twilight_model::guild::Permissions;
@@ -142,7 +143,7 @@ const SVG_OPEN: &str = r#"<svg class="icon" viewBox="0 0 24 24" fill="none" stro
 const X: &str = r#"<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>"#;
 
 async fn render_raw(builder: RouterBuilder, path: &str) -> TestResult<String> {
-    let router = builder.runtime().build();
+    let router = builder.layer(RuntimeLayer::new()).build();
     let response = router.handle(Request::get(path).body(Body::empty())?).await;
     let bytes = response.into_body().collect().await?.to_bytes();
     Ok(String::from_utf8(bytes.to_vec())?)
@@ -196,7 +197,7 @@ fn options() -> Vec<SelectOption> {
 }
 
 #[page("/confirm/default")]
-async fn confirm_default() -> ViewResult<impl View> {
+async fn confirm_default(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         confirm_button(
             label: "Delete",
@@ -207,7 +208,7 @@ async fn confirm_default() -> ViewResult<impl View> {
 }
 
 #[page("/confirm/ghost")]
-async fn confirm_ghost() -> ViewResult<impl View> {
+async fn confirm_ghost(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         confirm_button(
             label: "Remove",
@@ -261,7 +262,7 @@ async fn confirm_button_class_styles_only_the_trigger() {
 }
 
 #[page("/confirm/named")]
-async fn confirm_named() -> ViewResult<impl View> {
+async fn confirm_named(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         confirm_button(
             label: "Remove",
@@ -297,7 +298,7 @@ async fn confirm_button_names_the_object_in_the_dialog_title() {
 }
 
 #[page("/confirm/dialog/form")]
-async fn confirm_dialog_form() -> ViewResult<impl View> {
+async fn confirm_dialog_form(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         confirm_dialog(
             trigger: "Remove",
@@ -332,12 +333,12 @@ async fn confirm_dialog_names_its_form_on_both_submits_and_omits_an_absent_descr
 }
 
 #[page("/skeleton/one")]
-async fn skeleton_one() -> ViewResult<impl View> {
+async fn skeleton_one(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { shape_skeleton(shape: SkeletonShape::Btn) })
 }
 
 #[page("/skeleton/grid")]
-async fn skeleton_grid() -> ViewResult<impl View> {
+async fn skeleton_grid(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         <div class="skeleton-grid">
             shape_skeleton(shape: SkeletonShape::Card, count: 6)
@@ -382,7 +383,7 @@ fn skeleton_shapes_map_to_their_classes() {
 }
 
 #[page("/icon/x")]
-async fn icon_x() -> ViewResult<impl View> {
+async fn icon_x(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { icon(name: Icon::X) })
 }
 
@@ -394,7 +395,7 @@ async fn icon_renders_inline_stroke_svg_hidden_from_assistive_tech() {
 }
 
 #[page("/icon/all")]
-async fn icon_all() -> ViewResult<impl View> {
+async fn icon_all(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         #[key(index)]
         for (index, name) in Icon::ALL.into_iter().enumerate() {
@@ -440,7 +441,7 @@ fn module_icons_and_tints_follow_the_module_id() {
 }
 
 #[page("/guild-grid")]
-async fn guild_grid_page() -> ViewResult<impl View> {
+async fn guild_grid_page(cx: &Cx) -> ViewResult<impl View> {
     let guilds = [
         GuildCard {
             id: "1".to_owned(),
@@ -483,7 +484,7 @@ async fn guild_grid_links_every_guild_to_its_overview() {
 }
 
 #[page("/select/known")]
-async fn select_known() -> ViewResult<impl View> {
+async fn select_known(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         select_row(
             form: "logs",
@@ -496,7 +497,7 @@ async fn select_known() -> ViewResult<impl View> {
 }
 
 #[page("/select/unset")]
-async fn select_unset() -> ViewResult<impl View> {
+async fn select_unset(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         select_row(
             form: "logs",
@@ -509,7 +510,7 @@ async fn select_unset() -> ViewResult<impl View> {
 }
 
 #[page("/select/unknown")]
-async fn select_unknown() -> ViewResult<impl View> {
+async fn select_unknown(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         select_row(
             form: "logs",
@@ -524,7 +525,7 @@ async fn select_unknown() -> ViewResult<impl View> {
 }
 
 #[page("/select/locked")]
-async fn select_locked() -> ViewResult<impl View> {
+async fn select_locked(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         select_row(
             form: "logs",
@@ -537,7 +538,7 @@ async fn select_locked() -> ViewResult<impl View> {
 }
 
 #[page("/select/locked-unset")]
-async fn select_locked_unset() -> ViewResult<impl View> {
+async fn select_locked_unset(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         select_row(
             form: "logs",
@@ -713,14 +714,14 @@ fn forum_tag_options_flatten_tags_under_their_forum() {
 }
 
 #[page("/toggle/on")]
-async fn toggle_on() -> ViewResult<impl View> {
+async fn toggle_on(cx: &Cx) -> ViewResult<impl View> {
     Ok(
         view! { toggle_row(form: "ai", name: "enabled", label: "Enabled", value: true) },
     )
 }
 
 #[page("/toggle/off")]
-async fn toggle_off() -> ViewResult<impl View> {
+async fn toggle_off(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         toggle_row(
             form: "patreon",
@@ -766,7 +767,7 @@ async fn toggle_row_takes_custom_labels() {
 }
 
 #[page("/text/numeric")]
-async fn text_numeric() -> ViewResult<impl View> {
+async fn text_numeric(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         text_row(
             form: "rr",
@@ -779,7 +780,7 @@ async fn text_numeric() -> ViewResult<impl View> {
 }
 
 #[page("/text/ranged")]
-async fn text_ranged() -> ViewResult<impl View> {
+async fn text_ranged(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         text_row(
             form: "music",

@@ -1,5 +1,6 @@
 use topcoat::Result;
 use topcoat::asset::Asset;
+use topcoat::context::Cx;
 use topcoat::view::{Unescaped, View, ViewExt, attributes, class, component, view};
 
 use super::index::{CatalogIndex, missing_emojis};
@@ -47,6 +48,7 @@ impl Lists {
 
 #[component]
 pub(super) async fn editor(
+    cx: &Cx,
     catalog: &LoadoutCatalog,
     form: &LoadoutForm,
     data: &str,
@@ -133,6 +135,7 @@ pub(super) async fn editor(
 
 #[component]
 async fn text_input(
+    cx: &Cx,
     id: &str,
     label: &str,
     value: &str,
@@ -157,7 +160,7 @@ async fn text_input(
 }
 
 #[component]
-async fn enum_icon(index: &CatalogIndex, label: &str) -> Result<impl View> {
+async fn enum_icon(cx: &Cx, index: &CatalogIndex, label: &str) -> Result<impl View> {
     Ok(view! {
         if let Some(src) = index.enum_image(label) {
             <img class="enum-icon" src=(src) alt="">
@@ -167,6 +170,7 @@ async fn enum_icon(index: &CatalogIndex, label: &str) -> Result<impl View> {
 
 #[component]
 async fn icon_choice(
+    cx: &Cx,
     label: &str,
     name: &str,
     value: &str,
@@ -207,6 +211,7 @@ async fn icon_choice(
 
 #[component]
 async fn slot_face(
+    cx: &Cx,
     key: &str,
     label: &str,
     diamond: bool,
@@ -266,6 +271,7 @@ async fn slot_face(
 
 #[component]
 async fn key_slot(
+    cx: &Cx,
     label: &str,
     value: &str,
     #[default] diamond: bool,
@@ -288,6 +294,7 @@ async fn key_slot(
 
 #[component]
 async fn key_slot_list(
+    cx: &Cx,
     label: &str,
     noun: &str,
     values: &[String],
@@ -342,6 +349,7 @@ async fn key_slot_list(
 
 #[component]
 async fn item_slot(
+    cx: &Cx,
     label: &str,
     name: &str,
     icon_url: &str,
@@ -384,6 +392,7 @@ async fn item_slot(
 
 #[component]
 async fn subclass_card(
+    cx: &Cx,
     form: &LoadoutForm,
     index: &CatalogIndex,
 ) -> Result<impl View> {
@@ -442,6 +451,7 @@ async fn subclass_card(
 
 #[component]
 async fn aspect_block(
+    cx: &Cx,
     row: &AspectForm,
     number: usize,
     list: usize,
@@ -484,6 +494,7 @@ async fn aspect_block(
 
 #[component]
 async fn gear_card(
+    cx: &Cx,
     form: &LoadoutForm,
     catalog: &LoadoutCatalog,
     index: &CatalogIndex,
@@ -534,6 +545,7 @@ async fn gear_card(
 
 #[component]
 async fn weapon_line(
+    cx: &Cx,
     row: &WeaponForm,
     catalog: &LoadoutCatalog,
     list: usize,
@@ -593,6 +605,7 @@ async fn weapon_line(
 
 #[component]
 async fn armour_line(
+    cx: &Cx,
     row: &ArmourForm,
     list: usize,
     index: &CatalogIndex,
@@ -632,6 +645,7 @@ async fn armour_line(
 
 #[component]
 async fn artifact_card(
+    cx: &Cx,
     form: &LoadoutForm,
     index: &CatalogIndex,
 ) -> Result<impl View> {
@@ -687,7 +701,11 @@ async fn artifact_card(
 }
 
 #[component]
-async fn stats_card(form: &LoadoutForm, index: &CatalogIndex) -> Result<impl View> {
+async fn stats_card(
+    cx: &Cx,
+    form: &LoadoutForm,
+    index: &CatalogIndex,
+) -> Result<impl View> {
     let lists = Lists::new(form);
 
     Ok(view! {
@@ -714,6 +732,7 @@ async fn stats_card(form: &LoadoutForm, index: &CatalogIndex) -> Result<impl Vie
 
 #[component]
 async fn stat_line(
+    cx: &Cx,
     row: &StatForm,
     position: usize,
     list: usize,
@@ -750,7 +769,7 @@ async fn stat_line(
 }
 
 #[component]
-async fn details_card(form: &LoadoutForm) -> Result<impl View> {
+async fn details_card(cx: &Cx, form: &LoadoutForm) -> Result<impl View> {
     Ok(view! {
         <section
             class="settings-section loadout-card"
@@ -795,7 +814,7 @@ async fn details_card(form: &LoadoutForm) -> Result<impl View> {
 }
 
 #[component]
-async fn tag_field(tags: &[String]) -> Result<impl View> {
+async fn tag_field(cx: &Cx, tags: &[String]) -> Result<impl View> {
     let full = tags.len() >= MAX_TAGS;
 
     Ok(view! {

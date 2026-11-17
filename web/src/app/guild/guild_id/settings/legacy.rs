@@ -5,20 +5,20 @@ use topcoat::router::request::uri;
 use topcoat::router::{page, path_param, segment};
 use topcoat::view::{View, view};
 
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::flash::{self, FlashKind};
 use crate::nav;
 
 path_param!(section);
 
-segment!(rename = "settings");
+segment!(rename: "settings");
 
 pub const NOT_SAVED: &str = "This page was updated and your change was not \
                              saved. Please try again.";
 
 fn target(cx: &Cx) -> String {
-    let guild_id: &str = path_param::<GuildId>(cx);
-    let slug: &str = path_param::<Section>(cx);
+    let guild_id: &str = guild_id(cx);
+    let slug: &str = section(cx);
     nav::legacy_href(guild_id, slug)
 }
 

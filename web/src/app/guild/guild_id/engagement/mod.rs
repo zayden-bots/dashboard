@@ -7,7 +7,7 @@ mod levels;
 mod reaction_roles;
 mod state;
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 pub const LEVELS_TITLE: &str = "Levels - Zayden Dashboard";
 pub const REACTION_ROLES_TITLE: &str = "Reaction roles - Zayden Dashboard";

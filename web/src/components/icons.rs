@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{Unescaped, View, component, view};
 
 macro_rules! glyph {
@@ -154,7 +155,7 @@ impl Icon {
 }
 
 #[component]
-pub async fn icon(name: Icon) -> Result<impl View> {
+pub async fn icon(cx: &Cx, name: Icon) -> Result<impl View> {
     Ok(view! {
         <svg
             class="icon"

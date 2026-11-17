@@ -8,10 +8,11 @@ use secrecy::SecretString;
 use sqlx::postgres::PgPoolOptions;
 use topcoat::Result as ViewResult;
 use topcoat::asset::{AssetBundle, RouterBuilderAssetExt};
+use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::response::Response;
 use topcoat::router::{Body, Router, RouterBuilder, StatusCode, header, page};
-use topcoat::runtime::RouterBuilderRuntimeExt;
+use topcoat::runtime::RuntimeLayer;
 use topcoat::view::{View, view};
 use web::app::public::layout::{SessionSlot, public_nav};
 use web::auth::SessionUser;
@@ -152,7 +153,7 @@ fn builder() -> TestResult<RouterBuilder> {
 fn app(state: Option<WebState>) -> TestResult<Router> {
     let base = web::router().assets(AssetBundle::load_dir(bundle_dir()?)?);
     let base = match state {
-        Some(state) => base.app_context(state),
+        Some(state) => base.with(state),
         None => base,
     };
     Ok(base.build())
@@ -246,22 +247,22 @@ fn count(html: &str, needle: &str) -> usize {
 }
 
 #[page("/nav/signed-out")]
-async fn nav_signed_out() -> ViewResult<impl View> {
+async fn nav_signed_out(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { public_nav(session: SessionSlot::SignedOut) })
 }
 
 #[page("/nav/unavailable")]
-async fn nav_unavailable() -> ViewResult<impl View> {
+async fn nav_unavailable(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { public_nav(session: SessionSlot::Unavailable) })
 }
 
 #[page("/nav/signed-in")]
-async fn nav_signed_in() -> ViewResult<impl View> {
+async fn nav_signed_in(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { public_nav(session: SessionSlot::SignedIn) })
 }
 
 async fn nav_html(builder: RouterBuilder, path: &str) -> TestResult<String> {
-    let router = builder.runtime().build();
+    let router = builder.layer(RuntimeLayer::new()).build();
     let response = router.handle(Request::get(path).body(Body::empty())?).await;
     body_text(response).await
 }

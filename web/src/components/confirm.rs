@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 use super::button::ButtonVariant;
@@ -11,6 +12,7 @@ use super::confirm_dialog::confirm_dialog;
 
 #[component]
 pub async fn confirm_button(
+    cx: &Cx,
     label: &str,
     prompt: &str,
     confirm: &str,

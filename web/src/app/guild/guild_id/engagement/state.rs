@@ -1,5 +1,5 @@
 use topcoat::Result;
-use topcoat::context::{Cx, try_request_context};
+use topcoat::context::{Cx, try_context};
 use topcoat::router::error::{rewrite, see_other};
 use topcoat::router::request::headers;
 use topcoat::router::{Body, Method, StatusCode, header};
@@ -16,7 +16,7 @@ pub(super) struct PageState {
 
 impl PageState {
     pub(super) fn load(cx: &Cx) -> Self {
-        try_request_context::<Failure>(cx).map_or_else(
+        try_context::<Failure>(cx).map_or_else(
             || Self { notice: take(cx), failure: None },
             |failure| Self::failed(failure.clone()),
         )

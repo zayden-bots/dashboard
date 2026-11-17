@@ -44,6 +44,7 @@ struct RoleRow {
 
 #[component]
 pub(super) async fn ping_roles_section(
+    cx: &Cx,
     guild_id: &str,
     page: Page,
     configured: &[String],

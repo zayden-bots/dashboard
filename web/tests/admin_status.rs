@@ -208,7 +208,7 @@ async fn harness(pool: &PgPool) -> TestResult<Router> {
 
     Ok(web::router()
         .assets(AssetBundle::load_dir(bundle_dir()?)?)
-        .app_context(state)
+        .with(state)
         .build())
 }
 

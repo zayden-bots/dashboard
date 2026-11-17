@@ -5,6 +5,7 @@ use std::sync::OnceLock;
 use http_body_util::BodyExt;
 use topcoat::Result as ViewResult;
 use topcoat::asset::{AssetBundle, RouterBuilderAssetExt};
+use topcoat::context::Cx;
 use topcoat::router::error::not_found;
 use topcoat::router::request::Request;
 use topcoat::router::response::Response;
@@ -35,7 +36,7 @@ const FOOTER: &str =
 type TestResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 
 #[page("/test/missing-record")]
-async fn missing_record() -> ViewResult<impl View> {
+async fn missing_record(cx: &Cx) -> ViewResult<impl View> {
     Err::<(), _>(not_found())?;
     Ok(view! { <p>"found"</p> })
 }

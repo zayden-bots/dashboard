@@ -180,7 +180,7 @@ serde = { version = "*", default-features = false }
 serde_json = { version = "*", default-features = false }
 
 # -- Dates and times
-jiff = { version = "*", default-features = false }
+jiff = { version = "1", default-features = false }
 jiff-sqlx = { version = "*", default-features = false }
 
 # -- CLI and configuration
@@ -222,7 +222,7 @@ sha2 = { version = "*", default-features = false }
 secrecy = { version = "*", default-features = false }
 
 # -- Frontend (Topcoat)
-topcoat = { version = "0.11", default-features = false }
+topcoat = { version = "0.12", default-features = false }
 
 # ── Testing and benchmarking ─────────────────────────────────────────────────
 http-body-util = { version = "*", default-features = false }

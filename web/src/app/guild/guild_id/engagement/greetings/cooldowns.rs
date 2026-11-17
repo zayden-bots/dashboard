@@ -1,4 +1,5 @@
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, ViewExt, component, view};
 use zayden_app::config::GreetingsSettingsRow;
 
@@ -24,6 +25,7 @@ const fn bounds(floor: i32) -> Range {
 
 #[component]
 pub(super) async fn cooldown_section(
+    cx: &Cx,
     guild_id: &str,
     cooldowns: CooldownView,
     state: &PageState,

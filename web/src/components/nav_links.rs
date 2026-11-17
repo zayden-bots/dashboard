@@ -164,6 +164,7 @@ pub async fn nav_links(
 
 #[component]
 async fn nav_group(
+    cx: &Cx,
     prefix: &str,
     label: &str,
     guild_id: &str,

@@ -215,6 +215,7 @@ async fn save_selected(
 
 #[component]
 pub(super) async fn deadlock_section(
+    cx: &Cx,
     prefs: Option<&DeadlockPrefs>,
 ) -> Result<impl View> {
     Ok(view! {

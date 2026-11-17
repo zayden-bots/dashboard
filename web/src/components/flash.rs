@@ -4,13 +4,14 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 use super::icons::{Icon, icon};
 use crate::flash::{Flash, FlashKind};
 
 #[component]
-pub async fn flash_message(notice: &Flash) -> Result<impl View> {
+pub async fn flash_message(cx: &Cx, notice: &Flash) -> Result<impl View> {
     let (class, mark) = match notice.kind {
         FlashKind::Success => ("flash flash-success", Icon::Check),
         FlashKind::Error => ("flash flash-error", Icon::X),
@@ -25,7 +26,7 @@ pub async fn flash_message(notice: &Flash) -> Result<impl View> {
 }
 
 #[component]
-pub async fn flash(#[default] notice: Option<&Flash>) -> Result<impl View> {
+pub async fn flash(cx: &Cx, #[default] notice: Option<&Flash>) -> Result<impl View> {
     Ok(view! {
         <div class="flash-region" role="status">
             if let Some(notice) = notice {

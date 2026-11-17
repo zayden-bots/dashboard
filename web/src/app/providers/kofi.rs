@@ -7,7 +7,7 @@ use topcoat::context::Cx;
 use topcoat::router::content::Json;
 use topcoat::router::request::Bytes;
 use topcoat::router::response::Response;
-use topcoat::router::{route, segment};
+use topcoat::router::{OriginPolicy, route, segment};
 use tracing::warn;
 use zayden_app::entitlement::{
     EntitlementProvider,
@@ -25,9 +25,9 @@ use super::reply::{acknowledge, reject};
 use crate::auth::{app_state, web_state};
 use crate::util::email_hash;
 
-segment!(kind = Group);
+segment!(kind: Group);
 
-#[route(POST "./webhooks/kofi")]
+#[route(POST "./webhooks/kofi", with(OriginPolicy::dangerous_disable()))]
 pub(super) async fn kofi_webhook_handler(cx: &Cx, body: Bytes) -> Result<Response> {
     let [data] = match fields::form(cx, &body, ["data"]) {
         Ok(fields) => fields,

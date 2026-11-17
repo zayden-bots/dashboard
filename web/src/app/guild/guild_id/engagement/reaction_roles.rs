@@ -9,7 +9,7 @@ use super::action::{FormAction, form_action, not_saved, page_href};
 use super::fields::{load_error, load_problem};
 use super::header::page_header;
 use super::state::{Done, PageState, rerender, settle};
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::auth::{ChannelInfo, RoleInfo};
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 use crate::components::confirm_dialog::confirm_dialog;
@@ -93,7 +93,7 @@ pub(super) fn action_names() -> Vec<&'static str> {
 
 #[page]
 pub(super) async fn show(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! {
@@ -105,7 +105,7 @@ pub(super) async fn show(cx: &Cx) -> Result<impl View> {
 /// A post from before the action paths: nothing is applied.
 #[page(POST)]
 pub(super) async fn legacy_submit(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     not_saved(cx, guild_id, PAGE)?;
     Ok(view! { "" })
 }
@@ -115,8 +115,8 @@ pub(super) async fn submit(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
-    let Some(action) = RoleAction::find(path_param::<Action>(cx)) else {
+    let guild_id: &str = guild_id(cx);
+    let Some(action) = RoleAction::find(action(cx)) else {
         return Err(not_found().into());
     };
 
@@ -199,6 +199,7 @@ async fn reaction_roles_page(
 
 #[component]
 async fn add_section(
+    cx: &Cx,
     guild_id: &str,
     page: &ReactionRolesPage,
     state: &PageState,
@@ -292,6 +293,7 @@ async fn add_section(
 
 #[component]
 async fn list_section(
+    cx: &Cx,
     guild_id: &str,
     page: &ReactionRolesPage,
     state: &PageState,
@@ -346,6 +348,7 @@ fn custom_emoji_name(emoji: &str) -> Option<&str> {
 
 #[component]
 async fn mapping_row(
+    cx: &Cx,
     guild_id: &str,
     mapping: &ReactionRoleInfo,
     channels: &[ChannelInfo],

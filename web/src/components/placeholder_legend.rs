@@ -4,10 +4,14 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 #[component]
-pub async fn placeholder_legend(entries: &[(&str, &str)]) -> Result<impl View> {
+pub async fn placeholder_legend(
+    cx: &Cx,
+    entries: &[(&str, &str)],
+) -> Result<impl View> {
     Ok(view! {
         <ul class="placeholder-legend">
             #[key(*token)]

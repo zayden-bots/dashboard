@@ -1,22 +1,22 @@
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::error::not_found;
-use topcoat::router::{StatusCode, page, path_param, segment};
+use topcoat::router::{StatusCode, page, segment};
 use topcoat::view::{View, view};
 
-use super::GuildId;
+use super::guild_id;
 use crate::components::error_panel::{ErrorAction, error_panel};
 use crate::guild::list_manageable_guilds;
 use crate::nav::path_segment;
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const MESSAGE: &str = "There is no page at this address in this server. The link may \
                        have a typo, or the page may have moved.";
 
 #[page("./{*rest}")]
 pub(super) async fn guild_not_found(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let guilds = match list_manageable_guilds(cx).await {
         Ok(guilds) => guilds,
         Err(error) => {

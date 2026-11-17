@@ -1,11 +1,11 @@
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::content::Form;
-use topcoat::router::{page, path_param};
+use topcoat::router::page;
 use topcoat::view::{View, ViewExt, attributes, component, view};
 
 use super::Pane;
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::app::guild::guild_id::settings::fields::roles as role_choices;
 use crate::app::guild::guild_id::settings::state::{
     Done,
@@ -51,7 +51,7 @@ const REMOVE_LINK: &str = "remove-link";
 
 #[page]
 async fn roles_page(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
@@ -65,7 +65,7 @@ fn act(
     values: Vec<(String, String)>,
     result: std::result::Result<(), GuildError>,
 ) -> Result<Failure> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     settle(cx, form, values, result, &Done {
         page: PAGE.href(guild_id),
         section: Some(section),
@@ -78,7 +78,7 @@ async fn add_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = SupportRoleForm::from_pairs(pairs)?;
@@ -101,7 +101,7 @@ async fn remove_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = SupportRoleForm::from_pairs(pairs)?;
@@ -130,7 +130,7 @@ async fn add_link(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = AddHelperLinkForm::from_pairs(pairs)?;
@@ -153,7 +153,7 @@ async fn remove_link(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = RemoveHelperLinkForm::from_pairs(pairs)?;
@@ -178,6 +178,7 @@ struct RoleRow {
 
 #[component]
 pub(super) async fn pane(
+    cx: &Cx,
     guild_id: &str,
     settings: &SupportRolesSection,
     lists: &Lists,
@@ -201,6 +202,7 @@ pub(super) async fn pane(
 
 #[component]
 async fn roles_section(
+    cx: &Cx,
     guild_id: &str,
     support_roles: &std::result::Result<Vec<String>, String>,
     lists: &Lists,
@@ -341,6 +343,7 @@ async fn roles_section(
 
 #[component]
 async fn links_section(
+    cx: &Cx,
     guild_id: &str,
     helper_links: &std::result::Result<Vec<HelperLinkInfo>, String>,
     state: &PageState,

@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{Attributes, Child, StaticClass, View, class, component, view};
 
 /// Classes that align label content and reflect the disabled state of a nearby or
@@ -33,6 +34,7 @@ const LABEL: StaticClass = class!(
 /// ```
 #[component]
 pub async fn label(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {

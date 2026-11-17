@@ -6,7 +6,7 @@ use topcoat::runtime::{link_attrs, prefetch_mode};
 use topcoat::view::{View, ViewExt, component, suspense, view};
 
 use super::Pane;
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::app::guild::guild_id::settings::faq::{
     ArticleError,
     ArticleForm,
@@ -70,7 +70,7 @@ fn article_failure(
 
 #[page]
 async fn article_index(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! {
@@ -161,7 +161,7 @@ async fn article_list(cx: &Cx, guild_id: &str) -> Result<impl View> {
 }
 
 #[component]
-async fn source(article: &FaqArticleInfo) -> Result<impl View> {
+async fn source(cx: &Cx, article: &FaqArticleInfo) -> Result<impl View> {
     Ok(view! {
         match (article.generated, article.source_thread_id.as_deref()) {
             (true, Some(thread)) => (format!("Solved ticket, thread {thread}")),
@@ -173,7 +173,7 @@ async fn source(article: &FaqArticleInfo) -> Result<impl View> {
 
 #[page("./new")]
 async fn new_article_page(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! {
@@ -191,7 +191,7 @@ async fn create_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let (result, missing) = save(cx, guild_id, pairs, None).await;
     let failure = match result {
@@ -234,12 +234,12 @@ async fn save(
 }
 
 fn requested_id(cx: &Cx) -> Option<i32> {
-    parse_article_id(path_param::<ArticleId>(cx))
+    parse_article_id(article_id(cx))
 }
 
 #[page("./{article_id}")]
 async fn edit_article(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let id = requested_id(cx);
     let state = PageState::load(cx);
 
@@ -258,7 +258,7 @@ async fn update_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let id = requested_id(cx);
     let values = pairs.clone();
     let (result, missing) = match id {
@@ -293,7 +293,7 @@ async fn delete_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let id = requested_id(cx);
     let values = pairs.clone();
     let result = async {
@@ -388,6 +388,7 @@ async fn article_editor(
 
 #[component]
 async fn article_form(
+    cx: &Cx,
     guild_id: &str,
     article: Option<&FaqArticleInfo>,
     state: &PageState,
@@ -481,6 +482,7 @@ async fn article_form(
 
 #[component]
 async fn delete_section(
+    cx: &Cx,
     guild_id: &str,
     article: &FaqArticleInfo,
     state: &PageState,

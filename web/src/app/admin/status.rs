@@ -37,6 +37,7 @@ pub(super) async fn status(cx: &Cx) -> Result<impl View> {
 
 #[component]
 pub async fn status_page(
+    cx: &Cx,
     rows: std::result::Result<Vec<ProcessView>, AdminError>,
 ) -> Result<impl View> {
     Ok(view! {

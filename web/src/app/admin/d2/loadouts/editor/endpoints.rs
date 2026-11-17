@@ -8,7 +8,7 @@ use crate::admin::dto::{EmojiInfo, EmojiSource, LoadoutCheck, LoadoutForm};
 use crate::admin::{check_loadout, create_zayden_emoji, save_loadout};
 use crate::util::server_error_text;
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

@@ -1,6 +1,6 @@
 use topcoat::Result;
 use topcoat::context::Cx;
-use topcoat::router::{page, path_param};
+use topcoat::router::page;
 use topcoat::runtime::{PrefetchMode, link_attrs};
 use topcoat::view::{View, ViewExt, attributes, component, suspense, view};
 
@@ -8,7 +8,7 @@ use super::action::path_segment;
 use super::fields::{load_error, load_problem};
 use super::header::page_header;
 use super::state::PageState;
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::components::data_table::{data_cell, data_row, data_table};
 use crate::components::empty_state::empty_state;
 use crate::components::flash::flash;
@@ -29,7 +29,7 @@ const COLUMNS: &[&str] = &["Rank", "Member", "Level", "XP", "Messages"];
 
 #[page]
 pub(super) async fn levels(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let board = LeaderboardView::from_request(cx);
     let state = PageState::load(cx);
 
@@ -38,6 +38,7 @@ pub(super) async fn levels(cx: &Cx) -> Result<impl View> {
 
 #[component]
 async fn levels_page(
+    cx: &Cx,
     guild_id: &str,
     board: LeaderboardView,
     state: &PageState,
@@ -157,7 +158,7 @@ async fn leaderboard(
 }
 
 #[component]
-async fn entry_row(entry: &LeaderboardEntry) -> Result<impl View> {
+async fn entry_row(cx: &Cx, entry: &LeaderboardEntry) -> Result<impl View> {
     Ok(view! {
         data_row(
             data_cell(label: "Rank", numeric: true, (entry.rank))

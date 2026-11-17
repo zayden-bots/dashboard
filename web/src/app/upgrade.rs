@@ -93,6 +93,7 @@ async fn link(
 
 #[component]
 async fn upgrade_page(
+    cx: &Cx,
     #[default] notice: Option<&Flash>,
     #[default] failure: Option<KofiFailure>,
 ) -> Result<impl View> {
@@ -126,7 +127,7 @@ async fn upgrade_page(
 }
 
 #[component]
-async fn pro_features() -> Result<impl View> {
+async fn pro_features(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <ul
             class="list-none m-0 mb-8 p-0 grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4"
@@ -161,6 +162,7 @@ async fn pro_features() -> Result<impl View> {
 
 #[component]
 async fn kofi_form(
+    cx: &Cx,
     notice: Option<&Flash>,
     failure: Option<&KofiFailure>,
 ) -> Result<impl View> {

@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{Attributes, Child, StaticClass, View, class, component, view};
 
 /// Classes for a textarea that grows with its content. Browsers without content
@@ -31,6 +32,7 @@ const TEXTAREA: StaticClass = class!(
 /// ```
 #[component]
 pub async fn textarea(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {

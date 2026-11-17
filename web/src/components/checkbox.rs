@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::icon::icon;
 use topcoat::view::{
     Attributes,
@@ -43,7 +44,10 @@ const CHECKBOX: StaticClass = class!(
 /// }
 /// ```
 #[component]
-pub async fn checkbox(#[default] mut attrs: Attributes) -> Result<impl View> {
+pub async fn checkbox(
+    cx: &Cx,
+    #[default] mut attrs: Attributes,
+) -> Result<impl View> {
     // The checkmark cannot be drawn by the `<input>` itself, which renders no
     // children or pseudo-elements: it is a sibling icon overlaid on the
     // control, revealed by the input's `peer` state while checked.

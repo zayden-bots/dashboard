@@ -2,7 +2,7 @@ use ::patreon::embeds::PLACEHOLDERS;
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::content::Form;
-use topcoat::router::{page, path_param};
+use topcoat::router::page;
 use topcoat::view::{View, ViewExt, component, view};
 use zayden_app::delivery::DeliveryKind;
 
@@ -16,7 +16,7 @@ use super::fields::channels;
 use super::provider::{Banner, banner, query_value, status_unknown};
 use super::state::{Done, PageState, settle};
 use super::{Lists, Page, TEXT_KINDS, ensure_path_guild, settings_page};
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 use crate::components::confirm::confirm_button;
 use crate::components::delivery::delivery_fields;
@@ -48,7 +48,7 @@ const DISCONNECT: &str = "patreon-disconnect";
 
 #[page]
 async fn patreon(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
@@ -59,7 +59,7 @@ async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = save_settings(cx, guild_id, pairs).await;
     let failure = settle(cx, FORM, values, result, &Done {
@@ -80,7 +80,7 @@ async fn disconnect(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = drop_connection(cx, guild_id, pairs).await;
     let failure = settle(cx, DISCONNECT, values, result, &Done {
@@ -101,7 +101,7 @@ async fn add_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = PingRoleForm::from_pairs(pairs)?;
@@ -122,7 +122,7 @@ async fn remove_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = async {
         let form = PingRoleForm::from_pairs(pairs)?;

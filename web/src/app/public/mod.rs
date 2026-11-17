@@ -7,7 +7,7 @@ mod login;
 mod privacy;
 mod terms;
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 pub const LANDING_TITLE: &str = "Zayden — the all-in-one Discord bot";
 pub const LOGIN_TITLE: &str = "Sign In - Zayden Dashboard";

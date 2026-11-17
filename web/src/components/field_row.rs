@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{Child, View, attributes, component, view};
 
 use super::alert::{AlertVariant, alert, alert_title};
@@ -36,6 +37,7 @@ pub struct Range {
 
 #[component]
 pub async fn field_row(
+    cx: &Cx,
     id: &str,
     label: &str,
     #[default] help: Option<&str>,
@@ -60,6 +62,7 @@ pub async fn field_row(
 
 #[component]
 pub async fn text_row(
+    cx: &Cx,
     form: &str,
     name: &str,
     label: &str,
@@ -112,6 +115,7 @@ pub async fn text_row(
 
 #[component]
 pub async fn textarea_row(
+    cx: &Cx,
     form: &str,
     name: &str,
     label: &str,
@@ -146,6 +150,7 @@ pub async fn textarea_row(
 
 #[component]
 pub async fn select_row(
+    cx: &Cx,
     form: &str,
     name: &str,
     label: &str,
@@ -227,6 +232,7 @@ pub async fn select_row(
 
 #[component]
 pub async fn toggle_row(
+    cx: &Cx,
     form: &str,
     name: &str,
     label: &str,
@@ -260,6 +266,7 @@ pub async fn toggle_row(
 
 #[component]
 pub async fn form_summary(
+    cx: &Cx,
     form: &str,
     message: &str,
     #[default("Not saved")] outcome: &str,

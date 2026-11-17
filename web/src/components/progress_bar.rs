@@ -4,10 +4,11 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 #[component]
-pub async fn progress_bar() -> Result<impl View> {
+pub async fn progress_bar(cx: &Cx) -> Result<impl View> {
     let bar = view! {
         <div class="nav-progress" data-nav-progress="" aria-hidden="true"></div>
     };

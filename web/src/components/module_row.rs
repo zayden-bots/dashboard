@@ -138,6 +138,7 @@ pub async fn module_row(
 
 #[component]
 pub async fn module_group(
+    cx: &Cx,
     title: &str,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {

@@ -5,14 +5,14 @@ mod settings;
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::content::Form;
-use topcoat::router::{page, path_param};
+use topcoat::router::page;
 use topcoat::runtime::{PrefetchMode, link_attrs};
 use topcoat::view::{View, ViewExt, attributes, component, view};
 
 use super::header::switch_module;
 use super::state::PageState;
 use super::{Lists, Page, settings_page};
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::components::tabs::{tabs_list, tabs_trigger};
 use crate::guild::dto::SupportSection;
 
@@ -57,7 +57,7 @@ async fn switch(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let page = Page::Support(Pane::Tickets);
     let state = PageState::failed(switch_module(cx, guild_id, page, pairs).await?);
 
@@ -96,6 +96,7 @@ pub(super) async fn subnav(
 
 #[component]
 pub(super) async fn tab(
+    cx: &Cx,
     guild_id: &str,
     settings: &SupportSection,
     lists: &Lists,

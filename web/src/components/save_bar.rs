@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 use super::button::{ButtonSize, ButtonVariant, button_variants};
@@ -12,6 +13,7 @@ use crate::flash::Flash;
 
 #[component]
 pub async fn save_bar(
+    cx: &Cx,
     #[default("Save changes")] label: &str,
     #[default] notice: Option<&Flash>,
 ) -> Result<impl View> {

@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 use zayden_app::modules::{self, Backing};
 
@@ -23,6 +24,7 @@ fn module_control(module: &ModuleView) -> ModuleControl {
 
 #[component]
 pub async fn module_card(
+    cx: &Cx,
     module: &ModuleView,
     guild_id: &str,
     #[default] error: Option<&str>,

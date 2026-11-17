@@ -7,6 +7,11 @@
 //! never sent. Each `#[sqlx::test]` builds one full app state and runs its
 //! scenarios in sequence, with a database pool of three connections.
 
+#![expect(
+    clippy::empty_enums,
+    reason = "path_param! expands to a variantless marker enum"
+)]
+
 use std::error::Error;
 use std::fmt::Write as _;
 use std::io::{BufRead, BufReader, Read, Write};
@@ -398,9 +403,8 @@ fn web_state(pool: PgPool) -> TestResult<(WebState, Discord, Arc<ZaydenAppState>
 
 fn harness_without_database(pool: PgPool) -> TestResult<Harness> {
     let (state, discord, app) = web_state(pool.clone())?;
-    let base = web::router()
-        .assets(AssetBundle::load_dir(bundle_dir()?)?)
-        .app_context(state);
+    let base =
+        web::router().assets(AssetBundle::load_dir(bundle_dir()?)?).with(state);
 
     Ok(Harness { router: base.build(), pool, discord, app })
 }
@@ -449,9 +453,8 @@ async fn harness(
     .execute(&pool)
     .await?;
 
-    let base = web::router()
-        .assets(AssetBundle::load_dir(bundle_dir()?)?)
-        .app_context(state);
+    let base =
+        web::router().assets(AssetBundle::load_dir(bundle_dir()?)?).with(state);
 
     Ok(Harness { router: extra(base).build(), pool, discord, app })
 }
@@ -2474,7 +2477,7 @@ path_param!(variant);
 
 #[page("/test/channels/{variant}")]
 async fn channel_variants(cx: &Cx) -> ViewResult<impl View> {
-    let variant: &str = path_param::<Variant>(cx);
+    let variant: &str = variant(cx);
     let channels = [
         ChannelInfo {
             id: "21".to_owned(),

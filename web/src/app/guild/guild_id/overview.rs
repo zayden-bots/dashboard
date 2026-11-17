@@ -2,13 +2,13 @@ use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::content::Form;
 use topcoat::router::error::see_other;
-use topcoat::router::{StatusCode, page, path_param, segment};
+use topcoat::router::{StatusCode, page, segment};
 use topcoat::runtime::{link_attrs, prefetch_mode};
 use topcoat::view::{View, ViewExt, attributes, component, view};
 use zayden_app::applications::{AppKind, Slot as Seat};
 use zayden_app::modules;
 
-use super::GuildId;
+use super::guild_id;
 use crate::auth::{AuthError, app_state};
 use crate::components::alert::{
     AlertVariant,
@@ -37,7 +37,7 @@ use crate::nav::{self, path_segment};
 use crate::shell::module_card;
 use crate::util::server_error_text;
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const LEAD: &str = "Turn modules on or off for this server. A module that's off \
                     has its commands removed from the server.";
@@ -97,7 +97,7 @@ struct ToggleFailure {
 
 #[page]
 pub(super) async fn guild_overview(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let notice = take_flash(cx);
     let slot = seat::selected_slot(cx);
     let loaded = load(cx, guild_id, slot).await?;
@@ -112,7 +112,7 @@ pub(super) async fn toggle_module(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let module_id = pairs
         .iter()
         .find(|(name, _)| name == "module_id")
@@ -375,6 +375,7 @@ async fn overview(
 
 #[component]
 async fn bot_tabs(
+    cx: &Cx,
     guild_id: &str,
     seats: &[SeatView],
     current: Seat,
@@ -385,9 +386,7 @@ async fn bot_tabs(
             for seat in seats {
                 tabs_trigger(
                     active: seat.slot == current,
-                    attrs: attributes! {
-                        href=(seat::overview_href(guild_id, seat.slot))
-                    },
+                    attrs: attributes! { href=(seat::overview_href(guild_id, seat.slot)) },
                     if let Some(url) = seat.avatar_url.as_deref() {
                         <img src=(url) alt="" class="size-5 rounded-full">
                     }
@@ -407,6 +406,7 @@ async fn bot_tabs(
 
 #[component]
 async fn absent_alert(
+    cx: &Cx,
     guild_id: &str,
     seats: &[SeatView],
     current: Seat,
@@ -448,7 +448,7 @@ async fn absent_alert(
 }
 
 #[component]
-async fn overlap_alert(overlaps: &[Overlap]) -> Result<impl View> {
+async fn overlap_alert(cx: &Cx, overlaps: &[Overlap]) -> Result<impl View> {
     let lines: Vec<String> = overlaps
         .iter()
         .map(|overlap| {
@@ -478,6 +478,7 @@ async fn overlap_alert(overlaps: &[Overlap]) -> Result<impl View> {
 
 #[component]
 async fn rack(
+    cx: &Cx,
     guild_id: &str,
     modules: &[ModuleView],
     notice: Option<&Flash>,

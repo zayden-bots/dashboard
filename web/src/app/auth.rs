@@ -22,7 +22,7 @@ use crate::auth::{
     web_state,
 };
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const OAUTH_STATE_TTL: std::time::Duration = std::time::Duration::from_mins(10);
 const AUTH_FAILED_PATH: &str = "/login?error=auth_failed";

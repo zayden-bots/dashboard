@@ -1,7 +1,7 @@
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::content::Form;
-use topcoat::router::{page, path_param, segment};
+use topcoat::router::{page, segment};
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::fields::{channels, roles};
@@ -14,21 +14,21 @@ use super::{
     ensure_path_guild,
     settings_page,
 };
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::components::field_row::{form_summary, select_row};
 use crate::components::save_bar::save_bar;
 use crate::guild::GuildError;
 use crate::guild::dto::GeneralSection;
 use crate::guild::settings::{ServerSettingsForm, save_server_settings};
 
-segment!(rename = "settings");
+segment!(rename: "settings");
 
 const PAGE: Page = Page::Server;
 const FORM: &str = "server-settings";
 
 #[page]
 async fn server_settings(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
@@ -39,7 +39,7 @@ async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = save_server(cx, guild_id, pairs).await;
     let failure = settle(cx, FORM, values, result, &Done {
@@ -67,6 +67,7 @@ async fn save_server(
 
 #[component]
 pub(super) async fn tab(
+    cx: &Cx,
     guild_id: &str,
     settings: &GeneralSection,
     lists: &Lists,

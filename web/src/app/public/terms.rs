@@ -1,4 +1,5 @@
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::router::page;
 use topcoat::view::{View, component, view};
 
@@ -20,7 +21,7 @@ const CONTENTS: &[(&str, &str)] = &[
 ];
 
 #[page]
-pub(crate) async fn terms() -> Result<impl View> {
+pub(crate) async fn terms(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         legal_document(
             title: "Terms of Service",
@@ -40,7 +41,7 @@ pub(crate) async fn terms() -> Result<impl View> {
 }
 
 #[component]
-async fn acceptance() -> Result<impl View> {
+async fn acceptance(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="acceptance">
             <h2>"Acceptance"</h2>
@@ -70,7 +71,7 @@ async fn acceptance() -> Result<impl View> {
 }
 
 #[component]
-async fn compliance() -> Result<impl View> {
+async fn compliance(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="discord">
             <h2>"Discord's rules"</h2>
@@ -86,7 +87,7 @@ async fn compliance() -> Result<impl View> {
 }
 
 #[component]
-async fn acceptable_use() -> Result<impl View> {
+async fn acceptable_use(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="acceptable-use">
             <h2>"Acceptable use"</h2>
@@ -108,7 +109,7 @@ async fn acceptable_use() -> Result<impl View> {
 }
 
 #[component]
-async fn server_admins() -> Result<impl View> {
+async fn server_admins(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="server-admins">
             <h2>"Server admins"</h2>
@@ -123,7 +124,7 @@ async fn server_admins() -> Result<impl View> {
 }
 
 #[component]
-async fn paid_features() -> Result<impl View> {
+async fn paid_features(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="paid-features">
             <h2>"Paid features"</h2>
@@ -166,7 +167,7 @@ async fn paid_features() -> Result<impl View> {
 }
 
 #[component]
-async fn warranty() -> Result<impl View> {
+async fn warranty(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="warranty">
             <h2>"No warranty and limited liability"</h2>
@@ -187,7 +188,7 @@ async fn warranty() -> Result<impl View> {
 }
 
 #[component]
-async fn termination() -> Result<impl View> {
+async fn termination(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="termination">
             <h2>"Termination"</h2>
@@ -202,7 +203,7 @@ async fn termination() -> Result<impl View> {
 }
 
 #[component]
-async fn changes() -> Result<impl View> {
+async fn changes(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="changes">
             <h2>"Changes and contact"</h2>
@@ -218,7 +219,7 @@ async fn changes() -> Result<impl View> {
 }
 
 #[component]
-async fn governing_law() -> Result<impl View> {
+async fn governing_law(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="governing-law">
             <h2>"Governing law"</h2>

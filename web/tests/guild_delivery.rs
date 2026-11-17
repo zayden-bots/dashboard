@@ -350,7 +350,7 @@ async fn harness(pool: &PgPool) -> TestResult<Harness> {
 
     let router = web::router()
         .assets(AssetBundle::load_dir(bundle_dir()?)?)
-        .app_context(state)
+        .with(state)
         .build();
     Ok(Harness { router, pool: pool.clone(), discord })
 }

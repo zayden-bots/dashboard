@@ -13,7 +13,7 @@ use super::badge::{BadgeVariant, badge_variants};
 pub const PLANS_PATH: &str = "/upgrade";
 
 #[component]
-pub async fn plan_tag(label: &str) -> Result<impl View> {
+pub async fn plan_tag(cx: &Cx, label: &str) -> Result<impl View> {
     Ok(view! { <span class=(badge_variants(BadgeVariant::Outline))>(label)</span> })
 }
 

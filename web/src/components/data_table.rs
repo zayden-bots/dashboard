@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{Child, View, attributes, component, view};
 
 use super::table::{
@@ -18,6 +19,7 @@ use super::table::{
 
 #[component]
 pub async fn data_table(
+    cx: &Cx,
     caption: &str,
     columns: &[&str],
     #[default] child: Child<'_>,
@@ -45,12 +47,13 @@ pub async fn data_table(
 }
 
 #[component]
-pub async fn data_row(#[default] child: Child<'_>) -> Result<impl View> {
+pub async fn data_row(cx: &Cx, #[default] child: Child<'_>) -> Result<impl View> {
     Ok(view! { table_row(attrs: attributes! { role="row" }, (child)) })
 }
 
 #[component]
 pub async fn data_cell(
+    cx: &Cx,
     label: &str,
     #[default] header: bool,
     #[default] numeric: bool,

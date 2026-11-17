@@ -99,7 +99,7 @@ pub(crate) async fn frame(
 }
 
 #[component]
-pub async fn app_shell(#[default] child: Child<'_>) -> Result<impl View> {
+pub async fn app_shell(cx: &Cx, #[default] child: Child<'_>) -> Result<impl View> {
     Ok(view! { frame((child)) })
 }
 

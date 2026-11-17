@@ -1,7 +1,7 @@
 //! Guild ownership of submitted ids, and the bot's channel permissions
 //! resolved the way Discord resolves them.
 
-use topcoat::context::CxTestBuilder;
+use topcoat::context::Cx;
 use twilight_model::channel::permission_overwrite::{
     PermissionOverwrite,
     PermissionOverwriteType,
@@ -54,7 +54,7 @@ fn a_negative_id_is_foreign() {
 /// The context has no Discord client, so success proves no lookup ran.
 #[tokio::test]
 async fn an_empty_submission_needs_no_discord_lookup() {
-    let cx = CxTestBuilder::new().build();
+    let cx = Cx::new();
 
     assert!(
         GuildIds::default().channel(None).role(None).ensure_in(&cx, 1).await.is_ok()
@@ -63,7 +63,7 @@ async fn an_empty_submission_needs_no_discord_lookup() {
 
 #[tokio::test]
 async fn a_submission_without_app_state_fails() {
-    let cx = CxTestBuilder::new().build();
+    let cx = Cx::new();
 
     let error =
         GuildIds::default().channel(Some(5)).ensure_in(&cx, 1).await.unwrap_err();

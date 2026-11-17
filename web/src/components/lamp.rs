@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -41,6 +42,7 @@ impl LampState {
 
 #[component]
 pub async fn lamp(
+    cx: &Cx,
     state: LampState,
     #[default] text: Option<&str>,
     #[default] pending: Option<&str>,

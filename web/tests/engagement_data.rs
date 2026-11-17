@@ -4,6 +4,11 @@
 //! the few endpoints each case needs and records every request it gets, so a
 //! case can also assert what was never sent.
 
+#![expect(
+    clippy::empty_enums,
+    reason = "path_param! expands to a variantless marker enum"
+)]
+
 use std::error::Error;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::{TcpListener, TcpStream};
@@ -292,7 +297,7 @@ fn done(result: std::result::Result<(), EngagementError>) -> String {
 
 #[route(GET "/test/levels/{guild}")]
 async fn levels(cx: &Cx) -> Result<String> {
-    let guild: &str = path_param::<Guild>(cx);
+    let guild: &str = guild(cx);
     let view = LeaderboardView::from_request(cx);
 
     Ok(render(get_leaderboard(cx, guild, view.global, view.page).await, |page| {
@@ -319,8 +324,8 @@ async fn levels(cx: &Cx) -> Result<String> {
 
 #[route(GET "/test/levels-raw/{guild}/{action}")]
 async fn levels_raw(cx: &Cx) -> Result<String> {
-    let guild: &str = path_param::<Guild>(cx);
-    let page: i32 = path_param::<Action>(cx).parse().unwrap_or(1);
+    let guild: &str = guild(cx);
+    let page: i32 = action(cx).parse().unwrap_or(1);
 
     Ok(render(get_leaderboard(cx, guild, false, page).await, |page| {
         format!(
@@ -337,7 +342,7 @@ async fn levels_raw(cx: &Cx) -> Result<String> {
 
 #[route(GET "/test/rr/list/{guild}")]
 async fn rr_list(cx: &Cx) -> Result<String> {
-    let guild: &str = path_param::<Guild>(cx);
+    let guild: &str = guild(cx);
     Ok(render(list_reaction_roles(cx, guild).await, |rows| {
         rows.iter()
             .map(|r| {
@@ -353,7 +358,7 @@ async fn rr_list(cx: &Cx) -> Result<String> {
 
 #[route(GET "/test/rr/page/{guild}")]
 async fn rr_page(cx: &Cx) -> Result<String> {
-    let guild: &str = path_param::<Guild>(cx);
+    let guild: &str = guild(cx);
     Ok(render(load_reaction_roles_page(cx, guild).await, |page| {
         let channels = page
             .channels
@@ -375,7 +380,7 @@ async fn rr_post(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<String> {
-    let action: &str = path_param::<Action>(cx);
+    let action: &str = action(cx);
     Ok(match action {
         "add" => match AddReactionRoleForm::from_pairs(pairs) {
             Ok(form) => done(add_reaction_role(cx, &form).await),
@@ -391,13 +396,13 @@ async fn rr_post(
 
 #[route(GET "/test/greetings-view/{guild}")]
 async fn greetings_view(cx: &Cx) -> Result<String> {
-    let guild: &str = path_param::<Guild>(cx);
+    let guild: &str = guild(cx);
     Ok(render(get_greetings(cx, guild).await, |view| debug(&view)))
 }
 
 #[route(GET "/test/greetings-page/{guild}")]
 async fn greetings_page(cx: &Cx) -> Result<String> {
-    let guild: &str = path_param::<Guild>(cx);
+    let guild: &str = guild(cx);
     Ok(render(load_greetings_page(cx, guild).await, |page| {
         format!(
             "{} channels: {}",
@@ -416,7 +421,7 @@ async fn greetings_post(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<String> {
-    let action: &str = path_param::<Action>(cx);
+    let action: &str = action(cx);
     let result = match action {
         "messages" => match SaveGreetingMessagesForm::from_pairs(pairs) {
             Ok(form) => save_greeting_messages(cx, &form).await,
@@ -492,7 +497,7 @@ fn config() -> BotConfig {
     }
 }
 
-fn guild(id: u64, name: &str, permissions: Permissions) -> CurrentUserGuild {
+fn user_guild(id: u64, name: &str, permissions: Permissions) -> CurrentUserGuild {
     CurrentUserGuild {
         id: Id::new(id),
         name: name.to_owned(),
@@ -508,14 +513,17 @@ async fn seed_guilds(cache: &UserGuildsCache) {
         .insert(
             41,
             Arc::from([
-                guild(7, "Guild 7", Permissions::MANAGE_GUILD),
-                guild(11, "Guild 11", Permissions::MANAGE_GUILD),
-                guild(12, "Guild 12", Permissions::ADMINISTRATOR),
+                user_guild(7, "Guild 7", Permissions::MANAGE_GUILD),
+                user_guild(11, "Guild 11", Permissions::MANAGE_GUILD),
+                user_guild(12, "Guild 12", Permissions::ADMINISTRATOR),
             ]),
         )
         .await;
     cache
-        .insert(43, Arc::from([guild(7, "Guild 7", Permissions::SEND_MESSAGES)]))
+        .insert(
+            43,
+            Arc::from([user_guild(7, "Guild 7", Permissions::SEND_MESSAGES)]),
+        )
         .await;
     cache.insert(44, Arc::from([])).await;
 }
@@ -581,7 +589,7 @@ async fn harness(pool: PgPool) -> TestResult<Harness> {
     .await?;
 
     let base = web::router()
-        .app_context(state)
+        .with(state)
         .route(levels)
         .route(levels_raw)
         .route(rr_list)

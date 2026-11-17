@@ -41,7 +41,7 @@ const fn role_text(role: WebRole) -> &'static str {
 }
 
 #[component]
-pub async fn closed(role: WebRole, gate: Gate) -> Result<impl View> {
+pub async fn closed(cx: &Cx, role: WebRole, gate: Gate) -> Result<impl View> {
     let back = [ErrorAction::new("Back to servers", "/guilds")];
     let (status, title, message) = match gate {
         Gate::Unavailable(reason) => (

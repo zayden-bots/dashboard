@@ -1,3 +1,8 @@
+#![expect(
+    clippy::empty_enums,
+    reason = "path_param! expands to a variantless marker enum"
+)]
+
 mod endpoints;
 mod index;
 mod page;
@@ -16,6 +21,6 @@ pub const LOADOUT_NOT_FOUND_TITLE: &str = "Loadout not found - Zayden Dashboard"
 pub const LOADOUT_EDITOR_JS: Asset =
     asset!("../../../../../../assets/loadout-editor.js");
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 path_param!(pub loadout_id);

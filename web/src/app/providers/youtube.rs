@@ -10,7 +10,7 @@ use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::request::{Bytes, headers};
 use topcoat::router::response::{IntoResponse, Response};
-use topcoat::router::{Body, Next, StatusCode, layer, route, segment};
+use topcoat::router::{Body, Next, OriginPolicy, StatusCode, layer, route, segment};
 use tracing::warn;
 use zayden_app::events::Channel;
 use zayden_app::state::AppState;
@@ -31,7 +31,7 @@ use super::reply::{acknowledge, redirect, reject};
 use crate::auth::{app_state, require_session, web_state};
 use crate::guild::dto::youtube::{OUTCOME_PARAM, YoutubeOutcome};
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const YOUTUBE_STATE_COOKIE: &str = "youtube_oauth_state";
 const SETTINGS_SLUG: &str = "youtube";
@@ -281,7 +281,7 @@ pub(super) async fn youtube_verify_handler(cx: &Cx) -> Result<Response> {
     (StatusCode::OK, challenge).into_response(cx)
 }
 
-#[route(POST "./webhooks/youtube")]
+#[route(POST "./webhooks/youtube", with(OriginPolicy::dangerous_disable()))]
 pub(super) async fn youtube_notify_handler(
     cx: &Cx,
     body: Bytes,

@@ -6,9 +6,10 @@ use std::error::Error;
 
 use http_body_util::BodyExt;
 use topcoat::Result as ViewResult;
+use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::{Body, Router, RouterBuilder, page};
-use topcoat::runtime::RouterBuilderRuntimeExt;
+use topcoat::runtime::RuntimeLayer;
 use topcoat::view::{View, view};
 use web::admin::AdminError;
 use web::app::admin::servers::servers_page;
@@ -27,7 +28,7 @@ fn card(id: &str, name: &str, icon: Option<&str>) -> GuildCard {
 }
 
 #[page("/t/list")]
-async fn listed() -> ViewResult<impl View> {
+async fn listed(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         servers_page(
             guilds: Ok(
@@ -41,24 +42,24 @@ async fn listed() -> ViewResult<impl View> {
 }
 
 #[page("/t/none")]
-async fn none() -> ViewResult<impl View> {
+async fn none(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { servers_page(guilds: Ok(Vec::new())) })
 }
 
 #[page("/t/denied")]
-async fn denied() -> ViewResult<impl View> {
+async fn denied(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { servers_page(guilds: Err(AdminError::Auth(AuthError::Forbidden))) })
 }
 
 #[page("/t/signed-out")]
-async fn signed_out() -> ViewResult<impl View> {
+async fn signed_out(cx: &Cx) -> ViewResult<impl View> {
     Ok(
         view! { servers_page(guilds: Err(AdminError::Auth(AuthError::Unauthenticated))) },
     )
 }
 
 #[page("/t/failed")]
-async fn failed() -> ViewResult<impl View> {
+async fn failed(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         servers_page(guilds: Err(AdminError::Discord("429 Too Many Requests".into())))
     })
@@ -74,7 +75,7 @@ fn builder() -> RouterBuilder {
 }
 
 async fn render_raw(path: &str) -> TestResult<String> {
-    let router = builder().runtime().build();
+    let router = builder().layer(RuntimeLayer::new()).build();
     let response = router.handle(Request::get(path).body(Body::empty())?).await;
     let bytes = response.into_body().collect().await?.to_bytes();
     Ok(String::from_utf8(bytes.to_vec())?)

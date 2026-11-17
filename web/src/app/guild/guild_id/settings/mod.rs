@@ -39,7 +39,7 @@ use crate::guild::dto::{GuildDirectory, SectionSettings};
 use crate::guild::{GuildError, get_guild_directory, get_section_settings};
 use crate::nav::{self, ModuleNav};
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const TEXT_KINDS: &[ChannelType] = &[
     ChannelType::GuildText,
@@ -190,6 +190,7 @@ impl From<GuildDirectory> for Lists {
 
 #[component]
 async fn frame(
+    cx: &Cx,
     guild_id: &str,
     page: Page,
     state: &PageState,
@@ -215,6 +216,7 @@ async fn frame(
 
 #[component]
 async fn settings_page(
+    cx: &Cx,
     guild_id: &str,
     page: Page,
     state: &PageState,
@@ -336,6 +338,7 @@ async fn section_panel(
 
 #[component]
 async fn section_tab(
+    cx: &Cx,
     guild_id: &str,
     lists: &Lists,
     settings: SectionSettings,

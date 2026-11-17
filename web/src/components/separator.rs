@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{
     Attributes,
     PromotedStr,
@@ -71,6 +72,7 @@ const SEPARATOR: StaticClass = class!("shrink-0 border-0 bg-border");
 /// ```
 #[component]
 pub async fn separator(
+    cx: &Cx,
     /// The direction the rule runs in.
     #[default]
     orientation: SeparatorOrientation,

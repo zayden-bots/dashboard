@@ -4,7 +4,7 @@ use std::sync::LazyLock;
 
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
-use topcoat::context::{Cx, try_app_context};
+use topcoat::context::{Cx, try_context};
 use topcoat::cookie::time::Duration;
 use topcoat::cookie::{Cookies, Key};
 use topcoat::runtime::connected_untracked;
@@ -107,7 +107,7 @@ fn is_section_id(id: &str) -> bool {
 }
 
 fn key(cx: &Cx) -> Option<&Key> {
-    try_app_context::<Key>(cx).or(PROCESS_KEY.as_ref())
+    try_context::<Key>(cx).or(PROCESS_KEY.as_ref())
 }
 
 pub fn set(cx: &Cx, kind: FlashKind, message: &str) -> Result<(), FlashError> {

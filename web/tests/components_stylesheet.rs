@@ -5,9 +5,10 @@ use std::path::{Path, PathBuf};
 
 use http_body_util::BodyExt;
 use topcoat::Result as ViewResult;
+use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::{Body, Router, page};
-use topcoat::runtime::RouterBuilderRuntimeExt;
+use topcoat::runtime::RuntimeLayer;
 use topcoat::view::{View, view};
 use web::components::confirm::confirm_button;
 use web::components::field_row::{
@@ -78,7 +79,7 @@ fn collect_rs(dir: &Path, out: &mut Vec<PathBuf>) -> TestResult {
 }
 
 #[page("/everything")]
-async fn everything() -> ViewResult<impl View> {
+async fn everything(cx: &Cx) -> ViewResult<impl View> {
     let guilds = [
         GuildCard {
             id: "1".to_owned(),
@@ -126,7 +127,8 @@ async fn everything() -> ViewResult<impl View> {
 }
 
 async fn everything_html() -> TestResult<String> {
-    let router = Router::builder().page(everything).runtime().build();
+    let router =
+        Router::builder().page(everything).layer(RuntimeLayer::new()).build();
     let response =
         router.handle(Request::get("/everything").body(Body::empty())?).await;
     Ok(String::from_utf8(response.into_body().collect().await?.to_bytes().to_vec())?)

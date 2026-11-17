@@ -9,7 +9,7 @@ use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::request::{Bytes, headers};
 use topcoat::router::response::Response;
-use topcoat::router::{Body, Next, layer, route, segment};
+use topcoat::router::{Body, Next, OriginPolicy, layer, route, segment};
 use tracing::{info, warn};
 use zayden_app::events::Channel;
 use zayden_app::state::AppState;
@@ -30,7 +30,7 @@ use super::reply::{acknowledge, redirect, reject};
 use crate::auth::{app_state, require_session, web_state};
 use crate::guild::dto::patreon::{OUTCOME_PARAM, PatreonOutcome};
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const PATREON_STATE_COOKIE: &str = "patreon_oauth_state";
 const SETTINGS_SLUG: &str = "patreon";
@@ -261,7 +261,7 @@ async fn previous_webhook(
     Some((webhook_id, token))
 }
 
-#[route(POST "./webhooks/patreon")]
+#[route(POST "./webhooks/patreon", with(OriginPolicy::dangerous_disable()))]
 pub(super) async fn patreon_webhook_handler(
     cx: &Cx,
     body: Bytes,

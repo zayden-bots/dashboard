@@ -18,7 +18,7 @@ use super::action::{FormAction, form_action, not_saved, page_href};
 use super::fields::{load_error, load_problem};
 use super::header::{MODULE_FORM, page_header, switch_module};
 use super::state::{Done, PageState, rerender, settle};
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::components::field_row::form_summary;
 use crate::components::flash::flash;
 use crate::engagement::EngagementError;
@@ -140,7 +140,7 @@ pub(in crate::app::guild::guild_id::engagement) fn action_names() -> Vec<&'stati
 
 #[page]
 pub(super) async fn show(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! {
@@ -151,7 +151,7 @@ pub(super) async fn show(cx: &Cx) -> Result<impl View> {
 
 #[page(POST)]
 pub(super) async fn legacy_submit(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     not_saved(cx, guild_id, PAGE)?;
     Ok(view! { "" })
 }
@@ -161,8 +161,8 @@ pub(super) async fn submit(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
-    let Some(action) = GreetingAction::find(path_param::<Action>(cx)) else {
+    let guild_id: &str = guild_id(cx);
+    let Some(action) = GreetingAction::find(action(cx)) else {
         return Err(not_found().into());
     };
     let page = page_href(guild_id, PAGE);
@@ -280,6 +280,7 @@ async fn greetings_page(
 
 #[component]
 async fn greeting_sections(
+    cx: &Cx,
     guild_id: &str,
     page: &GreetingsPage,
     state: &PageState,

@@ -192,6 +192,7 @@ async fn loadout_table(cx: &Cx, class: &Signal<String>) -> Result<impl View> {
 
 #[component]
 async fn loadout_rows(
+    cx: &Cx,
     rows: &[LoadoutSummary],
     class: &Signal<String>,
 ) -> Result<impl View> {

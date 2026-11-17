@@ -10,7 +10,7 @@ use jiff::{SignedDuration, Timestamp};
 use secrecy::SecretString;
 use sqlx::PgPool;
 use topcoat::Result;
-use topcoat::context::{Cx, CxTestBuilder};
+use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::response::Response;
 use topcoat::router::{Body, HeaderValue, Router, StatusCode, header, route};
@@ -84,7 +84,7 @@ async fn start(cx: &Cx) -> Result<&'static str> {
 }
 
 #[route(GET "/test/protected")]
-async fn protected() -> Result<&'static str> {
+async fn protected(cx: &Cx) -> Result<&'static str> {
     Ok("inside")
 }
 
@@ -155,7 +155,7 @@ fn harness(pool: PgPool) -> TestResult<Harness> {
     let user_guilds = state.discord.user_guilds.clone();
 
     let base = web::router()
-        .app_context(state)
+        .with(state)
         .route(members)
         .route(whoami)
         .route(signed_in)
@@ -525,7 +525,7 @@ async fn protected_routes_refuse_requests_without_a_live_session(pool: PgPool) {
 /// the sign-in routes from it fails here.
 #[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn the_app_router_serves_the_sign_in_routes(pool: PgPool) {
-    let app = web::router().app_context(web_state(&pool).unwrap()).build();
+    let app = web::router().with(web_state(&pool).unwrap()).build();
     let get = |path: &str, cookie: Option<&str>| {
         let mut request = Request::get(path);
         if let Some(cookie) = cookie {
@@ -552,15 +552,12 @@ async fn the_app_router_serves_the_sign_in_routes(pool: PgPool) {
 /// Without the cookie layer the helpers report it instead of panicking.
 #[sqlx::test(migrator = "schema::MIGRATOR")]
 async fn helpers_without_a_cookie_layer_fail_cleanly(pool: PgPool) {
-    let cx = CxTestBuilder::new().app_context(web_state(&pool).unwrap()).build();
+    let cx = Cx::new().with(web_state(&pool).unwrap());
 
     let error = auth::current_session_identity(&cx).await.err().unwrap();
     assert_eq!(error.to_string(), "missing cookie jar");
 
-    let error = auth::current_session_identity(&CxTestBuilder::new().build())
-        .await
-        .err()
-        .unwrap();
+    let error = auth::current_session_identity(&Cx::new()).await.err().unwrap();
     assert_eq!(error.to_string(), "missing database pool");
 }
 

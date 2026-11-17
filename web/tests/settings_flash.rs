@@ -6,7 +6,7 @@ use std::error::Error;
 use http_body_util::BodyExt;
 use topcoat::Result as ViewResult;
 use topcoat::context::Cx;
-use topcoat::cookie::RouterBuilderCookieExt;
+use topcoat::cookie::CookieLayer;
 use topcoat::router::request::Request;
 use topcoat::router::response::Response;
 use topcoat::router::{Body, Router, header, page};
@@ -59,7 +59,12 @@ async fn take(cx: &Cx) -> ViewResult<impl View> {
 }
 
 fn app() -> Router {
-    Router::builder().page(set_blank).page(set_section).page(take).cookies().build()
+    Router::builder()
+        .page(set_blank)
+        .page(set_section)
+        .page(take)
+        .layer(CookieLayer::new())
+        .build()
 }
 
 async fn get(path: &str, cookie: Option<&str>) -> TestResult<Response> {

@@ -2,12 +2,12 @@ use serde::Serialize;
 use topcoat::Result;
 use topcoat::asset::Asset;
 use topcoat::context::Cx;
-use topcoat::router::{StatusCode, page, path_param, segment};
+use topcoat::router::{StatusCode, page, segment};
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::index::{draft_key, editor_id};
 use super::view::editor;
-use super::{LOADOUT_EDITOR_JS, LoadoutId};
+use super::{LOADOUT_EDITOR_JS, loadout_id};
 use crate::admin::dto::{LoadoutCatalog, LoadoutForm};
 use crate::admin::{AdminError, get_loadout, loadout_catalog};
 use crate::app::admin::gate::{Gate, closed, gate};
@@ -16,7 +16,7 @@ use crate::components::error_panel::{ErrorAction, error_panel};
 use crate::error::MissingPage;
 use crate::shell::app_shell;
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const LIST_PATH: &str = "/admin/destiny2/loadouts";
 
@@ -61,9 +61,8 @@ pub(super) async fn edit_loadout(cx: &Cx) -> Result<impl View> {
     if access != Gate::Open {
         return Ok(view! { closed(role: WebRole::Admin, gate: access) }.boxed());
     }
-    let raw: &str = path_param::<LoadoutId>(cx);
 
-    let Some(id) = editor_id(raw) else {
+    let Some(id) = editor_id(loadout_id(cx)) else {
         return Err(MissingPage::Loadout.into());
     };
 
@@ -141,7 +140,7 @@ async fn editor_page(cx: &Cx, id: Option<i32>) -> Result<impl View> {
 }
 
 #[component]
-pub(crate) async fn missing_loadout() -> Result<impl View> {
+pub(crate) async fn missing_loadout(cx: &Cx) -> Result<impl View> {
     let back = [ErrorAction::new("Back to loadouts", LIST_PATH)];
 
     Ok(view! {

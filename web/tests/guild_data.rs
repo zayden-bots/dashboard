@@ -3,6 +3,11 @@
 //! Discord: guild lists come from the seeded cache and no submitted id needs
 //! an ownership check.
 
+#![expect(
+    clippy::empty_enums,
+    reason = "path_param! expands to a variantless marker enum"
+)]
+
 use std::error::Error;
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -135,8 +140,8 @@ async fn active(cx: &Cx) -> Result<String> {
 }
 
 #[route(GET "/test/section/{section}")]
-async fn section(cx: &Cx) -> Result<String> {
-    let section: &str = path_param::<Section>(cx);
+async fn section_settings(cx: &Cx) -> Result<String> {
+    let section: &str = section(cx);
     Ok(render(get_section_settings(cx, "7", section).await, |s| format!("{s:?}")))
 }
 
@@ -336,7 +341,7 @@ async fn save_form(
 
 #[route(POST "/test/save/{kind}")]
 async fn save(cx: &Cx, Form(pairs): Form<Vec<(String, String)>>) -> Result<String> {
-    let kind: &str = path_param::<Kind>(cx);
+    let kind: &str = kind(cx);
     Ok(render(save_form(cx, kind, pairs).await, |()| "ok".to_owned()))
 }
 
@@ -456,10 +461,10 @@ async fn harness_for(pool: PgPool, zayden_id: u64) -> TestResult<Harness> {
     insert_session(&pool, "member-token", 43).await?;
 
     let base = web::router()
-        .app_context(state)
+        .with(state)
         .route(guilds)
         .route(active)
-        .route(section)
+        .route(section_settings)
         .route(forbidden_section)
         .route(module_cards)
         .route(user_tier)

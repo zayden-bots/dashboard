@@ -34,7 +34,7 @@ pub(crate) async fn login(cx: &Cx) -> Result<impl View> {
 }
 
 #[component]
-async fn login_card(failed: bool) -> Result<impl View> {
+async fn login_card(cx: &Cx, failed: bool) -> Result<impl View> {
     Ok(view! {
         public_layout(
             <div class="login-page">

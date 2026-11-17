@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{Attributes, StaticClass, View, class, component, view};
 
 /// Classes for the input's dimensions, border, and interaction states.
@@ -29,6 +30,6 @@ const INPUT: StaticClass = class!(
 /// }
 /// ```
 #[component]
-pub async fn input(#[default] mut attrs: Attributes) -> Result<impl View> {
+pub async fn input(cx: &Cx, #[default] mut attrs: Attributes) -> Result<impl View> {
     Ok(view! { <input class=(class!(INPUT, attrs.remove("class"))) (attrs)> })
 }

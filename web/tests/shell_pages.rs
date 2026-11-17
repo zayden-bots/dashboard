@@ -25,12 +25,12 @@ use topcoat::asset::{AssetBundle, RouterBuilderAssetExt};
 use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::response::Response;
-use topcoat::router::{Body, Router, StatusCode, header, page, path_param};
+use topcoat::router::{Body, Router, StatusCode, header, page};
 use topcoat::view::{View, view};
 use twilight_model::guild::Permissions;
 use twilight_model::id::Id;
 use twilight_model::user::CurrentUserGuild;
-use web::app::guild::guild_id::GuildId;
+use web::app::guild::guild_id::guild_id;
 use web::auth::{SessionUser, WebRole, has_role};
 use web::components::brand::LOGO;
 use web::document::{PENDING_SUBMIT, STYLESHEET};
@@ -67,7 +67,7 @@ const CHECK: &str = r#"<path d="M20 6 9 17l-5-5"/></svg>"#;
 
 #[page("/guild/{guild_id}/probe")]
 async fn guild_probe(cx: &Cx) -> ViewResult<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     Ok(view! {
         <p id="probe">
             (guild_id)
@@ -280,7 +280,7 @@ async fn web_state(
 fn app_router(state: WebState) -> TestResult<Router> {
     let base = web::router()
         .assets(AssetBundle::load_dir(bundle_dir()?)?)
-        .app_context(state)
+        .with(state)
         .page(guild_probe);
     Ok(base.build())
 }

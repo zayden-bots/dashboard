@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -35,6 +36,7 @@ impl SkeletonShape {
 
 #[component]
 pub async fn shape_skeleton(
+    cx: &Cx,
     shape: SkeletonShape,
     #[default(1)] count: usize,
 ) -> Result<impl View> {

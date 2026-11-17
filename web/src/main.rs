@@ -55,9 +55,9 @@ async fn run() -> Result<(), StartupError> {
     EventListener::spawn(app.db.clone(), app.events.clone());
     session_pruning::spawn(app.db.clone());
 
-    let base = router().app_context(state).assets(assets);
+    let base = router().with(state).assets(assets);
     let base = match cookie_key {
-        Some(key) => base.app_context(key),
+        Some(key) => base.with(key),
         None => {
             warn!(
                 "{} is not set; flash cookies are signed with a per-process key \

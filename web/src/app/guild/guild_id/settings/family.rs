@@ -1,13 +1,13 @@
 use topcoat::Result;
 use topcoat::context::Cx;
 use topcoat::router::content::Form;
-use topcoat::router::{page, path_param};
+use topcoat::router::page;
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::header::switch_module;
 use super::state::{Done, PageState, settle};
 use super::{Page, ensure_path_guild, settings_page};
-use crate::app::guild::guild_id::GuildId;
+use crate::app::guild::guild_id::guild_id;
 use crate::components::field_row::{Range, form_summary, text_row};
 use crate::components::save_bar::save_bar;
 use crate::guild::GuildError;
@@ -19,7 +19,7 @@ const FORM: &str = "family-settings";
 
 #[page]
 async fn family(cx: &Cx) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
 
     Ok(view! { settings_page(guild_id: guild_id, page: PAGE, state: &state) })
@@ -30,7 +30,7 @@ async fn save(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let values = pairs.clone();
     let result = save_family(cx, guild_id, pairs).await;
     let failure = settle(cx, FORM, values, result, &Done {
@@ -51,7 +51,7 @@ async fn switch(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
 ) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let state = PageState::failed(switch_module(cx, guild_id, PAGE, pairs).await?);
 
     Ok(view! {
@@ -72,6 +72,7 @@ async fn save_family(
 
 #[component]
 pub(super) async fn tab(
+    cx: &Cx,
     guild_id: &str,
     settings: &FamilySection,
     state: &PageState,

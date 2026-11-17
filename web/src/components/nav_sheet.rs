@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::icons::{Icon, icon};
@@ -14,6 +15,7 @@ pub const SHEET_ID: &str = "nav-sheet";
 
 #[component]
 pub async fn nav_sheet(
+    cx: &Cx,
     access: NavAccess,
     #[default] guild_id: Option<&str>,
 ) -> Result<impl View> {

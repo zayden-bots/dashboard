@@ -1,3 +1,8 @@
+#![expect(
+    clippy::empty_enums,
+    reason = "module_param! expands to a variantless marker enum"
+)]
+
 pub mod engagement;
 pub mod missing;
 pub mod overview;
@@ -5,7 +10,7 @@ pub mod settings;
 
 use topcoat::Result;
 use topcoat::context::Cx;
-use topcoat::router::{Slot, layout, module_param, path_param};
+use topcoat::router::{Slot, layout, module_param};
 use topcoat::view::{View, view};
 
 use crate::guild::dto::GuildInfo;
@@ -26,7 +31,7 @@ async fn switcher_guilds(cx: &Cx) -> Result<Vec<GuildInfo>> {
 
 #[layout]
 async fn guild_shell(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
-    let guild_id: &str = path_param::<GuildId>(cx);
+    let guild_id: &str = guild_id(cx);
     let guilds = switcher_guilds(cx).await?;
 
     Ok(view! { frame(guild_id: Some(guild_id), guilds: &guilds, (slot)) })

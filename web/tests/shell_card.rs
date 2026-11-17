@@ -2,9 +2,10 @@ use std::error::Error;
 
 use http_body_util::BodyExt;
 use topcoat::Result as ViewResult;
+use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::{Body, Router, page};
-use topcoat::runtime::RouterBuilderRuntimeExt;
+use topcoat::runtime::RuntimeLayer;
 use topcoat::view::{View, view};
 use web::guild::dto::ModuleView;
 use web::shell::module_card;
@@ -48,37 +49,37 @@ fn module(
 }
 
 #[page("/card/unknown")]
-async fn card_unknown() -> ViewResult<impl View> {
+async fn card_unknown(cx: &Cx) -> ViewResult<impl View> {
     let music = module("music", "Music", None, None);
     Ok(view! { module_card(module: &music, guild_id: "7") })
 }
 
 #[page("/card/off")]
-async fn card_off() -> ViewResult<impl View> {
+async fn card_off(cx: &Cx) -> ViewResult<impl View> {
     let gambling = module("gambling", "Gambling & Economy", Some(false), None);
     Ok(view! { module_card(module: &gambling, guild_id: "7") })
 }
 
 #[page("/card/on")]
-async fn card_on() -> ViewResult<impl View> {
+async fn card_on(cx: &Cx) -> ViewResult<impl View> {
     let music = module("music", "Music", Some(true), None);
     Ok(view! { module_card(module: &music, guild_id: "7") })
 }
 
 #[page("/card/settings")]
-async fn card_settings() -> ViewResult<impl View> {
+async fn card_settings(cx: &Cx) -> ViewResult<impl View> {
     let ai = module("ai", "AI Chat", Some(false), None);
     Ok(view! { module_card(module: &ai, guild_id: "7") })
 }
 
 #[page("/card/derived")]
-async fn card_derived() -> ViewResult<impl View> {
+async fn card_derived(cx: &Cx) -> ViewResult<impl View> {
     let patreon = module("patreon", "Patreon", Some(true), Some("derived"));
     Ok(view! { module_card(module: &patreon, guild_id: "7") })
 }
 
 #[page("/card/failed")]
-async fn card_failed() -> ViewResult<impl View> {
+async fn card_failed(cx: &Cx) -> ViewResult<impl View> {
     let music = module("music", "Music", Some(false), None);
     Ok(view! {
         module_card(module: &music, guild_id: "7", error: Some("Not changed: nope"))
@@ -93,7 +94,7 @@ async fn render(path: &str) -> TestResult<String> {
         .page(card_settings)
         .page(card_derived)
         .page(card_failed)
-        .runtime()
+        .layer(RuntimeLayer::new())
         .build();
     let response = router.handle(Request::get(path).body(Body::empty())?).await;
     let bytes = response.into_body().collect().await?.to_bytes();

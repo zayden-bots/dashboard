@@ -8,6 +8,7 @@ pub mod public;
 pub mod upgrade;
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::router::{RouterBuilder, Slot, layout, module_router, not_found};
 use topcoat::view::{View, view};
 
@@ -21,6 +22,6 @@ pub(crate) fn routes() -> RouterBuilder {
 }
 
 #[layout]
-async fn root_layout(slot: Slot<'_>) -> Result<impl View> {
+async fn root_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View> {
     Ok(view! { document_layout(slot: slot) })
 }

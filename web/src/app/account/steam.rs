@@ -20,7 +20,7 @@ use crate::app::providers::oauth::{
 use crate::auth::{check_session, current_user_id, remember_login_next, web_state};
 use crate::flash::{FlashKind, set as set_flash};
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 const STEAM_NONCE_COOKIE: &str = "steam_openid_nonce";
 const LINK_PATH: &str = "/account/link/steam";

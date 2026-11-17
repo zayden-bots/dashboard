@@ -29,7 +29,7 @@ use crate::guild::seat;
 use crate::pages::not_found::not_found_page;
 use crate::shell::{GUILDS_TITLE, OVERVIEW_TITLE, UPGRADE_TITLE};
 
-pub const STYLESHEET: Asset = asset!(concat!(env!("OUT_DIR"), "/tailwind.css"));
+pub const STYLESHEET: Asset = asset!("{out_dir}/tailwind.css");
 
 pub const PENDING_SUBMIT: Asset = asset!("../assets/pending-submit.js");
 
@@ -169,6 +169,7 @@ pub(crate) async fn document_layout(cx: &Cx, slot: Slot<'_>) -> Result<impl View
 
 #[component]
 async fn document(
+    cx: &Cx,
     title: &str,
     #[default] description: Option<&str>,
     #[default] bot: Option<&str>,

@@ -5,10 +5,10 @@ version = 4
 [[package]]
 name = "accounts"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
- "jiff",
+ "jiff 1.0.0",
  "jiff-sqlx",
  "reqwest 0.13.5",
  "serenity",
@@ -96,7 +96,7 @@ dependencies = [
 [[package]]
 name = "ai"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-openai",
  "async-trait",
@@ -155,12 +155,6 @@ checksum = "ae221649c9976a6f6c56ae1facf410f3ddb33cc661c4b7b61020a912d4237fbc"
 dependencies = [
  "libc",
 ]
-
-[[package]]
-name = "anymap3"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb5dfbc6d8d2675589ccbe4d0fd61df2419075625f8c1a62325e718e2b0049f9"
 
 [[package]]
 name = "arrayvec"
@@ -329,26 +323,26 @@ dependencies = [
 
 [[package]]
 name = "bool_to_bitflags"
-version = "0.1.3"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c7c039d9bc676b768f6d59556e99f95f5e47c811b672f8b2b2b606eb28527a2f"
+checksum = "a1728688a4b25bea79ba69165320090b450a6b6318b4b46fda22239f968b858a"
 dependencies = [
- "darling",
+ "darling 0.24.1",
  "proc-macro2",
  "quote",
- "syn 2.0.119",
+ "syn 3.0.10",
  "to-arraystring",
 ]
 
 [[package]]
 name = "brotli"
-version = "9.1.1"
+version = "9.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "627b7cfb0578f0eafce087a90fcd40add1231900b69e4d4de2d456260a4f5d81"
+checksum = "9071f285ed78f04f37d675abaaef5de7689e2f30a216c8dc6795465d81910a13"
 dependencies = [
  "alloc-no-stdlib 3.0.0",
  "alloc-stdlib 0.3.0",
- "brotli-decompressor 6.3.1",
+ "brotli-decompressor 6.3.2",
 ]
 
 [[package]]
@@ -363,9 +357,9 @@ dependencies = [
 
 [[package]]
 name = "brotli-decompressor"
-version = "6.3.1"
+version = "6.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75c74c9c51b9140663e196b5fb88bc94c334d7a497c8311cb759d8557874747f"
+checksum = "cc031cd87c6529082b0b65c604e86af0ed7744841b17ccfe60b1e31fa606179e"
 dependencies = [
  "alloc-no-stdlib 3.0.0",
  "alloc-stdlib 0.3.0",
@@ -373,9 +367,9 @@ dependencies = [
 
 [[package]]
 name = "bumpalo"
-version = "3.20.3"
+version = "3.20.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
+checksum = "87a0cf66fd1eb2fb7b822cb78370d82303750809bc6ba855f3f58e517d3238db"
 
 [[package]]
 name = "bungie-api"
@@ -383,7 +377,7 @@ version = "2.0.0"
 source = "git+https://github.com/ViridianLink/bungie-api.git?branch=main#0a980c0f2d0107a3a13bfc4eb5a456aa42a97c19"
 dependencies = [
  "bitflags",
- "jiff",
+ "jiff 0.2.46",
  "reqwest 0.13.5",
  "serde",
  "serde_json",
@@ -413,9 +407,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.11.1"
+version = "1.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ff2a8126fff0f8c839080d619675a585e61720bb12d2baceae45769fd66f155"
+checksum = "33ef9e3e8154a45c7a95cff4c1299702106ad94062d7bb85fdc5d3a5afd91d45"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -701,8 +695,18 @@ version = "0.20.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc7f46116c46ff9ab3eb1597a45688b6715c6e628b5c133e288e709a29bcb4ee"
 dependencies = [
- "darling_core",
- "darling_macro",
+ "darling_core 0.20.11",
+ "darling_macro 0.20.11",
+]
+
+[[package]]
+name = "darling"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed17f5901b6630b993ca003def43f2f8ef4014fc13b047b57aad617ff32bc2ec"
+dependencies = [
+ "darling_core 0.24.1",
+ "darling_macro 0.24.1",
 ]
 
 [[package]]
@@ -720,14 +724,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling_core"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6837e2cf7485aaae18f86181d2f0e9a7ed297a025e220aeabf63fdebd3a2ddff"
+dependencies = [
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn 3.0.10",
+]
+
+[[package]]
 name = "darling_macro"
 version = "0.20.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fc34b93ccb385b40dc71c6fceac4b2ad23662c7eeb248cf10d529b7e055b6ead"
 dependencies = [
- "darling_core",
+ "darling_core 0.20.11",
  "quote",
  "syn 2.0.119",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.24.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2ac7135c3ef02b2f7833bbeb1be5ba7f966dcde8a87c6b87f65a778d71a02785"
+dependencies = [
+ "darling_core 0.24.1",
+ "quote",
+ "syn 3.0.10",
 ]
 
 [[package]]
@@ -754,12 +782,12 @@ checksum = "4583a4551df46e2792f82ceeac45e850d2e2d5debba0b91f102385cda5b11f06"
 [[package]]
 name = "deadlock"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
  "deadlock-api",
  "futures",
- "jiff",
+ "jiff 1.0.0",
  "jiff-sqlx",
  "moka",
  "reqwest 0.13.5",
@@ -778,9 +806,9 @@ dependencies = [
 [[package]]
 name = "deadlock-api"
 version = "0.1.0"
-source = "git+https://github.com/ViridianLink/deadlock-api.git?branch=main#0ba1e54aca689dff7521cf6b514ddd9bc8d08fa9"
+source = "git+https://github.com/ViridianLink/deadlock-api.git?branch=main#828430e787816218d19d4cfedf85a2f79b955b6e"
 dependencies = [
- "jiff",
+ "jiff 1.0.0",
  "reqwest 0.13.5",
  "serde",
  "serde_json",
@@ -808,7 +836,7 @@ version = "0.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2d5bcf7b024d6835cfb3d473887cd966994907effbe9227e8c8219824d06c4e8"
 dependencies = [
- "darling",
+ "darling 0.20.11",
  "proc-macro2",
  "quote",
  "syn 2.0.119",
@@ -848,7 +876,7 @@ dependencies = [
 [[package]]
 name = "destiny2"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
  "bungie-api",
@@ -951,22 +979,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "email-encoding"
-version = "0.4.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f690ae2169f2ceb3f45b28b6fcd8fa16839f2f5c8818546774b9425f5f71004"
-dependencies = [
- "base64 0.23.1",
- "memchr",
-]
-
-[[package]]
-name = "email_address"
-version = "0.2.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
-
-[[package]]
 name = "encoding_rs"
 version = "0.8.44"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1033,7 +1045,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74fef4569247a5f429d9156b9d0a2599914385dd189c539334c625d8099d90ab"
 dependencies = [
  "futures-core",
- "nom 7.1.3",
+ "nom",
  "pin-project-lite",
 ]
 
@@ -1308,12 +1320,12 @@ dependencies = [
 [[package]]
 name = "greetings"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
- "jiff",
+ "jiff 1.0.0",
  "moka",
- "rand 0.10.3",
+ "rand 0.10.4",
  "reqwest 0.13.5",
  "secrecy",
  "serenity",
@@ -1437,7 +1449,7 @@ dependencies = [
 [[package]]
 name = "honeypot"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
  "moderation",
@@ -1453,12 +1465,12 @@ dependencies = [
 [[package]]
 name = "hosting"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
- "jiff",
+ "jiff 1.0.0",
  "jiff-sqlx",
- "rand 0.10.3",
+ "rand 0.10.4",
  "reqwest 0.13.5",
  "secrecy",
  "serde",
@@ -1469,17 +1481,6 @@ dependencies = [
  "tracing",
  "zayden-app",
  "zayden-core",
-]
-
-[[package]]
-name = "hostname"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "617aaa3557aef3810a6369d0a99fac8a080891b68bd9f9812a1eeda0c0730cbd"
-dependencies = [
- "cfg-if",
- "libc",
- "windows-link 0.2.1",
 ]
 
 [[package]]
@@ -1859,13 +1860,29 @@ checksum = "3bd1574e617a9a6c1f8f8181bd7e841e1f20e4277607ef28945765188d6284d4"
 
 [[package]]
 name = "jiff"
-version = "0.2.43"
+version = "0.2.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26699905cc795a23e3949585cc7ba3ee8ade090872a27e4316304a777297894a"
+checksum = "175dc66334db3b9ab9985bf8b61cfed50dc16d20964bb47f9e479adcae984a7f"
 dependencies = [
- "jiff-core",
- "jiff-static",
- "jiff-tzdb-platform",
+ "jiff-core 0.1.8",
+ "jiff-static 0.2.46",
+ "jiff-tzdb-platform 0.1.3",
+ "log",
+ "portable-atomic",
+ "portable-atomic-util",
+ "serde_core",
+ "windows-link 0.2.1",
+]
+
+[[package]]
+name = "jiff"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cc767b5763de45e810109520123bb2829a653f3a7ed9be40b2bc4f81158f595"
+dependencies = [
+ "jiff-core 1.0.0",
+ "jiff-static 1.0.0",
+ "jiff-tzdb-platform 1.0.0",
  "log",
  "portable-atomic",
  "portable-atomic-util",
@@ -1875,9 +1892,18 @@ dependencies = [
 
 [[package]]
 name = "jiff-core"
-version = "0.1.5"
+version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffe6854081f5ac0a3046a9b223729ccd7a20b1e0e8277e44dc0660eedf67dfe2"
+checksum = "e599b80292e597019b8b3e392de3f4bea2959ddfb8c7dff60e035e9e311a2c1b"
+dependencies = [
+ "log",
+]
+
+[[package]]
+name = "jiff-core"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "894f7ac42105f584100691b3bf6e6b92dd12fcfa225f6c397f95c8a94b47b68f"
 dependencies = [
  "log",
 ]
@@ -1888,38 +1914,56 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fa4804a5e6441082f7b8f2e840c639e489902aba5533c1e95c2fb7f0ab23d96c"
 dependencies = [
- "jiff",
+ "jiff 0.2.46",
  "phf 0.13.1",
  "winnow",
 ]
 
 [[package]]
 name = "jiff-sqlx"
-version = "0.2.2"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6639870bba69eee8eb23555a5fe8c554f7731c5692c1a4abf834eba77414491"
+checksum = "a4996ad290ff7f7081becdda47e28556fbebb81618c599eac5d09182b5a60e38"
 dependencies = [
- "jiff",
+ "jiff 1.0.0",
  "sqlx",
 ]
 
 [[package]]
 name = "jiff-static"
-version = "0.2.43"
+version = "0.2.46"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4b4ff49b2887190c760b86207b55cdcaabbdecaf7a0660d68aa2ed6f652abf0a"
+checksum = "c7b1af7547d47354bc438d797e3854601bde8f8d185780c5ba4ab27afa54f1ba"
 dependencies = [
- "jiff-core",
+ "jiff-core 0.1.8",
  "proc-macro2",
  "quote",
  "syn 2.0.119",
 ]
 
 [[package]]
-name = "jiff-tzdb"
-version = "0.1.9"
+name = "jiff-static"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fa8377070c6bae868759445e5a77f66d84f0b72f3a054bfb00e6d038b8282da7"
+checksum = "955491488dc99b572ea6d67b172dcd98787d00744b1fb44a5689b4e6413695a6"
+dependencies = [
+ "jiff-core 1.0.0",
+ "proc-macro2",
+ "quote",
+ "syn 3.0.10",
+]
+
+[[package]]
+name = "jiff-tzdb"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0980fca2cc272465bd60e82397607ba9f33add9e48defd77923301bbd03808f2"
+
+[[package]]
+name = "jiff-tzdb"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12e71a1b68a875a44a33bb7a1dd84392cb77145a3367a552a3cfe6a4f5cf3afc"
 
 [[package]]
 name = "jiff-tzdb-platform"
@@ -1927,7 +1971,16 @@ version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "875a5a69ac2bab1a891711cf5eccbec1ce0341ea805560dcd90b7a2e925132e8"
 dependencies = [
- "jiff-tzdb",
+ "jiff-tzdb 0.1.10",
+]
+
+[[package]]
+name = "jiff-tzdb-platform"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc65b284afcfa8f6cf189c7274c805505314a7ab975c60e1f548bff56525420e"
+dependencies = [
+ "jiff-tzdb 1.0.0",
 ]
 
 [[package]]
@@ -2015,23 +2068,6 @@ dependencies = [
  "crossbeam-utils",
  "loom",
  "slab",
-]
-
-[[package]]
-name = "lettre"
-version = "0.11.23"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2c646bd5cc763b1087b15493e29a64be6147ba8f19342004fa52048ee596eae"
-dependencies = [
- "email-encoding",
- "email_address",
- "fastrand",
- "hostname",
- "httpdate",
- "idna",
- "mime",
- "nom 8.0.0",
- "quoted_printable",
 ]
 
 [[package]]
@@ -2246,9 +2282,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "1.2.4"
+version = "1.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1788edb87fdc09c7e26304471e2f5be8cdefb1b6930d6e3985fc02ff53bf86ee"
+checksum = "20521a903f02b0a573cd6840e9d0a5a0cc043d361fe924092cd70f8556cc9c4a"
 dependencies = [
  "libc",
  "wasi",
@@ -2258,10 +2294,10 @@ dependencies = [
 [[package]]
 name = "moderation"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
- "jiff",
+ "jiff 1.0.0",
  "serenity",
  "sqlx",
  "zayden-core",
@@ -2307,15 +2343,6 @@ checksum = "d273983c5a657a70a3e8f2a01329822f3b8c8172b73826411a55751e404a0a4a"
 dependencies = [
  "memchr",
  "minimal-lexical",
-]
-
-[[package]]
-name = "nom"
-version = "8.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df9761775871bdef83bee530e60050f7e54b1105350d6884eb0fb4f46c2f9405"
-dependencies = [
- "memchr",
 ]
 
 [[package]]
@@ -2452,13 +2479,13 @@ dependencies = [
 [[package]]
 name = "patreon"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
  "ego-tree",
  "futures",
  "hmac 0.13.0",
- "jiff",
+ "jiff 1.0.0",
  "jiff-cron",
  "jiff-sqlx",
  "md-5",
@@ -2723,7 +2750,7 @@ dependencies = [
  "bytes",
  "getrandom 0.4.3",
  "lru-slab",
- "rand 0.10.3",
+ "rand 0.10.4",
  "rand_pcg",
  "ring",
  "rustc-hash",
@@ -2760,12 +2787,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "quoted_printable"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "478e0585659a122aa407eb7e3c0e1fa51b1d8a870038bd29f0cf4a8551eea972"
-
-[[package]]
 name = "r-efi"
 version = "5.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2800,9 +2821,9 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.10.3"
+version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65c9fb96cbc91e3478eaae79a69fcd3f1ae4ad052e471fe6732fff548984b4af"
+checksum = "8f6fa277c67e6ea590466f04c3fe82cb509f0864fe470643e5570de9514a9b11"
 dependencies = [
  "chacha20",
  "getrandom 0.4.3",
@@ -2892,7 +2913,7 @@ dependencies = [
 [[package]]
 name = "reaction-roles"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
  "serenity",
@@ -3383,7 +3404,7 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.12.5"
-source = "git+https://github.com/serenity-rs/serenity?branch=next#a265dccfe6bd9128405df748dd7a995660b28e4f"
+source = "git+https://github.com/serenity-rs/serenity?branch=next#912efb4244cf26145bd3ae476e2891b71293fed6"
 dependencies = [
  "aformat",
  "arrayvec",
@@ -3395,8 +3416,9 @@ dependencies = [
  "dashmap",
  "extract_map",
  "flate2",
+ "foldhash",
  "futures",
- "jiff",
+ "jiff 0.2.46",
  "mime",
  "mime_guess",
  "nonmax",
@@ -3709,7 +3731,7 @@ dependencies = [
  "log",
  "md-5",
  "memchr",
- "rand 0.10.3",
+ "rand 0.10.4",
  "serde",
  "serde_json",
  "sha2 0.11.1",
@@ -3847,7 +3869,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "suggestions"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
  "futures",
@@ -3966,14 +3988,14 @@ dependencies = [
 [[package]]
 name = "ticket"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "ai",
  "async-trait",
  "dashmap",
  "futures",
  "htmd",
- "jiff",
+ "jiff 1.0.0",
  "jiff-cron",
  "jiff-sqlx",
  "regex",
@@ -4193,9 +4215,9 @@ checksum = "009dbb7700f11c55ef83aebbe4c0e9cf1f1ac0844bd8d6f00dc38f302026e13a"
 
 [[package]]
 name = "topcoat"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70b5093d8133b513742b7461a28d374107b8bf9168aa60f4f567ad89acd2ed9e"
+checksum = "16bfbdbedee481dc7a9e89ed7c5be0a8fda008d6170fe9012c220590297eb4b9"
 dependencies = [
  "futures-util",
  "inventory",
@@ -4203,6 +4225,7 @@ dependencies = [
  "tokio",
  "tokio-tungstenite 0.29.0",
  "topcoat-asset",
+ "topcoat-asset-macro",
  "topcoat-cookie",
  "topcoat-core",
  "topcoat-core-macro",
@@ -4211,7 +4234,7 @@ dependencies = [
  "topcoat-icon",
  "topcoat-icon-macro",
  "topcoat-l10n",
- "topcoat-mail",
+ "topcoat-metadata",
  "topcoat-router",
  "topcoat-router-macro",
  "topcoat-runtime",
@@ -4225,9 +4248,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-asset"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac70debf9eee62714ce45416eae27b283c3a44a0f9ebcb2ac088fda48b533f3e"
+checksum = "14de3c5734f7bb8ffc85ae33baa00e7dafee22978d02ef13e2ce3ad992fb1bc8"
 dependencies = [
  "http",
  "memchr",
@@ -4243,10 +4266,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "topcoat-cookie"
-version = "0.11.0"
+name = "topcoat-asset-grammar"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df79aba10192abe21fbd01dfcb46bb04dab5ae64adb4432d9f078eb05f94e6a5"
+checksum = "7ce8fec8374473aa09ec85dd51469aca40ee6175397c4a7e38f7dc22f4798d03"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.10",
+ "topcoat-core-grammar",
+]
+
+[[package]]
+name = "topcoat-asset-macro"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3d98de54cc49ab5f9d5af639064ed1bb1b562ac170d346280b706cec7a1553d"
+dependencies = [
+ "quote",
+ "syn 3.0.10",
+ "topcoat-asset-grammar",
+]
+
+[[package]]
+name = "topcoat-cookie"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7fa34d585203cb080afce31749310bf5d9f238491636806d875726c7faebe10c"
 dependencies = [
  "cookie",
  "getrandom 0.2.17",
@@ -4259,11 +4305,10 @@ dependencies = [
 
 [[package]]
 name = "topcoat-core"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffff49b885744cdb89ee158c5d81cc8c619692bd9f4ab3cae92ad1adc0ce612e"
+checksum = "121a7616ec29bc5525a4a580554c3d5330ce4314655a13d0d8d10cc1a083fc7a"
 dependencies = [
- "anymap3",
  "base64 0.22.1",
  "elsa",
  "http",
@@ -4275,9 +4320,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-core-grammar"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b788a2010234cd29fc050268e52ceb393d2124b20f669a83d8f61a9dbf895bb6"
+checksum = "6d2326406a37c4eb212d60bc421589f3b600f50ca440b8e39dbdb7f7d032cb8a"
 dependencies = [
  "proc-macro-crate",
  "proc-macro2",
@@ -4287,9 +4332,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-core-macro"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3e3786bf2ee2c8b4f728d3fb53c41f639aa66583788b3135acbd63c11458b25b"
+checksum = "020d81b3dfe852b7b5e44bbb2079c6b1346d6dfe50bc267e5d5a05c40bf5d9a4"
 dependencies = [
  "quote",
  "syn 3.0.10",
@@ -4298,9 +4343,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-font"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "caa4656294aac116def1e7633f03117a84b65126c503242793ff4adc78577fb8"
+checksum = "5e4382e452ddefff5b03cee1b3c84bcd36783e50afd2fea1e21fc9b41807142e"
 dependencies = [
  "heck",
  "inventory",
@@ -4315,9 +4360,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-font-grammar"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b462fae28641a1bb24eab1fa9c473520389ca690331ca53fd6143d5b2746045e"
+checksum = "d6159e8e361f19367ddb11de5e5ff9b04f92d91e0c46ef9b1a076404d83fcfe8"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4328,9 +4373,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-font-macro"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "40776cd3087aaea5e0c8b597126b1c09dbfb0d69833088d7f3b229305bbbb87f"
+checksum = "7e3d3a71216cec0a27497716d4559e34245e61328f6e04fc2a2bac3b80679b31"
 dependencies = [
  "quote",
  "syn 3.0.10",
@@ -4339,9 +4384,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-icon"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b58c90b0c0a5a8d14efa25eff58b7f11ed8abf6e0aaa2190f52a2af052c60c2a"
+checksum = "124c92b7fa7e06a430287be4bb3c47b9b5edfc5d9307b684e785f9b7d7e41577"
 dependencies = [
  "topcoat-core",
  "topcoat-view",
@@ -4350,9 +4395,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-icon-grammar"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7d026a6a99399fef6a27dafded373c9a7a187f6942be8a0b7d63eb2463c532c7"
+checksum = "dfd69aa9d95d388630549e9f9b1e432303d7db24bbfcd56aceb5fe19d7deedd0"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -4365,9 +4410,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-icon-macro"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8a27d93f6f993a66acd5cef7f499abf9b76990e49a3cc2ec6c86f3c33fe7b4b7"
+checksum = "f281a1f38ee06fab1b58e4026e811174a961030a903481aec38dd0adc4ec7e97"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4377,10 +4422,11 @@ dependencies = [
 
 [[package]]
 name = "topcoat-l10n"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34da63b3a5aea3d6c243d9fa8c98ca79b181b985f6a0a042f630672f54d12e9e"
+checksum = "d877822424504842f90d9f018dbaa61be2d52071653bc0f0921652ef925fdabd"
 dependencies = [
+ "http",
  "icu_locale",
  "icu_locale_core",
  "topcoat-core",
@@ -4388,24 +4434,24 @@ dependencies = [
 ]
 
 [[package]]
-name = "topcoat-mail"
-version = "0.11.0"
+name = "topcoat-metadata"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54a13c10c6399d9eb9b0bde38bd3d947eba56ddfaea99d9a4f971b74b6a651db"
+checksum = "bf250ddbaea17bd63c7d6f124ce8f883dee44ece584cfab979ec33a87a030875"
 dependencies = [
- "lettre",
- "thiserror 2.0.21",
- "time",
+ "topcoat-asset",
  "topcoat-core",
+ "topcoat-core-macro",
  "topcoat-router",
  "topcoat-view",
+ "topcoat-view-macro",
 ]
 
 [[package]]
 name = "topcoat-router"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b9488065b08f293208b0f1aeb6667d5836b66c12dfced5e330f9a8f1d7f1ca1a"
+checksum = "c86534384925992375ac979e9b5af7e4086119803b4586c6ac9bca814e814ed2"
 dependencies = [
  "bytes",
  "form_urlencoded",
@@ -4438,11 +4484,10 @@ dependencies = [
 
 [[package]]
 name = "topcoat-router-grammar"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac3f51fa1a1e538bd34e02f88ebba554ac5931e55c688303a58a8e78123dfb04"
+checksum = "0aa0f6bb59f921cdde73395cc526374d8a553d3285c3f4ac8086c40bedc5be3a"
 dependencies = [
- "heck",
  "proc-macro2",
  "quote",
  "syn 3.0.10",
@@ -4451,9 +4496,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-router-macro"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3c1b56d3bf19d54bddf300d6d57ca754531d7ad5481afca0b2302ac33f5d43af"
+checksum = "71ddd5e527cdab30c73293f907e8f40ef16c421484bb7bad107ecd967a6b98c3"
 dependencies = [
  "quote",
  "syn 3.0.10",
@@ -4462,9 +4507,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-runtime"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "03b22136b99694b349a950cd757387a04b080fdb131eecdd51d0511e1a45ebf5"
+checksum = "3e8f8651d36f003dd85a6a36ff5e1161b01af1cc5ae5baa38e649bda3605037a"
 dependencies = [
  "futures-util",
  "pin-project-lite",
@@ -4473,6 +4518,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "topcoat-asset",
+ "topcoat-asset-macro",
  "topcoat-core",
  "topcoat-router",
  "topcoat-view",
@@ -4481,9 +4527,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-runtime-grammar"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab93a83c38a045a4f541c2e548d30ba5dfdd3173c18de8b1c7b049709c29db97"
+checksum = "1650432fe7adeab5aa815b84245c29c3ea5390a3b4a41d7cc2868e8f60f6277b"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -4497,9 +4543,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-runtime-macro"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5acb1db0bdba3c36e4f80f7ef530945779a1b0294b1087e7d877e33005da6283"
+checksum = "f4ea7a5b61e948d702a5cb6727c38a3b0c934b630cc003971ca86a9262c16b0c"
 dependencies = [
  "quote",
  "syn 3.0.10",
@@ -4508,9 +4554,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-session"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2325c30a484b1b1b6f5012b50bc18994d37c33c6bd2f71be8ff509b591a17457"
+checksum = "d705011dbdf07ea9e3f74397f177cf3224a2fa0ff600a2514c11837ef04e1858"
 dependencies = [
  "base64 0.22.1",
  "getrandom 0.4.3",
@@ -4519,15 +4565,14 @@ dependencies = [
  "tokio",
  "topcoat-cookie",
  "topcoat-core",
- "topcoat-router",
  "web-time",
 ]
 
 [[package]]
 name = "topcoat-tailwind"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "efbc592cc87155ed9e2fd464407e0f7708d340966c4cc8a22ce0b55006fe5136"
+checksum = "076ac4b4d97d250fd9748215409cda7cbddcfadd32dab5eafbf7ce6be8b7e51b"
 dependencies = [
  "sha2 0.11.1",
  "thiserror 2.0.21",
@@ -4537,15 +4582,15 @@ dependencies = [
 
 [[package]]
 name = "topcoat-ui-registry"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2f0bd66ac0e18d782a28fb7be6a289ee460629e7a06d7dfa432ae6ccb5d7f218"
+checksum = "f13f2a60f5c80732511b9c30bcc3d40317d0d6d7801835b4668f259c0a8922b7"
 
 [[package]]
 name = "topcoat-view"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db4553b91f30e30c71c2bd95ae8e931a33326c6ffb604663b9d214008f12947c"
+checksum = "654e102f97a4c26ba9b7deb72bdac45c8587ced30480b431155a56a935d12e86"
 dependencies = [
  "futures-core",
  "futures-util",
@@ -4559,9 +4604,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-view-grammar"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75dd093ffc848370da4cce7670ccdfd4e98eab48e178d5d0da5509f747d85ca6"
+checksum = "28e348a794d04565ee00e7899f215c02db9acf0711bb8eefbba2ffa14bc72a5c"
 dependencies = [
  "heck",
  "proc-macro2",
@@ -4573,9 +4618,9 @@ dependencies = [
 
 [[package]]
 name = "topcoat-view-macro"
-version = "0.11.0"
+version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ffa1688d165704f08d58c03710453d0d39553292bea61b18be7959a996c3e39b"
+checksum = "eed1edf71f2fe9f5edf9dcfa2ec3e55b9bae443c015497f80347f82cf6b7af8d"
 dependencies = [
  "quote",
  "syn 3.0.10",
@@ -4757,7 +4802,7 @@ dependencies = [
  "http",
  "httparse",
  "log",
- "rand 0.10.3",
+ "rand 0.10.4",
  "rustls",
  "rustls-pki-types",
  "sha1 0.11.0",
@@ -4955,9 +5000,9 @@ checksum = "3a3b425286980a367278453f3b6d28cdcb134b574e5a35824a6ff5eebad50bb6"
 
 [[package]]
 name = "uuid"
-version = "1.29.2"
+version = "1.29.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bed99139f7dac9b5cfe5f17be4d66dc7079a34dee1d74bcc77217119240e267c"
+checksum = "3c14b15dffa2f4bd712103e857140aa04a4f2ff6e955c77d7eb8e53ee02a3b64"
 dependencies = [
  "getrandom 0.4.3",
  "js-sys",
@@ -5098,13 +5143,13 @@ dependencies = [
  "honeypot",
  "hosting",
  "http-body-util",
- "jiff",
+ "jiff 1.0.0",
  "jiff-sqlx",
  "md-5",
  "moka",
  "oauth2",
  "patreon",
- "rand 0.10.3",
+ "rand 0.10.4",
  "reaction-roles",
  "reqwest 0.13.5",
  "rustls",
@@ -5486,12 +5531,12 @@ dependencies = [
 [[package]]
 name = "youtube"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#c7e1538e484eff4e0cb02887f51286d966bbbd13"
+source = "git+https://github.com/zayden-bots/modules#173d0218143702488175278404d778c0cd37f5ad"
 dependencies = [
  "async-trait",
  "futures",
  "hmac 0.13.0",
- "jiff",
+ "jiff 1.0.0",
  "jiff-cron",
  "jiff-sqlx",
  "reqwest 0.13.5",
@@ -5512,12 +5557,12 @@ dependencies = [
 [[package]]
 name = "zayden-app"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/platform#3b73085e98e62ab6e96ab565ad6541be8b921956"
+source = "git+https://github.com/zayden-bots/platform#4b2ad82387fa9baf1c08cbbc39ed8d50c6a4e379"
 dependencies = [
  "async-trait",
  "aws-lc-rs",
  "base64 0.23.1",
- "jiff",
+ "jiff 1.0.0",
  "jiff-sqlx",
  "metrics",
  "metrics-exporter-prometheus",
@@ -5536,12 +5581,12 @@ dependencies = [
 [[package]]
 name = "zayden-core"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/platform#3b73085e98e62ab6e96ab565ad6541be8b921956"
+source = "git+https://github.com/zayden-bots/platform#4b2ad82387fa9baf1c08cbbc39ed8d50c6a4e379"
 dependencies = [
  "async-trait",
  "base64 0.23.1",
  "dashmap",
- "jiff",
+ "jiff 1.0.0",
  "jiff-cron",
  "metrics",
  "moka",

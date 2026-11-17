@@ -190,7 +190,7 @@ fn harness(pool: &PgPool) -> TestResult<Harness> {
     let user_guilds = state.discord.user_guilds.clone();
 
     let base = web::router()
-        .app_context(state)
+        .with(state)
         .route(roles)
         .route(operator_access)
         .route(operator_access_bad_id)

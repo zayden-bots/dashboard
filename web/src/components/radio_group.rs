@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{Attributes, Child, StaticClass, View, class, component, view};
 
 /// A container for options that allow one selection.
@@ -30,6 +31,7 @@ use topcoat::view::{Attributes, Child, StaticClass, View, class, component, view
 /// ```
 #[component]
 pub async fn radio_group(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
     #[default] child: Child<'_>,
 ) -> Result<impl View> {
@@ -64,6 +66,7 @@ const DOT: StaticClass = class!(
 /// attributes go on the `<input>`.
 #[component]
 pub async fn radio_group_item(
+    cx: &Cx,
     #[default] mut attrs: Attributes,
 ) -> Result<impl View> {
     // The dot cannot be drawn by the `<input>` itself, which renders no

@@ -6,9 +6,10 @@ use std::error::Error;
 
 use http_body_util::BodyExt;
 use topcoat::Result as ViewResult;
+use topcoat::context::Cx;
 use topcoat::router::request::Request;
 use topcoat::router::{Body, Router, RouterBuilder, page};
-use topcoat::runtime::RouterBuilderRuntimeExt;
+use topcoat::runtime::RuntimeLayer;
 use topcoat::view::{View, view};
 use web::components::data_table::{data_cell, data_row, data_table};
 use web::components::empty_state::empty_state;
@@ -89,7 +90,7 @@ const NAV_LIST: &str = "flex flex-col gap-1 m-0 p-0 list-none";
 const NAV_HEADING: &str = "m-0 py-1 px-3 font-mono text-[12px] font-medium tracking-[0.06em] uppercase text-text-3";
 
 async fn render(builder: RouterBuilder, path: &str) -> TestResult<String> {
-    let router = builder.runtime().build();
+    let router = builder.layer(RuntimeLayer::new()).build();
     let response = router.handle(Request::get(path).body(Body::empty())?).await;
     let bytes = response.into_body().collect().await?.to_bytes();
     let html = String::from_utf8(bytes.to_vec())?;
@@ -112,7 +113,7 @@ fn count(html: &str, needle: &str) -> usize {
 }
 
 #[page("/lamp")]
-async fn lamp_page() -> ViewResult<impl View> {
+async fn lamp_page(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         lamp(state: LampState::On)
         lamp(state: LampState::Off, text: Some("Disabled"))
@@ -141,7 +142,7 @@ async fn the_lamp_pairs_a_hidden_light_with_its_state_in_words() {
 }
 
 #[page("/module/switch")]
-async fn module_switch() -> ViewResult<impl View> {
+async fn module_switch(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         module_group(
             title: "Voice & games",
@@ -179,7 +180,7 @@ async fn a_module_switch_is_a_named_role_switch_posting_the_opposite_state() {
 }
 
 #[page("/module/status")]
-async fn module_status() -> ViewResult<impl View> {
+async fn module_status(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         module_row(
             guild_id: "7",
@@ -237,7 +238,7 @@ async fn status_and_unsynced_rows_have_no_switch() {
 }
 
 #[page("/save-bar")]
-async fn save_bar_page() -> ViewResult<impl View> {
+async fn save_bar_page(cx: &Cx) -> ViewResult<impl View> {
     let notice = Flash::new(FlashKind::Success, "Saved.");
     Ok(view! { save_bar(notice: Some(&notice)) })
 }
@@ -258,7 +259,7 @@ async fn the_save_bar_announces_its_state_and_hides_discard_until_dirty() {
 }
 
 #[page("/flash")]
-async fn flash_page() -> ViewResult<impl View> {
+async fn flash_page(cx: &Cx) -> ViewResult<impl View> {
     let notice = Flash::new(FlashKind::Error, "Couldn't save.");
     Ok(view! {
         flash()
@@ -294,7 +295,7 @@ fn a_flash_survives_its_cookie_encoding_and_rejects_tampering() {
 }
 
 #[page("/field-row")]
-async fn field_row_page() -> ViewResult<impl View> {
+async fn field_row_page(cx: &Cx) -> ViewResult<impl View> {
     let described = describedby("prefix", true, true);
     Ok(view! {
         field_row(
@@ -340,7 +341,7 @@ fn describedby_names_only_the_lines_that_exist() {
 }
 
 #[page("/settings-ids")]
-async fn settings_ids() -> ViewResult<impl View> {
+async fn settings_ids(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         text_row(form: "faq-3", name: "title", label: "Title", value: "")
         toggle_row(form: "ai", name: "enabled", label: "Enabled", value: true)
@@ -372,7 +373,7 @@ async fn field_rows_take_their_id_from_the_form_for_repeated_forms() {
 }
 
 #[page("/table")]
-async fn table_page() -> ViewResult<impl View> {
+async fn table_page(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         data_table(
             caption: "Reaction roles",
@@ -398,7 +399,7 @@ async fn the_data_table_keeps_table_roles_and_cell_labels_for_reflow() {
 }
 
 #[page("/empty-and-error")]
-async fn empty_and_error() -> ViewResult<impl View> {
+async fn empty_and_error(cx: &Cx) -> ViewResult<impl View> {
     let actions = [
         ErrorAction::new("Add Zayden to Guild 7", "/invite?guild=7").external(),
         ErrorAction::new("Back to servers", "/guilds"),
@@ -443,7 +444,7 @@ async fn empty_and_error_states_lead_with_one_primary_action() {
 }
 
 #[page("/plan")]
-async fn plan_page() -> ViewResult<impl View> {
+async fn plan_page(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! {
         plan_note(tier: "Pro", text: "Cooldowns below 60 seconds need Pro.")
         plan_tag(label: "Pro")
@@ -463,7 +464,7 @@ async fn a_plan_note_names_the_tier_in_text_and_links_the_plans_once() {
 }
 
 #[page("/progress")]
-async fn progress_page() -> ViewResult<impl View> {
+async fn progress_page(cx: &Cx) -> ViewResult<impl View> {
     Ok(view! { progress_bar() })
 }
 
@@ -479,7 +480,7 @@ async fn the_progress_bar_is_hidden_from_assistive_tech() {
 }
 
 #[page("/guild/{guild_id}/music")]
-async fn nav_on_music() -> ViewResult<impl View> {
+async fn nav_on_music(cx: &Cx) -> ViewResult<impl View> {
     let staff = NavAccess { operator: true, admin: true, on_operator_page: true };
     Ok(view! {
         nav_rail(access: staff, guild_id: Some("7"))
@@ -540,7 +541,7 @@ fn guilds(n: usize) -> Vec<GuildInfo> {
 }
 
 #[page("/guild/{guild_id}/support")]
-async fn plate_page() -> ViewResult<impl View> {
+async fn plate_page(cx: &Cx) -> ViewResult<impl View> {
     let list = guilds(FILTER_THRESHOLD + 1);
     let current =
         GuildCard { id: "2".to_owned(), name: "Guild 2".to_owned(), icon: None };
@@ -548,7 +549,7 @@ async fn plate_page() -> ViewResult<impl View> {
 }
 
 #[page("/guild/{guild_id}/levels")]
-async fn plate_small() -> ViewResult<impl View> {
+async fn plate_small(cx: &Cx) -> ViewResult<impl View> {
     let list = guilds(2);
     Ok(view! { server_plate(current: None, guilds: &list) })
 }

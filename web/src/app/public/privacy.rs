@@ -1,4 +1,5 @@
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::router::page;
 use topcoat::view::{View, component, view};
 
@@ -24,7 +25,7 @@ const CONTENTS: &[(&str, &str)] = &[
 ];
 
 #[page]
-pub(crate) async fn privacy() -> Result<impl View> {
+pub(crate) async fn privacy(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         legal_document(
             title: "Privacy Policy",
@@ -50,7 +51,10 @@ pub(crate) async fn privacy() -> Result<impl View> {
 }
 
 #[component]
-pub(super) async fn legal_contents(entries: &[(&str, &str)]) -> Result<impl View> {
+pub(super) async fn legal_contents(
+    cx: &Cx,
+    entries: &[(&str, &str)],
+) -> Result<impl View> {
     Ok(view! {
         <nav class="legal-callout" aria-labelledby="legal-contents">
             <p class="label" id="legal-contents">"On this page"</p>
@@ -65,7 +69,7 @@ pub(super) async fn legal_contents(entries: &[(&str, &str)]) -> Result<impl View
 }
 
 #[component]
-async fn intro() -> Result<impl View> {
+async fn intro(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <p class="legal-lead">
             "Zayden is a Discord bot and web dashboard operated by Oscar Six "
@@ -86,7 +90,7 @@ async fn intro() -> Result<impl View> {
 }
 
 #[component]
-async fn discord_data() -> Result<impl View> {
+async fn discord_data(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="discord">
             <h2>"Information from Discord"</h2>
@@ -130,7 +134,7 @@ async fn discord_data() -> Result<impl View> {
 }
 
 #[component]
-async fn feature_data() -> Result<impl View> {
+async fn feature_data(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="features">
             <h2>"Data stored by each feature"</h2>
@@ -214,7 +218,7 @@ async fn feature_data() -> Result<impl View> {
 }
 
 #[component]
-async fn ai_features() -> Result<impl View> {
+async fn ai_features(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="ai">
             <h2>"AI features"</h2>
@@ -256,7 +260,7 @@ async fn ai_features() -> Result<impl View> {
 }
 
 #[component]
-async fn payments() -> Result<impl View> {
+async fn payments(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="payments">
             <h2>"Payments and entitlements"</h2>
@@ -308,7 +312,7 @@ async fn payments() -> Result<impl View> {
 }
 
 #[component]
-async fn patreon() -> Result<impl View> {
+async fn patreon(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="patreon">
             <h2>"Patreon connection"</h2>
@@ -340,7 +344,7 @@ async fn patreon() -> Result<impl View> {
 }
 
 #[component]
-async fn youtube() -> Result<impl View> {
+async fn youtube(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="youtube">
             <h2>"YouTube connection"</h2>
@@ -421,7 +425,7 @@ async fn youtube() -> Result<impl View> {
 }
 
 #[component]
-async fn jellyfin_watch() -> Result<impl View> {
+async fn jellyfin_watch(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="watch">
             <h2>"Jellyfin and Watch"</h2>
@@ -467,7 +471,7 @@ async fn jellyfin_watch() -> Result<impl View> {
 }
 
 #[component]
-async fn palworld() -> Result<impl View> {
+async fn palworld(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="palworld">
             <h2>"Palworld"</h2>
@@ -489,7 +493,7 @@ async fn palworld() -> Result<impl View> {
 }
 
 #[component]
-async fn third_parties() -> Result<impl View> {
+async fn third_parties(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="third-parties">
             <h2>"Third parties"</h2>
@@ -545,7 +549,7 @@ async fn third_parties() -> Result<impl View> {
 }
 
 #[component]
-async fn security() -> Result<impl View> {
+async fn security(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="security">
             <h2>"Storage and security"</h2>
@@ -564,7 +568,7 @@ async fn security() -> Result<impl View> {
 }
 
 #[component]
-async fn retention() -> Result<impl View> {
+async fn retention(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="retention">
             <h2>"How long data is kept"</h2>
@@ -608,7 +612,7 @@ async fn retention() -> Result<impl View> {
 }
 
 #[component]
-async fn rights() -> Result<impl View> {
+async fn rights(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="rights">
             <h2>"Your choices and rights"</h2>
@@ -637,7 +641,7 @@ async fn rights() -> Result<impl View> {
 }
 
 #[component]
-async fn minors() -> Result<impl View> {
+async fn minors(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="children">
             <h2>"Children"</h2>
@@ -651,7 +655,7 @@ async fn minors() -> Result<impl View> {
 }
 
 #[component]
-async fn changes() -> Result<impl View> {
+async fn changes(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <section id="changes">
             <h2>"Changes to this policy"</h2>

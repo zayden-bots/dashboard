@@ -4,6 +4,7 @@
 )]
 
 use topcoat::Result;
+use topcoat::context::Cx;
 use topcoat::view::{View, ViewExt, component, view};
 
 use super::legal::legal_links;
@@ -11,6 +12,7 @@ use super::nav_links::{NavAccess, nav_links};
 
 #[component]
 pub async fn nav_rail(
+    cx: &Cx,
     access: NavAccess,
     #[default] guild_id: Option<&str>,
 ) -> Result<impl View> {

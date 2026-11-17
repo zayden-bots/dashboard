@@ -5,12 +5,13 @@
 
 use topcoat::Result;
 use topcoat::asset::{Asset, asset};
+use topcoat::context::Cx;
 use topcoat::view::{View, component, view};
 
 pub const LOGO: Asset = asset!("../../assets/logo.png");
 
 #[component]
-pub async fn brand_mark() -> Result<impl View> {
+pub async fn brand_mark(cx: &Cx) -> Result<impl View> {
     Ok(view! {
         <img
             class="flex-none w-[28px] h-[28px] rounded-(--radius-full)"

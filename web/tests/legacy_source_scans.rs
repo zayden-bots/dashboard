@@ -269,7 +269,7 @@ fn the_whole_state_is_fetched_only_by_the_context_accessors() {
     let readers: Vec<_> = files
         .iter()
         .filter_map(|entry| entry.split_once('\u{0}'))
-        .filter(|(_, text)| text.contains("app_context::<WebState>"))
+        .filter(|(_, text)| text.contains("context::<WebState>"))
         .map(|(path, _)| path.to_owned())
         .collect();
 

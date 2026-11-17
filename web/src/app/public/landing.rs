@@ -9,7 +9,7 @@ use crate::auth;
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 use crate::components::icons::{Icon, icon, module_icon, module_tint};
 
-segment!(kind = Group);
+segment!(kind: Group);
 
 struct Feature {
     id: &'static str,
