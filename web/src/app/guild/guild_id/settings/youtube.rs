@@ -113,7 +113,10 @@ async fn add_ping_role(
     })
 }
 
-#[page(POST "./remove-ping-role", with(Metadata::new().title("YouTube - Zayden Dashboard")))]
+#[page(
+    POST "./remove-ping-role",
+    with(Metadata::new().title("YouTube - Zayden Dashboard"))
+)]
 async fn remove_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

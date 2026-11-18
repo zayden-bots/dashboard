@@ -23,6 +23,7 @@ use zayden_app::config::BotConfig;
 use zayden_app::state::AppState as ZaydenAppState;
 
 use crate::auth::SessionUser;
+use crate::deadlock_app::limits::AppLimits;
 use crate::error::StartupError;
 use crate::rest::RestClients;
 
@@ -85,6 +86,7 @@ pub struct WebState {
     pub rest: RestClients,
     pub integrations: IntegrationsState,
     pub urls: SiteUrls,
+    pub app_limits: AppLimits,
 }
 
 impl WebState {
@@ -152,6 +154,7 @@ impl WebState {
                 upgrade: config.upgrade_url.clone(),
                 dashboard: config.dashboard_url.clone(),
             },
+            app_limits: AppLimits::new(),
         })
     }
 

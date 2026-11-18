@@ -14,8 +14,10 @@ workspace = true
 accounts = { workspace = true }
 base64 = { workspace = true, features = ["alloc"] }
 deadlock = { workspace = true }
+deadlock-protocol = { workspace = true }
 destiny2 = { workspace = true }
 dotenvy = { workspace = true }
+governor = { workspace = true }
 greetings = { workspace = true }
 honeypot = { workspace = true }
 hosting = { workspace = true }

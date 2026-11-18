@@ -20,6 +20,8 @@ pub enum StartupError {
     BindAddr(#[from] AddrParseError),
     #[error("invalid DASHBOARD_COOKIE_KEY: {0}")]
     CookieKey(#[from] CookieKeyError),
+    #[error("invalid DASHBOARD_TRUSTED_PROXIES entry {0:?}")]
+    TrustedProxy(String),
     #[error(
         "could not load the asset bundle (run `topcoat asset bundle -p web`): {0}"
     )]

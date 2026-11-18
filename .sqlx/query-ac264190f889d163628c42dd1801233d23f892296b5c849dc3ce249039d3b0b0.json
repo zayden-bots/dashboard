@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE deadlock_device_codes SET granted_at = now(), last_polled_at = now() WHERE device_code_hash = $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ac264190f889d163628c42dd1801233d23f892296b5c849dc3ce249039d3b0b0"
+}

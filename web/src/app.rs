@@ -1,8 +1,10 @@
 pub mod account;
 pub mod admin;
+pub mod api;
 pub mod auth;
 pub mod guild;
 pub mod guilds;
+pub mod link;
 pub mod providers;
 pub mod public;
 pub mod upgrade;

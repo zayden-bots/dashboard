@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE deadlock_device_codes SET denied_at = now()\n        WHERE user_code = $1 AND expires_at > now()\n          AND approved_at IS NULL AND denied_at IS NULL\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "33f4bfa0c942256d4475ceafa8f6ccba82265e6725dcf08081a5ac5feff080c3"
+}

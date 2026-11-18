@@ -25,6 +25,7 @@ const DM_ACTION: &str = "/account/deadlock";
 const SERVERS_ACTION: &str = "/account/deadlock/servers";
 const DM_FIELD: &str = "dm_summaries";
 const BRIEFING_FIELD: &str = "patch_briefing";
+const MATCH_FETCH_FIELD: &str = "match_fetch";
 const SHARE_PREFIX: &str = "share_";
 const SQUAD_PREFIX: &str = "squad_";
 
@@ -38,6 +39,7 @@ pub(super) struct ServerChoice {
 pub(super) struct DeadlockPrefs {
     dm_summaries: bool,
     patch_briefing: bool,
+    match_fetch: bool,
     servers: Vec<ServerChoice>,
 }
 
@@ -75,13 +77,14 @@ async fn load_prefs(
 ) -> std::result::Result<DeadlockPrefs, AuthError> {
     let pool = db_pool(cx)?;
     let allowed = allowed_guilds(cx, identity).await?;
-    let (dm_summaries, patch_briefing, shared, squad) = tokio::try_join!(
+    let (dm_summaries, patch_briefing, match_fetch, shared, squad) = tokio::try_join!(
         async {
             user_settings::dm_target(pool, identity.user_id)
                 .await
                 .map(|(enabled, _)| enabled)
         },
         user_settings::patch_briefing(pool, identity.user_id),
+        user_settings::match_fetch(pool, identity.user_id),
         guild_members::shared_guilds(pool, identity.user_id),
         guild_members::squad_guilds(pool, identity.user_id),
     )?;
@@ -89,6 +92,7 @@ async fn load_prefs(
     Ok(DeadlockPrefs {
         dm_summaries,
         patch_briefing,
+        match_fetch,
         servers: allowed
             .into_iter()
             .map(|(id, name)| ServerChoice {
@@ -139,9 +143,16 @@ pub(super) async fn save_dm(
     let identity = signed_in(cx).await?;
     let summaries = pairs.iter().any(|(name, _)| name == DM_FIELD);
     let briefing = pairs.iter().any(|(name, _)| name == BRIEFING_FIELD);
+    let match_fetch = pairs.iter().any(|(name, _)| name == MATCH_FETCH_FIELD);
 
-    match save_dm_preferences(db_pool(cx)?, identity.user_id, summaries, briefing)
-        .await
+    match save_dm_preferences(
+        db_pool(cx)?,
+        identity.user_id,
+        summaries,
+        briefing,
+        match_fetch,
+    )
+    .await
     {
         Ok(()) => {
             set_flash(cx, FlashKind::Success, "Deadlock DM settings saved.")?;
@@ -164,9 +175,11 @@ async fn save_dm_preferences(
     user_id: i64,
     summaries: bool,
     briefing: bool,
+    match_fetch: bool,
 ) -> sqlx::Result<()> {
     user_settings::set_dm_summaries(pool, user_id, summaries, None).await?;
-    user_settings::set_patch_briefing(pool, user_id, briefing, None).await
+    user_settings::set_patch_briefing(pool, user_id, briefing, None).await?;
+    user_settings::set_match_fetch(pool, user_id, match_fetch, None).await
 }
 
 #[page(POST "./servers")]
@@ -244,6 +257,16 @@ pub(super) async fn deadlock_section(
                         action=(DM_ACTION)
                         data-pending=""
                     >
+                        <label class="flex items-center gap-2 text-text">
+                            <input
+                                type="checkbox"
+                                name=(MATCH_FETCH_FIELD)
+                                checked=(prefs.match_fetch)
+                            >
+                            <span>
+                                "Fetch my match data when the Deadlock app reports a match"
+                            </span>
+                        </label>
                         <label class="flex items-center gap-2 text-text">
                             <input
                                 type="checkbox"

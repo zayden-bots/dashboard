@@ -86,7 +86,10 @@ async fn save_tickets(
     })
 }
 
-#[page("./suggestions", with(Metadata::new().title("Suggestions - Support - Zayden Dashboard")))]
+#[page(
+    "./suggestions",
+    with(Metadata::new().title("Suggestions - Support - Zayden Dashboard"))
+)]
 async fn suggestions_page(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -94,7 +97,10 @@ async fn suggestions_page(cx: &Cx) -> Result<impl View> {
     Ok(view! { settings_page(guild_id: guild_id, page: SUGGESTIONS, state: &state) })
 }
 
-#[page(POST "./suggestions", with(Metadata::new().title("Suggestions - Support - Zayden Dashboard")))]
+#[page(
+    POST "./suggestions",
+    with(Metadata::new().title("Suggestions - Support - Zayden Dashboard"))
+)]
 async fn save_suggestions(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -168,7 +174,10 @@ fn key_change(pairs: &[(String, String)]) -> &'static str {
     }
 }
 
-#[page(POST "./wiki/wiki-key", with(Metadata::new().title("Wiki - Support - Zayden Dashboard")))]
+#[page(
+    POST "./wiki/wiki-key",
+    with(Metadata::new().title("Wiki - Support - Zayden Dashboard"))
+)]
 async fn save_key(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

@@ -144,7 +144,10 @@ async fn save_squad(
     })
 }
 
-#[page(POST "./add-ping-role", with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
+#[page(
+    POST "./add-ping-role",
+    with(Metadata::new().title("Deadlock - Zayden Dashboard"))
+)]
 async fn add_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -165,7 +168,10 @@ async fn add_ping_role(
     })
 }
 
-#[page(POST "./remove-ping-role", with(Metadata::new().title("Deadlock - Zayden Dashboard")))]
+#[page(
+    POST "./remove-ping-role",
+    with(Metadata::new().title("Deadlock - Zayden Dashboard"))
+)]
 async fn remove_ping_role(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,

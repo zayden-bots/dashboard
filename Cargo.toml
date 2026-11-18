@@ -157,6 +157,7 @@ youtube = { git = "https://github.com/zayden-bots/modules" }
 schema = { git = "https://github.com/zayden-bots/schema" }
 zayden-app = { git = "https://github.com/zayden-bots/platform" }
 zayden-core = { git = "https://github.com/zayden-bots/platform" }
+deadlock-protocol = { git = "https://github.com/ViridianLink/deadlock-protocol" }
 
 # -- Discord
 twilight-http = { version = "*", default-features = false, features = [
@@ -170,6 +171,7 @@ thiserror = { version = "*", default-features = false }
 
 # -- Collections and concurrency
 moka = { version = "*", default-features = false }
+governor = { version = "0.10", default-features = false, features = ["std", "dashmap", "quanta"] }
 
 # -- Randomness and numerics
 rand = { version = "0.10", default-features = false }

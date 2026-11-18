@@ -47,11 +47,7 @@ const DELETE_FORM: &str = "faq-delete";
 const ARTICLES_SECTION: &str = "faq-articles";
 
 fn article_href(cx: &Cx, guild_id: &str, id: impl std::fmt::Display) -> String {
-    href!(
-        edit_article,
-        guild_id: guild_id,
-        article_id: id.to_string()
-    )
+    href!(edit_article, guild_id: guild_id, article_id: id.to_string())
     .resolve(cx)
 }
 
@@ -177,7 +173,10 @@ async fn source(cx: &Cx, article: &FaqArticleInfo) -> Result<impl View> {
     })
 }
 
-#[page("./new", with(Metadata::new().title("New FAQ article - Support - Zayden Dashboard")))]
+#[page(
+    "./new",
+    with(Metadata::new().title("New FAQ article - Support - Zayden Dashboard"))
+)]
 async fn new_article_page(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let state = PageState::load(cx);
@@ -192,7 +191,10 @@ async fn new_article_page(cx: &Cx) -> Result<impl View> {
     })
 }
 
-#[page(POST "./new", with(Metadata::new().title("New FAQ article - Support - Zayden Dashboard")))]
+#[page(
+    POST "./new",
+    with(Metadata::new().title("New FAQ article - Support - Zayden Dashboard"))
+)]
 async fn create_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -243,7 +245,10 @@ fn requested_id(cx: &Cx) -> Option<i32> {
     parse_article_id(article_id(cx))
 }
 
-#[page("./{article_id}", with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard")))]
+#[page(
+    "./{article_id}",
+    with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard"))
+)]
 async fn edit_article(cx: &Cx) -> Result<impl View> {
     let guild_id: &str = guild_id(cx);
     let id = requested_id(cx);
@@ -259,7 +264,10 @@ async fn edit_article(cx: &Cx) -> Result<impl View> {
     })
 }
 
-#[page(POST "./{article_id}", with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard")))]
+#[page(
+    POST "./{article_id}",
+    with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard"))
+)]
 async fn update_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -294,7 +302,10 @@ async fn update_article(
     })
 }
 
-#[page(POST "./{article_id}/delete", with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard")))]
+#[page(
+    POST "./{article_id}/delete",
+    with(Metadata::new().title("Edit FAQ article - Support - Zayden Dashboard"))
+)]
 async fn delete_article(
     cx: &Cx,
     Form(pairs): Form<Vec<(String, String)>>,
@@ -493,11 +504,7 @@ async fn delete_section(
     article: &FaqArticleInfo,
     state: &PageState,
 ) -> Result<impl View> {
-    let action = href!(
-        delete_article,
-        guild_id: guild_id,
-        article_id: &article.id
-    )
+    let action = href!(delete_article, guild_id: guild_id, article_id: &article.id)
     .resolve(cx);
     let confirm_object = format!("\u{201c}{}\u{201d}", article.title);
     let failed = state.sent(DELETE_FORM).summary();

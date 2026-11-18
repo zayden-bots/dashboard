@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, discord_id,\n               (last_used_at IS NULL OR last_used_at < now() - interval '1 minute') AS \"stale!\"\n        FROM deadlock_app_tokens\n        WHERE token_hash = $1 AND revoked_at IS NULL\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "deadlock_app_tokens",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "discord_id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "deadlock_app_tokens",
+            "name": "discord_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "stale!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "2c59c4668d242cf727be44c2b10117538e306d8b3a6faaea73e3fd9462e56c97"
+}

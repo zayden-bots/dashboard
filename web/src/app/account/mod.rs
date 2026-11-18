@@ -1,4 +1,5 @@
 pub mod deadlock;
+mod devices;
 pub(crate) mod page;
 mod steam;
 

@@ -5,6 +5,7 @@ pub mod app;
 pub mod auth;
 pub mod components;
 pub mod config;
+pub mod deadlock_app;
 pub mod document;
 pub mod engagement;
 pub mod error;

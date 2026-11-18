@@ -229,10 +229,7 @@ async fn account_menu(cx: &Cx, name: &str) -> Result<impl View> {
             >
                 "Plans"
             </a>
-            <a
-                class="menu-item"
-                (link_attrs(cx, href!(account), prefetch_mode(cx)))
-            >
+            <a class="menu-item" (link_attrs(cx, href!(account), prefetch_mode(cx)))>
                 "Linked accounts"
             </a>
             <a href="/logout" rel="external" class="menu-item">

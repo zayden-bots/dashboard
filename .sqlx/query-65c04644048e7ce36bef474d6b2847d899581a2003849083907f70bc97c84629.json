@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM deadlock_device_codes WHERE expires_at <= now() - interval '1 day'",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "65c04644048e7ce36bef474d6b2847d899581a2003849083907f70bc97c84629"
+}

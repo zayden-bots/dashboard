@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT device_code_hash, user_code FROM deadlock_device_codes",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "device_code_hash",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "device_code_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "user_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "user_code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "1c867af4d9f1b2a6c9c6748fbbdbec00c3fbb437d601fc9d964afaceba8e9b43"
+}

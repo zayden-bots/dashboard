@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, device_name, app_version,\n               created_at AS \"created_at: jiff_sqlx::Timestamp\",\n               last_used_at AS \"last_used_at: jiff_sqlx::Timestamp\"\n        FROM deadlock_app_tokens\n        WHERE discord_id = $1 AND revoked_at IS NULL\n        ORDER BY created_at DESC, id DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "deadlock_app_tokens",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "device_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_app_tokens",
+            "name": "device_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "app_version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_app_tokens",
+            "name": "app_version"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at: jiff_sqlx::Timestamp",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "deadlock_app_tokens",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "last_used_at: jiff_sqlx::Timestamp",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "deadlock_app_tokens",
+            "name": "last_used_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "68d1b3fcd00b24613503276c5f7cf63bd06c685d66bf7f461b10a51c826de165"
+}

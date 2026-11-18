@@ -51,6 +51,11 @@ expression = "LicenseRef-Proprietary"
 license-files = []
 
 [[licenses.clarify]]
+name = "deadlock-protocol"
+expression = "LicenseRef-Proprietary"
+license-files = []
+
+[[licenses.clarify]]
 name = "google-sheets-api"
 expression = "LicenseRef-Proprietary"
 license-files = []

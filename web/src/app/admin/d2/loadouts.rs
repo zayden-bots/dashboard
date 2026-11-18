@@ -239,7 +239,7 @@ async fn loadout_row(
 ) -> Result<impl View> {
     let href = href!(
         editor::page::edit_loadout,
-        editor::loadout_id: loadout.id.to_string()
+        editor::loadout_id: loadout.id.to_string(),
     );
     let own_class = loadout.class.clone();
     let delete_title = format!("Delete loadout \u{201c}{}\u{201d}?", loadout.name);
@@ -252,10 +252,7 @@ async fn loadout_row(
             data_cell(
                 label: "Loadout",
                 header: true,
-                <a
-                    class="loadout-name"
-                    (link_attrs(cx, href, prefetch_mode(cx)))
-                >
+                <a class="loadout-name" (link_attrs(cx, href, prefetch_mode(cx)))>
                     (loadout.name.as_str())
                 </a>
             )

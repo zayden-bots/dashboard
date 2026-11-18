@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT device_name FROM deadlock_device_codes",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "device_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "device_name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7e0cba6f45d689ecdbc7d8b673b0a6a2abfdacafb66274bfe527865df4e6b3ec"
+}

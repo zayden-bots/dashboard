@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE deadlock_app_tokens SET revoked_at = now()\n        WHERE id = $1 AND discord_id = $2 AND revoked_at IS NULL\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "febe827dbaa93fd2e7d56ad45a214bf161b097776266b33a7a5a167cfb98eeb5"
+}

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT user_code, device_name, app_version,\n               requested_at AS \"requested_at: jiff_sqlx::Timestamp\"\n        FROM deadlock_device_codes\n        WHERE user_code = $1 AND expires_at > now()\n          AND approved_at IS NULL AND denied_at IS NULL\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "user_code"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "device_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "device_name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "app_version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "app_version"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "requested_at: jiff_sqlx::Timestamp",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "requested_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1478f367ba260d9496b93fc9355fb541cc64a3f2507ff010a35dcd130c1b816b"
+}

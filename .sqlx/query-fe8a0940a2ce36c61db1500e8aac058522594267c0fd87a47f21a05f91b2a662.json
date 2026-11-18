@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT last_used_at IS NOT NULL AS \"used!\" FROM deadlock_app_tokens",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "used!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "fe8a0940a2ce36c61db1500e8aac058522594267c0fd87a47f21a05f91b2a662"
+}

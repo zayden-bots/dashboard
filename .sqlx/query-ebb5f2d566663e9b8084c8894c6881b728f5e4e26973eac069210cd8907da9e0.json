@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT user_code FROM deadlock_device_codes",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_code",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "user_code"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ebb5f2d566663e9b8084c8894c6881b728f5e4e26973eac069210cd8907da9e0"
+}

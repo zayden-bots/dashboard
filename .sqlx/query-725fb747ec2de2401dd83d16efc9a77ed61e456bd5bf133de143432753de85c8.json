@@ -1,0 +1,92 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT expires_at <= now() AS \"expired!\",\n               granted_at IS NOT NULL AS \"granted!\",\n               denied_at IS NOT NULL AS \"denied!\",\n               approved_by,\n               interval_secs AS \"interval_secs!\",\n               (last_polled_at IS NOT NULL\n                AND last_polled_at > now() - make_interval(secs => interval_secs::double precision)) AS \"early!\",\n               device_name,\n               app_version\n        FROM deadlock_device_codes\n        WHERE device_code_hash = $1\n        FOR UPDATE\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "expired!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "granted!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "denied!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "approved_by",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "approved_by"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "interval_secs!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "interval_secs"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "early!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 6,
+        "name": "device_name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "device_name"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "app_version",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "deadlock_device_codes",
+            "name": "app_version"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      true,
+      false,
+      null,
+      false,
+      false
+    ]
+  },
+  "hash": "725fb747ec2de2401dd83d16efc9a77ed61e456bd5bf133de143432753de85c8"
+}

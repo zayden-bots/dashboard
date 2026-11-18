@@ -15,6 +15,7 @@ use tracing::warn;
 
 use super::ACCOUNT_TITLE;
 use super::deadlock::{DeadlockPrefs, deadlock_section, load as load_deadlock};
+use super::devices::{devices_section, load as load_devices};
 use crate::app::public::layout::public_layout;
 use crate::auth::{
     AuthError,
@@ -26,6 +27,7 @@ use crate::auth::{
 use crate::components::alert::{AlertVariant, alert, alert_title};
 use crate::components::button::{ButtonSize, ButtonVariant, button_variants};
 use crate::components::flash::flash;
+use crate::deadlock_app::tokens::AppDevice;
 use crate::flash::{Flash, FlashKind, set as set_flash, take as take_flash};
 
 segment!(kind: Group);
@@ -39,7 +41,7 @@ pub(super) const SIGN_IN_PATH: &str = "/auth/discord";
 pub(crate) async fn account(cx: &Cx) -> Result<impl View> {
     let notice = take_flash(cx);
 
-    let (links, summaries) = match require_user(cx).await {
+    let (links, summaries, devices) = match require_user(cx).await {
         Ok(identity) => {
             let links =
                 match AccountLink::list_for_user(db_pool(cx)?, identity.user_id)
@@ -51,7 +53,11 @@ pub(crate) async fn account(cx: &Cx) -> Result<impl View> {
                         None
                     },
                 };
-            (links, load_deadlock(cx, &identity).await)
+            (
+                links,
+                load_deadlock(cx, &identity).await,
+                load_devices(cx, &identity).await,
+            )
         },
         Err(AuthError::Unauthenticated) => {
             remember_login_next(cx, PAGE)?;
@@ -59,7 +65,7 @@ pub(crate) async fn account(cx: &Cx) -> Result<impl View> {
         },
         Err(error) => {
             warn!(error = %error, "failed to resolve the signed-in user");
-            (None, None)
+            (None, None, None)
         },
     };
 
@@ -68,7 +74,8 @@ pub(crate) async fn account(cx: &Cx) -> Result<impl View> {
             account_page(
                 notice: notice.as_ref(),
                 links: links.as_deref(),
-                summaries: summaries.as_ref()
+                summaries: summaries.as_ref(),
+                devices: devices.as_deref()
             )
         )
     })
@@ -127,6 +134,7 @@ async fn account_page(
     notice: Option<&Flash>,
     links: Option<&[AccountLink]>,
     summaries: Option<&DeadlockPrefs>,
+    devices: Option<&[AppDevice]>,
 ) -> Result<impl View> {
     Ok(view! {
         <div class="page w-full mx-auto my-0 py-16 px-6">
@@ -162,6 +170,7 @@ async fn account_page(
                 }
             }
             deadlock_section(prefs: summaries)
+            devices_section(devices: devices)
         </div>
     })
 }

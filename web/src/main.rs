@@ -6,6 +6,7 @@ use std::sync::Arc;
 use sqlx::PgPool;
 use tokio::net::TcpListener;
 use topcoat::asset::{AssetBundle, RouterBuilderAssetExt};
+use topcoat::router::TrustedProxies;
 use tracing::{error, info, warn};
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::layer::SubscriberExt;
@@ -55,7 +56,11 @@ async fn run() -> Result<(), StartupError> {
     EventListener::spawn(app.db.clone(), app.events.clone());
     session_pruning::spawn(app.db.clone());
 
-    let base = router().with(state).assets(assets);
+    let trusted_proxies = config::trusted_proxies()?;
+    let mut base = router().with(state).assets(assets);
+    if !trusted_proxies.is_empty() {
+        base = base.trusted_proxies(TrustedProxies::new().networks(trusted_proxies));
+    }
     let base = match cookie_key {
         Some(key) => base.with(key),
         None => {
