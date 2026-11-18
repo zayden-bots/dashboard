@@ -14,7 +14,7 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::{Layer, Registry, fmt};
 use web::error::StartupError;
 use web::state::WebState;
-use web::{config, router, session_pruning};
+use web::{config, deadlock_app, router, session_pruning};
 use zayden_app::config::BotConfig;
 use zayden_app::events::listener::EventListener;
 use zayden_app::state::AppState as ZaydenAppState;
@@ -54,6 +54,11 @@ async fn run() -> Result<(), StartupError> {
     let listener = TcpListener::bind(addr).await.map_err(StartupError::Listen)?;
 
     EventListener::spawn(app.db.clone(), app.events.clone());
+    deadlock_app::ws::spawn_pusher(
+        Arc::clone(&state.app_ws),
+        app.db.clone(),
+        app.events.subscribe(),
+    );
     session_pruning::spawn(app.db.clone());
 
     let trusted_proxies = config::trusted_proxies()?;

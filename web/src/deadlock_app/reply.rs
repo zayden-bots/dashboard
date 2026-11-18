@@ -5,7 +5,7 @@ use serde::de::DeserializeOwned;
 use topcoat::context::Cx;
 use topcoat::router::content::Json;
 use topcoat::router::response::{IntoResponse, Response};
-use topcoat::router::{HeaderMap, StatusCode};
+use topcoat::router::{HeaderMap, StatusCode, header};
 
 use super::AppApiError;
 
@@ -32,6 +32,14 @@ pub fn no_content(
 pub fn parse<T: DeserializeOwned>(body: &[u8]) -> Result<T, AppApiError> {
     serde_json::from_slice(body)
         .map_err(|e| AppApiError::BadRequest(format!("invalid JSON body: {e}")))
+}
+
+#[must_use]
+pub fn is_websocket_upgrade(headers: &HeaderMap) -> bool {
+    headers
+        .get(header::UPGRADE)
+        .and_then(|value| value.to_str().ok())
+        .is_some_and(|value| value.trim().eq_ignore_ascii_case("websocket"))
 }
 
 #[must_use]

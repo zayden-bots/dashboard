@@ -1,7 +1,10 @@
+use accounts::links::AccountLink;
+use accounts::provider::Provider;
 use base64::Engine as _;
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use rand::RngExt;
 use sha2::{Digest, Sha256};
+use sqlx::PgPool;
 use topcoat::context::Cx;
 use topcoat::router::request::headers;
 use topcoat::router::{HeaderMap, header};
@@ -43,6 +46,16 @@ pub fn bearer_token(headers: &HeaderMap) -> Option<&str> {
     let (scheme, token) = value.split_once(' ')?;
     let token = token.trim();
     (scheme.eq_ignore_ascii_case("bearer") && is_well_formed(token)).then_some(token)
+}
+
+pub async fn linked_account(
+    pool: &PgPool,
+    discord_id: i64,
+) -> Result<Option<u32>, AppApiError> {
+    Ok(AccountLink::select(pool, discord_id, Provider::Steam)
+        .await?
+        .and_then(|link| link.steam_id())
+        .map(|steam| steam.account_id().get()))
 }
 
 pub async fn authenticate(cx: &Cx) -> Result<AppCaller, AppApiError> {

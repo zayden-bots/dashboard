@@ -32,6 +32,19 @@ pub async fn find_live(
     .await
 }
 
+pub async fn is_live(pool: &PgPool, id: i64) -> sqlx::Result<bool> {
+    sqlx::query_scalar!(
+        r#"
+        SELECT EXISTS (
+            SELECT 1 FROM deadlock_app_tokens WHERE id = $1 AND revoked_at IS NULL
+        ) AS "live!"
+        "#,
+        id
+    )
+    .fetch_one(pool)
+    .await
+}
+
 pub async fn touch(pool: &PgPool, id: i64) -> sqlx::Result<()> {
     sqlx::query!(
         "UPDATE deadlock_app_tokens SET last_used_at = now() WHERE id = $1",

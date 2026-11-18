@@ -25,6 +25,7 @@ use zayden_app::state::AppState as ZaydenAppState;
 
 use crate::auth::SessionUser;
 use crate::deadlock_app::limits::AppLimits;
+use crate::deadlock_app::ws::{WsHub, WsTiming};
 use crate::error::StartupError;
 use crate::rest::RestClients;
 
@@ -89,6 +90,7 @@ pub struct WebState {
     pub urls: SiteUrls,
     pub app_limits: AppLimits,
     pub deadlock_proxy: Arc<DeadlockProxy>,
+    pub app_ws: Arc<WsHub>,
 }
 
 impl WebState {
@@ -163,6 +165,7 @@ impl WebState {
             },
             app_limits: AppLimits::new(),
             deadlock_proxy,
+            app_ws: Arc::new(WsHub::new(WsTiming::default())),
         })
     }
 

@@ -42,6 +42,7 @@ tokio = { workspace = true, features = [
   "macros",
   "net",
   "rt-multi-thread",
+  "sync",
   "time",
 ] }
 topcoat = { workspace = true, features = [
@@ -56,6 +57,7 @@ topcoat = { workspace = true, features = [
   "runtime",
   "serve",
   "view",
+  "websocket",
 ] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["ansi", "fmt", "json"] }
@@ -68,12 +70,14 @@ zayden-app = { workspace = true }
 
 [dev-dependencies]
 deadlock-api = { workspace = true }
+futures-util = { workspace = true, features = ["sink"] }
 hmac = { workspace = true }
 http-body-util = { workspace = true }
 md-5 = { workspace = true }
 schema = { workspace = true }
 sha1 = { workspace = true }
-tokio = { workspace = true, features = ["io-util"] }
+tokio = { workspace = true, features = ["io-util", "test-util"] }
+tokio-tungstenite = { workspace = true, features = ["connect"] }
 
 [build-dependencies]
 topcoat = { workspace = true, features = ["tailwind", "ui"] }

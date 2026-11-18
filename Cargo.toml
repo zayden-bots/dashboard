@@ -207,7 +207,9 @@ sqlx = { version = "*", default-features = false, features = [
 ] }
 
 # -- Async runtime
+futures-util = { version = "0.3", default-features = false }
 tokio = { version = "*", default-features = false }
+tokio-tungstenite = { version = "0.29", default-features = false }
 
 # -- Observability
 tracing = { version = "*", default-features = false }

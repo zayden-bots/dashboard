@@ -5,6 +5,7 @@ pub mod limits;
 pub mod proxy;
 pub mod reply;
 pub mod tokens;
+pub mod ws;
 
 pub use error::AppApiError;
 
