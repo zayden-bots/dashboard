@@ -15,6 +15,12 @@ pub enum AppApiError {
     NotFound,
     #[error("method not allowed")]
     MethodNotAllowed,
+    #[error("this deadlock-api path is not served by the proxy")]
+    NotProxied,
+    #[error("deadlock-api has no such resource")]
+    UpstreamNotFound,
+    #[error("deadlock-api is unavailable, try it directly")]
+    Upstream,
     #[error("too many requests, retry in {retry_after_secs} s")]
     RateLimited { retry_after_secs: u32 },
     #[error("x-deadlock-protocol must be {PROTOCOL_VERSION}")]
@@ -33,7 +39,9 @@ impl AppApiError {
         match self {
             Self::BadRequest(_) | Self::MethodNotAllowed => ErrorCode::BadRequest,
             Self::Unauthorized => ErrorCode::Unauthorized,
-            Self::NotFound => ErrorCode::NotFound,
+            Self::NotFound | Self::UpstreamNotFound => ErrorCode::NotFound,
+            Self::NotProxied => ErrorCode::NotProxied,
+            Self::Upstream => ErrorCode::Upstream,
             Self::RateLimited { .. } => ErrorCode::RateLimited,
             Self::ProtocolUnsupported => ErrorCode::ProtocolUnsupported,
             Self::Database(_) | Self::Accounts(_) | Self::Auth(_) => {

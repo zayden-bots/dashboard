@@ -158,6 +158,7 @@ schema = { git = "https://github.com/zayden-bots/schema" }
 zayden-app = { git = "https://github.com/zayden-bots/platform" }
 zayden-core = { git = "https://github.com/zayden-bots/platform" }
 deadlock-protocol = { git = "https://github.com/ViridianLink/deadlock-protocol" }
+deadlock-api = { git = "https://github.com/ViridianLink/deadlock-api.git", branch = "main" }
 
 # -- Discord
 twilight-http = { version = "*", default-features = false, features = [

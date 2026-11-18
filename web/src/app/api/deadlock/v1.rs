@@ -1,5 +1,6 @@
 mod device;
 mod me;
+mod proxy;
 mod token;
 
 use topcoat::Result;

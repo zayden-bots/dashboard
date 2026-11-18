@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use deadlock::DeadlockProxy;
 use moka::future::Cache;
 use oauth2::basic::BasicClient;
 use oauth2::url::ParseError;
@@ -87,6 +88,7 @@ pub struct WebState {
     pub integrations: IntegrationsState,
     pub urls: SiteUrls,
     pub app_limits: AppLimits,
+    pub deadlock_proxy: Arc<DeadlockProxy>,
 }
 
 impl WebState {
@@ -98,6 +100,11 @@ impl WebState {
             .discord_client_secret
             .as_ref()
             .ok_or(StartupError::MissingConfig("DISCORD_CLIENT_SECRET"))?;
+        let deadlock_proxy = Arc::new(DeadlockProxy::new(
+            app.http.clone(),
+            app.db.clone(),
+            config.deadlock_api_key.as_ref(),
+        )?);
         let rest =
             RestClients::new(app.keyring.clone(), RestClients::default_builder());
         Ok(Self {
@@ -155,6 +162,7 @@ impl WebState {
                 dashboard: config.dashboard_url.clone(),
             },
             app_limits: AppLimits::new(),
+            deadlock_proxy,
         })
     }
 

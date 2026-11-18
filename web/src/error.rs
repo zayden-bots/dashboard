@@ -12,6 +12,8 @@ pub enum StartupError {
     Database(#[from] sqlx::Error),
     #[error("could not load the bot config: {0}")]
     Config(#[from] zayden_app::Error),
+    #[error("could not build the deadlock-api client: {0}")]
+    DeadlockApi(#[from] deadlock::DeadlockError),
     #[error("{0} is not set")]
     MissingConfig(&'static str),
     #[error("invalid Discord OAuth URL: {0}")]

@@ -2,14 +2,19 @@
 //! verification page and the `/account` additions, through the app router
 //! against Postgres.
 
+use std::collections::HashMap;
 use std::error::Error;
 use std::fmt::{Debug, Write as _};
 use std::path::PathBuf;
-use std::sync::{Arc, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
+use std::time::Duration;
 
 use accounts::links::AccountLink;
 use accounts::provider::Provider;
-use deadlock::db::user_settings;
+use deadlock::DeadlockProxy;
+use deadlock::client::CacheKind;
+use deadlock::db::{proxy_cache, user_settings};
+use deadlock_api::{DeadlockClient, Limiter};
 use deadlock_protocol::auth::{
     DeviceCode,
     DevicePoll,
@@ -25,6 +30,8 @@ use serde::Serialize;
 use serde::de::DeserializeOwned;
 use sha2::{Digest, Sha256};
 use sqlx::PgPool;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::{TcpListener, TcpStream};
 use topcoat::asset::{AssetBundle, RouterBuilderAssetExt};
 use topcoat::router::request::Request;
 use topcoat::router::response::Response;
@@ -46,6 +53,8 @@ const STEAM_ID: &str = "76561197960287930";
 const FORM: &str = "application/x-www-form-urlencoded";
 const PROTOCOL: (&str, &str) = ("x-deadlock-protocol", "1");
 const ALPHABET: &str = "BCDFGHJKLMNPQRSTVWXZ";
+const PROXY: &str = "/api/deadlock/v1/proxy";
+const HEROES: &str = include_str!("fixtures/deadlock/heroes.json");
 
 fn bundle_dir() -> TestResult<PathBuf> {
     static DIR: OnceLock<Result<PathBuf, String>> = OnceLock::new();
@@ -129,11 +138,23 @@ fn config() -> BotConfig {
 }
 
 async fn harness(pool: &PgPool) -> TestResult<Router> {
+    harness_with(pool, None).await
+}
+
+async fn harness_with(pool: &PgPool, upstream: Option<&str>) -> TestResult<Router> {
     let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
 
     let config = config();
     let app = Arc::new(ZaydenAppState::new(pool.clone(), &config));
-    let state = WebState::new(app, &config)?;
+    let mut state = WebState::new(app, &config)?;
+    if let Some(base) = upstream {
+        let client = DeadlockClient::builder()
+            .base_url(base)
+            .limiter(Limiter::with_configs([], Duration::ZERO))
+            .build()?;
+        state.deadlock_proxy =
+            Arc::new(DeadlockProxy::from_client(client, pool.clone()));
+    }
     for (token, user_id) in [("member-token", USER_ID), ("other-token", OTHER_ID)] {
         state
             .sessions
@@ -821,4 +842,384 @@ fn client_key_groups_ipv6_by_64_bit_prefix() {
     assert_ne!(key("2001:db8:1:2::1"), key("2001:db8:1:3::1"));
     assert_eq!(key("::ffff:192.0.2.7"), key("192.0.2.7"));
     assert_eq!(client_key(None), ClientKey::Unknown);
+}
+
+type Requests = Arc<Mutex<Vec<String>>>;
+type Routes = Arc<Mutex<HashMap<String, Reply>>>;
+
+struct Reply {
+    status: u16,
+    body: String,
+}
+
+impl Reply {
+    fn new(status: u16, body: &str) -> Self {
+        Self { status, body: body.to_owned() }
+    }
+
+    fn render(&self) -> String {
+        format!(
+            "HTTP/1.1 {} Mock\r\ncontent-type: application/json\r\ncontent-length: {}\r\nconnection: close\r\n\r\n{}",
+            self.status,
+            self.body.len(),
+            self.body
+        )
+    }
+}
+
+struct Mock {
+    base: String,
+    requests: Requests,
+    routes: Routes,
+}
+
+impl Mock {
+    fn serve(&self, path: &str, reply: Reply) {
+        if let Ok(mut routes) = self.routes.lock() {
+            routes.insert(path.to_owned(), reply);
+        }
+    }
+
+    fn count(&self) -> usize {
+        self.requests.lock().map_or(0, |requests| requests.len())
+    }
+
+    fn heads(&self) -> Vec<String> {
+        self.requests.lock().map_or_else(|_| Vec::new(), |requests| requests.clone())
+    }
+}
+
+async fn read_head(socket: &mut TcpStream) -> Option<String> {
+    let mut buf = Vec::new();
+    let mut chunk = [0u8; 1024];
+
+    loop {
+        let n = match socket.read(&mut chunk).await {
+            Ok(0) | Err(_) => return None,
+            Ok(n) => n,
+        };
+        buf.extend_from_slice(chunk.get(..n)?);
+
+        if buf.windows(4).any(|window| window == b"\r\n\r\n") {
+            return Some(String::from_utf8_lossy(&buf).into_owned());
+        }
+    }
+}
+
+fn path_of(head: &str) -> &str {
+    head.split_whitespace()
+        .nth(1)
+        .and_then(|target| target.split('?').next())
+        .unwrap_or_default()
+}
+
+async fn spawn_mock(fallback: Reply) -> Option<Mock> {
+    let listener = TcpListener::bind("127.0.0.1:0").await.ok()?;
+    let base = format!("http://{}", listener.local_addr().ok()?);
+    let requests = Requests::default();
+    let routes = Routes::default();
+    let recorder = Arc::clone(&requests);
+    let table = Arc::clone(&routes);
+    let fallback = fallback.render();
+
+    tokio::spawn(async move {
+        loop {
+            let Ok((mut socket, _)) = listener.accept().await else {
+                break;
+            };
+
+            let head = read_head(&mut socket).await;
+            let path = head.as_deref().map_or("", path_of).to_owned();
+
+            if let Some(head) = head
+                && let Ok(mut recorded) = recorder.lock()
+            {
+                recorded.push(head);
+            }
+
+            let response = table
+                .lock()
+                .ok()
+                .and_then(|table| table.get(&path).map(Reply::render))
+                .unwrap_or_else(|| fallback.clone());
+
+            let _ = socket.write_all(response.as_bytes()).await;
+            let _ = socket.shutdown().await;
+        }
+    });
+
+    Some(Mock { base, requests, routes })
+}
+
+async fn proxy_harness(pool: &PgPool) -> TestResult<(Router, Mock)> {
+    let mock = spawn_mock(Reply::new(200, "[]")).await.ok_or("mock failed")?;
+    let router = harness_with(pool, Some(&mock.base)).await?;
+    Ok((router, mock))
+}
+
+async fn proxy_get(
+    router: &Router,
+    upstream: &str,
+    token: Option<&str>,
+) -> TestResult<Response> {
+    let bearer = token.map(|token| format!("Bearer {token}"));
+    let mut headers = vec![PROTOCOL];
+    if let Some(bearer) = bearer.as_deref() {
+        headers.push(("authorization", bearer));
+    }
+    api(router, Method::GET, &format!("{PROXY}{upstream}"), &headers, None).await
+}
+
+fn header_text(response: &Response, name: &str) -> Option<String> {
+    response.headers().get(name).and_then(|v| v.to_str().ok()).map(str::to_owned)
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn proxy_serves_the_upstream_body_verbatim(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+    mock.serve("/v1/assets/heroes", Reply::new(200, HEROES));
+    let token = grant_token(&router, &pool).await.unwrap();
+
+    let response =
+        proxy_get(&router, "/v1/assets/heroes?client_version=6123", Some(&token))
+            .await
+            .unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(
+        header_text(&response, "content-type").as_deref(),
+        Some("application/json")
+    );
+    let fetched_at: i64 =
+        header_text(&response, "x-deadlock-fetched-at").unwrap().parse().unwrap();
+    assert!((jiff::Timestamp::now().as_millisecond() - fetched_at).abs() < 60_000);
+    assert_eq!(header_text(&response, "x-deadlock-stale"), None);
+    assert_eq!(body_text(response).await.unwrap(), HEROES);
+    let heads = mock.heads();
+    assert_eq!(heads.len(), 1);
+    assert!(
+        heads[0].starts_with("GET /v1/assets/heroes?client_version=6123 HTTP/1.1"),
+        "{}",
+        heads[0]
+    );
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn proxy_canonicalizes_the_request(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+
+    let first = proxy_get(
+        &router,
+        "/v1/analytics/item-flow-stats?hero_ids=1&game_mode=normal",
+        Some(&token),
+    )
+    .await
+    .unwrap();
+    assert_eq!(first.status(), StatusCode::OK);
+    let first = body_text(first).await.unwrap();
+    let second = proxy_get(
+        &router,
+        "/v1/analytics/item-flow-stats?game_mode=normal&hero_ids=1",
+        Some(&token),
+    )
+    .await
+    .unwrap();
+    assert_eq!(second.status(), StatusCode::OK);
+
+    assert_eq!(body_text(second).await.unwrap(), first);
+    let heads = mock.heads();
+    assert_eq!(heads.len(), 1);
+    assert!(
+        heads[0].starts_with(
+            "GET /v1/analytics/item-flow-stats?game_mode=normal&hero_ids=1 HTTP/1.1"
+        ),
+        "{}",
+        heads[0]
+    );
+    let row = proxy_cache::get(
+        &pool,
+        "proxy:/v1/analytics/item-flow-stats?game_mode=normal&hero_ids=1",
+    )
+    .await
+    .unwrap();
+    assert!(row.is_some());
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn proxy_rejects_unlisted_paths(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+
+    for upstream in [
+        "/v1/players/1/match-history",
+        "/v1/matches/1/metadata",
+        "/v1/matches/1/salts?disable_steam=false",
+        "/v1/assets/he%2Froes",
+        "/v1/analytics/item-flow-stats?hero_ids=%31",
+        "/v1/analytics/item-flow-stats?hero_ids=1&x=2",
+    ] {
+        let response = proxy_get(&router, upstream, Some(&token)).await.unwrap();
+        let (status, error) = wire::<ApiError>(response).await.unwrap();
+
+        assert_eq!(status, StatusCode::BAD_REQUEST, "{upstream}");
+        api_error(&error, ErrorCode::NotProxied);
+    }
+    assert_eq!(mock.count(), 0);
+
+    let response = proxy_get(&router, "", Some(&token)).await.unwrap();
+    let (status, error) = wire::<ApiError>(response).await.unwrap();
+    assert_eq!(status, StatusCode::NOT_FOUND);
+    api_error(&error, ErrorCode::NotFound);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn proxy_requires_a_token_and_protocol(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+
+    let response = proxy_get(&router, "/v1/assets/heroes", None).await.unwrap();
+    let (status, error) = wire::<ApiError>(response).await.unwrap();
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    api_error(&error, ErrorCode::Unauthorized);
+
+    let response =
+        api(&router, Method::GET, &format!("{PROXY}/v1/assets/heroes"), &[], None)
+            .await
+            .unwrap();
+    assert_eq!(response.status(), StatusCode::UPGRADE_REQUIRED);
+    assert_eq!(mock.count(), 0);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn upstream_not_found_is_404_and_not_cached(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+    mock.serve("/v1/matches/1/metadata", Reply::new(404, "{}"));
+    let token = grant_token(&router, &pool).await.unwrap();
+    let upstream = "/v1/matches/1/metadata?disable_steam=true";
+
+    for _ in 0..2 {
+        let response = proxy_get(&router, upstream, Some(&token)).await.unwrap();
+        let (status, error) = wire::<ApiError>(response).await.unwrap();
+
+        assert_eq!(status, StatusCode::NOT_FOUND);
+        api_error(&error, ErrorCode::NotFound);
+    }
+
+    assert_eq!(mock.count(), 2);
+    let row = proxy_cache::get(&pool, &format!("proxy:{upstream}")).await.unwrap();
+    assert!(row.is_none());
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn upstream_client_error_is_400(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+    mock.serve("/v1/assets/heroes", Reply::new(400, "{}"));
+    let token = grant_token(&router, &pool).await.unwrap();
+
+    let response =
+        proxy_get(&router, "/v1/assets/heroes", Some(&token)).await.unwrap();
+    let (status, error) = wire::<ApiError>(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    api_error(&error, ErrorCode::BadRequest);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn upstream_failure_is_502(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+    mock.serve("/v1/assets/heroes", Reply::new(500, "{}"));
+    mock.serve("/v1/assets/items", Reply::new(429, "{}"));
+    let token = grant_token(&router, &pool).await.unwrap();
+
+    for upstream in ["/v1/assets/heroes", "/v1/assets/items"] {
+        let response = proxy_get(&router, upstream, Some(&token)).await.unwrap();
+        let (status, error) = wire::<ApiError>(response).await.unwrap();
+
+        assert_eq!(status, StatusCode::BAD_GATEWAY, "{upstream}");
+        api_error(&error, ErrorCode::Upstream);
+    }
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn stale_row_is_served_with_the_stale_header(pool: PgPool) {
+    let (router, mock) = proxy_harness(&pool).await.unwrap();
+    mock.serve("/v1/assets/heroes", Reply::new(503, "{}"));
+    let token = grant_token(&router, &pool).await.unwrap();
+    let fetched_at = proxy_cache::put(
+        &pool,
+        "proxy:/v1/assets/heroes",
+        CacheKind::Asset,
+        None,
+        "[1]",
+        Duration::ZERO,
+    )
+    .await
+    .unwrap();
+
+    let response =
+        proxy_get(&router, "/v1/assets/heroes", Some(&token)).await.unwrap();
+
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(header_text(&response, "x-deadlock-stale").as_deref(), Some("1"));
+    assert_eq!(
+        header_text(&response, "x-deadlock-fetched-at"),
+        Some(fetched_at.as_millisecond().to_string())
+    );
+    assert_eq!(body_text(response).await.unwrap(), "[1]");
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn proxy_misses_are_rate_limited_per_token(pool: PgPool) {
+    let (router, _mock) = proxy_harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    let miss = |n: u32| format!("/v1/analytics/hero-build-stats/{n}");
+
+    for n in 1..=20 {
+        let response = proxy_get(&router, &miss(n), Some(&token)).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK, "{n}");
+    }
+
+    let mut limited = None;
+    for n in 21..=25 {
+        let response = proxy_get(&router, &miss(n), Some(&token)).await.unwrap();
+        if response.status() == StatusCode::TOO_MANY_REQUESTS {
+            limited = Some(response);
+            break;
+        }
+    }
+    let response = limited.unwrap();
+    let retry_after = header_text(&response, "retry-after")
+        .and_then(|v| v.parse::<u32>().ok())
+        .unwrap();
+    let (status, error) = wire::<ApiError>(response).await.unwrap();
+    assert_eq!(status, StatusCode::TOO_MANY_REQUESTS);
+    api_error(&error, ErrorCode::RateLimited);
+    assert!(retry_after >= 1);
+    assert_eq!(error.retry_after_secs, Some(retry_after));
+
+    let hit = proxy_get(&router, &miss(1), Some(&token)).await.unwrap();
+    assert_eq!(hit.status(), StatusCode::OK);
+
+    let other = grant_token(&router, &pool).await.unwrap();
+    let response = proxy_get(&router, &miss(30), Some(&other)).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn proxy_wrong_method_is_json_400(pool: PgPool) {
+    let (router, _mock) = proxy_harness(&pool).await.unwrap();
+
+    let response = api(
+        &router,
+        Method::POST,
+        &format!("{PROXY}/v1/assets/heroes"),
+        &[PROTOCOL],
+        None,
+    )
+    .await
+    .unwrap();
+    let (status, error) = wire::<ApiError>(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    api_error(&error, ErrorCode::BadRequest);
 }

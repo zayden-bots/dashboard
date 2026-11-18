@@ -67,11 +67,13 @@ zayden-core = { workspace = true }
 zayden-app = { workspace = true }
 
 [dev-dependencies]
+deadlock-api = { workspace = true }
 hmac = { workspace = true }
 http-body-util = { workspace = true }
 md-5 = { workspace = true }
 schema = { workspace = true }
 sha1 = { workspace = true }
+tokio = { workspace = true, features = ["io-util"] }
 
 [build-dependencies]
 topcoat = { workspace = true, features = ["tailwind", "ui"] }

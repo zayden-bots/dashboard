@@ -2,6 +2,7 @@ pub mod auth;
 pub mod device;
 pub mod error;
 pub mod limits;
+pub mod proxy;
 pub mod reply;
 pub mod tokens;
 
