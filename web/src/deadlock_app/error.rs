@@ -11,6 +11,10 @@ pub enum AppApiError {
     BadRequest(String),
     #[error("missing, malformed or revoked access token")]
     Unauthorized,
+    #[error("link a Steam account on the dashboard first")]
+    NotLinked,
+    #[error("account_id is not the Steam account linked to this token")]
+    AccountMismatch,
     #[error("no such route")]
     NotFound,
     #[error("method not allowed")]
@@ -39,6 +43,8 @@ impl AppApiError {
         match self {
             Self::BadRequest(_) | Self::MethodNotAllowed => ErrorCode::BadRequest,
             Self::Unauthorized => ErrorCode::Unauthorized,
+            Self::NotLinked => ErrorCode::NotLinked,
+            Self::AccountMismatch => ErrorCode::AccountMismatch,
             Self::NotFound | Self::UpstreamNotFound => ErrorCode::NotFound,
             Self::NotProxied => ErrorCode::NotProxied,
             Self::Upstream => ErrorCode::Upstream,

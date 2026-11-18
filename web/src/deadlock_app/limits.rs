@@ -13,6 +13,7 @@ const PRUNE_EVERY: u32 = 256;
 const ENTRY_BURST: u32 = 10;
 const PROXY_PER_MINUTE: u32 = 60;
 const PROXY_BURST: u32 = 20;
+const MATCH_REPORTS_PER_HOUR: u32 = 30;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[expect(
@@ -73,6 +74,7 @@ pub struct AppLimits {
     pub device_start: KeyedLimit<ClientKey>,
     pub code_entry: KeyedLimit<i64>,
     pub proxy_miss: KeyedLimit<i64>,
+    pub match_report: KeyedLimit<i64>,
 }
 
 const fn nonzero(n: u32) -> NonZeroU32 {
@@ -90,6 +92,10 @@ const fn proxy_quota() -> Quota {
     Quota::per_minute(nonzero(PROXY_PER_MINUTE)).allow_burst(nonzero(PROXY_BURST))
 }
 
+const fn match_report_quota() -> Quota {
+    Quota::per_hour(nonzero(MATCH_REPORTS_PER_HOUR))
+}
+
 impl AppLimits {
     #[must_use]
     pub fn new() -> Self {
@@ -97,6 +103,7 @@ impl AppLimits {
             device_start: KeyedLimit::new(entry_quota()),
             code_entry: KeyedLimit::new(entry_quota()),
             proxy_miss: KeyedLimit::new(proxy_quota()),
+            match_report: KeyedLimit::new(match_report_quota()),
         }
     }
 }

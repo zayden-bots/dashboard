@@ -13,7 +13,8 @@ use accounts::links::AccountLink;
 use accounts::provider::Provider;
 use deadlock::DeadlockProxy;
 use deadlock::client::CacheKind;
-use deadlock::db::{proxy_cache, user_settings};
+use deadlock::db::{proxy_cache, report_waits, user_settings};
+use deadlock::report_fetch::{cache_key, metadata_canonical, salts_canonical};
 use deadlock_api::{DeadlockClient, Limiter};
 use deadlock_protocol::auth::{
     DeviceCode,
@@ -24,7 +25,10 @@ use deadlock_protocol::auth::{
     Tier,
 };
 use deadlock_protocol::error::{ApiError, ErrorCode};
+use deadlock_protocol::paths::{MATCHES, proxy_upstream};
+use deadlock_protocol::rest::{MatchReport, MatchReportAck};
 use http_body_util::BodyExt;
+use jiff::{SignedDuration, Timestamp};
 use secrecy::SecretString;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
@@ -992,7 +996,7 @@ async fn proxy_serves_the_upstream_body_verbatim(pool: PgPool) {
     );
     let fetched_at: i64 =
         header_text(&response, "x-deadlock-fetched-at").unwrap().parse().unwrap();
-    assert!((jiff::Timestamp::now().as_millisecond() - fetched_at).abs() < 60_000);
+    assert!((Timestamp::now().as_millisecond() - fetched_at).abs() < 60_000);
     assert_eq!(header_text(&response, "x-deadlock-stale"), None);
     assert_eq!(body_text(response).await.unwrap(), HEROES);
     let heads = mock.heads();
@@ -1203,6 +1207,298 @@ async fn proxy_misses_are_rate_limited_per_token(pool: PgPool) {
     let other = grant_token(&router, &pool).await.unwrap();
     let response = proxy_get(&router, &miss(30), Some(&other)).await.unwrap();
     assert_eq!(response.status(), StatusCode::OK);
+}
+
+const REPORTED_MATCH: u64 = 136_219_028;
+const REPORTED_ACCOUNT: u32 = 22_202;
+
+async fn report(
+    router: &Router,
+    token: Option<&str>,
+    body: &str,
+) -> TestResult<Response> {
+    let bearer = token.map(|token| format!("Bearer {token}"));
+    let mut headers = vec![PROTOCOL];
+    if let Some(bearer) = bearer.as_deref() {
+        headers.push(("authorization", bearer));
+    }
+    api(router, Method::POST, MATCHES, &headers, Some(body)).await
+}
+
+fn report_body(
+    account_id: u32,
+    match_id: u64,
+    ended_at_ms: i64,
+) -> TestResult<String> {
+    Ok(serde_json::to_string(&MatchReport {
+        match_id,
+        account_id,
+        hero: Some("hero_inferno".to_owned()),
+        ended_at_ms,
+        client_version: Some(6123),
+        party_size: None,
+    })?)
+}
+
+fn minutes_ago_ms(minutes: i64) -> i64 {
+    Timestamp::now().as_millisecond() - minutes * 60_000
+}
+
+async fn report_ack(response: Response) -> TestResult<(StatusCode, String)> {
+    let status = response.status();
+    Ok((status, body_text(response).await?))
+}
+
+async fn report_error(response: Response) -> TestResult<(StatusCode, ApiError)> {
+    let (status, error) = wire::<ApiError>(response).await?;
+    assert_eq!(error.retry_after_secs, None, "{error:?}");
+    Ok((status, error))
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn report_accepts_a_new_match(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    let ended_at_ms = minutes_ago_ms(10);
+    let body = report_body(REPORTED_ACCOUNT, REPORTED_MATCH, ended_at_ms).unwrap();
+
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let (status, text) = report_ack(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(text, r#"{"status":"accepted"}"#);
+    assert_eq!(
+        serde_json::from_str::<MatchReportAck>(&text).unwrap(),
+        MatchReportAck::Accepted
+    );
+
+    let row = report_waits::get(&pool, REPORTED_ACCOUNT, REPORTED_MATCH)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(row.discord_id, USER_ID);
+    assert_eq!(row.ended_at.as_millisecond(), ended_at_ms);
+    assert_eq!(row.expires_at, row.reported_at + SignedDuration::from_hours(24));
+    assert_eq!(
+        row.next_attempt_at,
+        (row.ended_at + SignedDuration::from_mins(1)).max(row.reported_at)
+    );
+    assert_eq!(row.attempts, 0);
+    assert_eq!(row.finished_at, None);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn repeat_report_is_known(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    let body =
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(10)).unwrap();
+
+    report(&router, Some(&token), &body).await.unwrap();
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let (status, text) = report_ack(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(text, r#"{"status":"known"}"#);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn cached_metadata_is_known(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    proxy_cache::put(
+        &pool,
+        &cache_key(&metadata_canonical(REPORTED_MATCH)),
+        CacheKind::Match,
+        None,
+        "{\"match_info\":{}}",
+        Duration::from_secs(60),
+    )
+    .await
+    .unwrap();
+    let body =
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(10)).unwrap();
+
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let (status, text) = report_ack(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(text, r#"{"status":"known"}"#);
+    let row = report_waits::get(&pool, REPORTED_ACCOUNT, REPORTED_MATCH)
+        .await
+        .unwrap()
+        .unwrap();
+    assert_eq!(row.next_attempt_at, row.reported_at);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn unusable_cached_metadata_is_not_known(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    proxy_cache::put(
+        &pool,
+        &cache_key(&metadata_canonical(REPORTED_MATCH)),
+        CacheKind::Match,
+        None,
+        "{}",
+        Duration::from_secs(60),
+    )
+    .await
+    .unwrap();
+    let body =
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(10)).unwrap();
+
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let (status, text) = report_ack(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(text, r#"{"status":"accepted"}"#);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn opted_out_report_inserts_nothing(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    user_settings::set_match_fetch(&pool, USER_ID, false, None).await.unwrap();
+    let body =
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(10)).unwrap();
+
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let (status, text) = report_ack(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(text, r#"{"status":"opted_out"}"#);
+    assert!(
+        report_waits::get(&pool, REPORTED_ACCOUNT, REPORTED_MATCH)
+            .await
+            .unwrap()
+            .is_none()
+    );
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn report_for_another_account_is_403(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    let body = report_body(7, REPORTED_MATCH, minutes_ago_ms(10)).unwrap();
+
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let (status, error) = report_error(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::FORBIDDEN);
+    api_error(&error, ErrorCode::AccountMismatch);
+    assert!(
+        report_waits::get(&pool, 7, REPORTED_MATCH).await.unwrap().is_none()
+            && report_waits::get(&pool, REPORTED_ACCOUNT, REPORTED_MATCH)
+                .await
+                .unwrap()
+                .is_none()
+    );
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn report_without_steam_link_is_403(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    AccountLink::delete(&pool, USER_ID, Provider::Steam).await.unwrap();
+    let body =
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(10)).unwrap();
+
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let (status, error) = report_error(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::FORBIDDEN);
+    api_error(&error, ErrorCode::NotLinked);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn report_rejects_bad_input(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    let recent = minutes_ago_ms(10);
+
+    for body in [
+        report_body(REPORTED_ACCOUNT, 9_223_372_036_854_775_808, recent).unwrap(),
+        report_body(REPORTED_ACCOUNT, 0, recent).unwrap(),
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(8 * 24 * 60))
+            .unwrap(),
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(-60)).unwrap(),
+        "{".to_owned(),
+    ] {
+        let response = report(&router, Some(&token), &body).await.unwrap();
+        let (status, error) = report_error(response).await.unwrap();
+
+        assert_eq!(status, StatusCode::BAD_REQUEST, "{body}");
+        api_error(&error, ErrorCode::BadRequest);
+    }
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn report_needs_a_token_and_protocol(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let body =
+        report_body(REPORTED_ACCOUNT, REPORTED_MATCH, minutes_ago_ms(10)).unwrap();
+
+    let response = report(&router, None, &body).await.unwrap();
+    let (status, error) = report_error(response).await.unwrap();
+    assert_eq!(status, StatusCode::UNAUTHORIZED);
+    api_error(&error, ErrorCode::Unauthorized);
+
+    let response =
+        api(&router, Method::POST, MATCHES, &[], Some(&body)).await.unwrap();
+    let (status, error) = report_error(response).await.unwrap();
+    assert_eq!(status, StatusCode::UPGRADE_REQUIRED);
+    api_error(&error, ErrorCode::ProtocolUnsupported);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn reports_are_rate_limited_per_token(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+    let token = grant_token(&router, &pool).await.unwrap();
+    let ended_at_ms = minutes_ago_ms(10);
+
+    for match_id in 1..=30 {
+        let body = report_body(REPORTED_ACCOUNT, match_id, ended_at_ms).unwrap();
+        let response = report(&router, Some(&token), &body).await.unwrap();
+        assert_eq!(response.status(), StatusCode::OK, "{match_id}");
+    }
+
+    let body = report_body(REPORTED_ACCOUNT, 31, ended_at_ms).unwrap();
+    let response = report(&router, Some(&token), &body).await.unwrap();
+    let retry_after = header_text(&response, "retry-after")
+        .and_then(|v| v.parse::<u32>().ok())
+        .unwrap();
+    let (status, error) = wire::<ApiError>(response).await.unwrap();
+    assert_eq!(status, StatusCode::TOO_MANY_REQUESTS);
+    api_error(&error, ErrorCode::RateLimited);
+    assert!(retry_after >= 1);
+    assert_eq!(error.retry_after_secs, Some(retry_after));
+
+    let other = grant_token(&router, &pool).await.unwrap();
+    let body = report_body(REPORTED_ACCOUNT, 32, ended_at_ms).unwrap();
+    let response = report(&router, Some(&other), &body).await.unwrap();
+    assert_eq!(response.status(), StatusCode::OK);
+}
+
+#[sqlx::test(migrator = "schema::MIGRATOR")]
+async fn report_wrong_method_is_json_400(pool: PgPool) {
+    let router = harness(&pool).await.unwrap();
+
+    let response =
+        api(&router, Method::GET, MATCHES, &[PROTOCOL], None).await.unwrap();
+    let (status, error) = wire::<ApiError>(response).await.unwrap();
+
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+    api_error(&error, ErrorCode::BadRequest);
+}
+
+#[test]
+fn report_keys_match_the_proxy_allowlist() {
+    for canonical in
+        [metadata_canonical(REPORTED_MATCH), salts_canonical(REPORTED_MATCH)]
+    {
+        assert_eq!(proxy_upstream(&canonical), Some(canonical));
+    }
 }
 
 #[sqlx::test(migrator = "schema::MIGRATOR")]
