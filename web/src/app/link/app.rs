@@ -82,7 +82,9 @@ pub(crate) async fn link_app(cx: &Cx) -> Result<impl View> {
         },
     };
 
-    Ok(view! { public_layout(link_app_page(notice: notice.as_ref(), state: &state)) })
+    Ok(
+        view! { public_layout(link_app_page(notice: notice.as_ref(), state: &state)) },
+    )
 }
 
 async fn resolve(

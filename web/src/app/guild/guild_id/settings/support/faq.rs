@@ -47,8 +47,7 @@ const DELETE_FORM: &str = "faq-delete";
 const ARTICLES_SECTION: &str = "faq-articles";
 
 fn article_href(cx: &Cx, guild_id: &str, id: impl std::fmt::Display) -> String {
-    href!(edit_article, guild_id: guild_id, article_id: id.to_string())
-    .resolve(cx)
+    href!(edit_article, guild_id: guild_id, article_id: id.to_string()).resolve(cx)
 }
 
 fn article_failure(
@@ -505,7 +504,7 @@ async fn delete_section(
     state: &PageState,
 ) -> Result<impl View> {
     let action = href!(delete_article, guild_id: guild_id, article_id: &article.id)
-    .resolve(cx);
+        .resolve(cx);
     let confirm_object = format!("\u{201c}{}\u{201d}", article.title);
     let failed = state.sent(DELETE_FORM).summary();
 
