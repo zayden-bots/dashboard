@@ -5,7 +5,7 @@ version = 4
 [[package]]
 name = "accounts"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "jiff 1.0.1",
@@ -96,7 +96,7 @@ dependencies = [
 [[package]]
 name = "ai"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-openai",
  "async-trait",
@@ -782,7 +782,7 @@ checksum = "4583a4551df46e2792f82ceeac45e850d2e2d5debba0b91f102385cda5b11f06"
 [[package]]
 name = "deadlock"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "deadlock-api",
@@ -885,7 +885,7 @@ dependencies = [
 [[package]]
 name = "destiny2"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "bungie-api",
@@ -1356,7 +1356,7 @@ dependencies = [
 [[package]]
 name = "greetings"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "jiff 1.0.1",
@@ -1485,7 +1485,7 @@ dependencies = [
 [[package]]
 name = "honeypot"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "moderation",
@@ -1501,7 +1501,7 @@ dependencies = [
 [[package]]
 name = "hosting"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "jiff 1.0.1",
@@ -1521,23 +1521,12 @@ dependencies = [
 
 [[package]]
 name = "htmd"
-version = "0.5.6"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "efd66117e0b1eac329399e316f30b9530afcb7cfbd0df59a007023b6673a6c37"
+checksum = "7d39c7ad9c654a43bdc1235259b4e78c84406576b231c1ac37cd06e0af878250"
 dependencies = [
- "html5ever 0.38.0",
- "markup5ever_rcdom",
- "phf 0.13.1",
-]
-
-[[package]]
-name = "html5ever"
-version = "0.38.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1054432bae2f14e0061e33d23402fbaa67a921d319d56adc6bcf887ddad1cbc2"
-dependencies = [
- "log",
- "markup5ever 0.38.0",
+ "ego-tree",
+ "html5ever",
 ]
 
 [[package]]
@@ -1547,7 +1536,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "456a1a377e608e555d22ddab27ac0114bc7a7b4199078108e34c2aeae6c9b130"
 dependencies = [
  "log",
- "markup5ever 0.40.0",
+ "markup5ever",
  "memchr",
 ]
 
@@ -2182,36 +2171,13 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
 
 [[package]]
 name = "markup5ever"
-version = "0.38.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8983d30f2915feeaaab2d6babdd6bc7e9ed1a00b66b5e6d74df19aa9c0e91862"
-dependencies = [
- "log",
- "tendril",
- "web_atoms 0.2.6",
-]
-
-[[package]]
-name = "markup5ever"
 version = "0.40.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ab3dc68ac4a0f5719e560136778c1ee716e296030d75dbd4484e37e39e3a842"
 dependencies = [
  "log",
  "tendril",
- "web_atoms 0.3.0",
-]
-
-[[package]]
-name = "markup5ever_rcdom"
-version = "0.38.0+unofficial"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "333171ccdf66e915257740d44e38ea5b1b19ce7b45d33cc35cb6f118fbd981ff"
-dependencies = [
- "html5ever 0.38.0",
- "markup5ever 0.38.0",
- "tendril",
- "xml5ever",
+ "web_atoms",
 ]
 
 [[package]]
@@ -2339,7 +2305,7 @@ dependencies = [
 [[package]]
 name = "moderation"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "jiff 1.0.1",
@@ -2548,7 +2514,7 @@ dependencies = [
 [[package]]
 name = "patreon"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "ego-tree",
@@ -2599,16 +2565,6 @@ dependencies = [
  "phf_macros 0.14.0",
  "phf_shared 0.14.0",
  "serde",
-]
-
-[[package]]
-name = "phf_codegen"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49aa7f9d80421bca176ca8dbfebe668cc7a2684708594ec9f3c0db0805d5d6e1"
-dependencies = [
- "phf_generator 0.13.1",
- "phf_shared 0.13.1",
 ]
 
 [[package]]
@@ -2945,9 +2901,9 @@ checksum = "63b8176103e19a2643978565ca18b50549f6101881c443590420e4dc998a3c69"
 
 [[package]]
 name = "rand_pcg"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "caa0f4137e1c0a72f4c651489402276c8e8e1cf081f3b0ba156d2cbeef09e86a"
+checksum = "eb95882a1e14462c69aea9984bb261293ccfe6022ef8de0eda18bd5afb0052df"
 dependencies = [
  "rand_core 0.10.1",
 ]
@@ -2982,7 +2938,7 @@ dependencies = [
 [[package]]
 name = "reaction-roles"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "serenity",
@@ -3279,7 +3235,7 @@ dependencies = [
 [[package]]
 name = "schema"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/schema#86506383f4fb4a50b2ff461c031c7086c58f4c62"
+source = "git+https://github.com/zayden-bots/schema#76c30df9e40037a27b7515f7779d48c01a0f97cc"
 dependencies = [
  "sqlx",
 ]
@@ -3304,7 +3260,7 @@ checksum = "6844b5f49a5579f12ba4f89d9f7eec6d71889e4aa0bc7181821040ce66f08fff"
 dependencies = [
  "cssparser",
  "ego-tree",
- "html5ever 0.40.1",
+ "html5ever",
  "precomputed-hash",
  "selectors",
 ]
@@ -3636,9 +3592,9 @@ dependencies = [
 
 [[package]]
 name = "smallvec"
-version = "1.16.5"
+version = "1.16.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46"
+checksum = "3244542535d5de959d90ec55d1b5ff0fd2bb7b1310223907d5f11932847f7b59"
 dependencies = [
  "serde",
 ]
@@ -3852,19 +3808,6 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 
 [[package]]
 name = "string_cache"
-version = "0.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a18596f8c785a729f2819c0f6a7eae6ebeebdfffbfe4214ae6b087f690e31901"
-dependencies = [
- "new_debug_unreachable",
- "parking_lot 0.12.5",
- "phf_shared 0.13.1",
- "precomputed-hash",
- "serde",
-]
-
-[[package]]
-name = "string_cache"
 version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ffa8a5dbe8b3f0bbe29d4c3225daafaeead63afdc1b65fc4c01a1384166038e6"
@@ -3873,18 +3816,6 @@ dependencies = [
  "parking_lot 0.12.5",
  "phf_shared 0.14.0",
  "precomputed-hash",
-]
-
-[[package]]
-name = "string_cache_codegen"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "585635e46db231059f76c5849798146164652513eb9e8ab2685939dd90f29b69"
-dependencies = [
- "phf_generator 0.13.1",
- "phf_shared 0.13.1",
- "proc-macro2",
- "quote",
 ]
 
 [[package]]
@@ -3946,7 +3877,7 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 [[package]]
 name = "suggestions"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "futures",
@@ -4065,7 +3996,7 @@ dependencies = [
 [[package]]
 name = "ticket"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "ai",
  "async-trait",
@@ -5245,7 +5176,7 @@ dependencies = [
  "thiserror 2.0.21",
  "ticket",
  "tokio",
- "tokio-tungstenite 0.29.0",
+ "tokio-tungstenite 0.30.0",
  "topcoat",
  "tracing",
  "tracing-subscriber",
@@ -5279,26 +5210,14 @@ dependencies = [
 
 [[package]]
 name = "web_atoms"
-version = "0.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba8b815c1b593dc0baf78dd0f4fc8fdb2de53198fb1163738093e9a311c33fb3"
-dependencies = [
- "phf 0.13.1",
- "phf_codegen 0.13.1",
- "string_cache 0.9.0",
- "string_cache_codegen 0.6.1",
-]
-
-[[package]]
-name = "web_atoms"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7572660c8890448ba236b7376f27e389c6a7e1c70195622faced601f855c0ada"
 dependencies = [
  "phf 0.14.0",
- "phf_codegen 0.14.0",
- "string_cache 0.11.0",
- "string_cache_codegen 0.11.2",
+ "phf_codegen",
+ "string_cache",
+ "string_cache_codegen",
 ]
 
 [[package]]
@@ -5584,16 +5503,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3ad82d2a33cdc9674dc7465672f271e096168fcdbe0f799d9e6db8c5892679dc"
 
 [[package]]
-name = "xml5ever"
-version = "0.38.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d3dc9559429edf0cd3f327cc0afd9d6b36fa8cec6d93107b7fbe64f806b5f2d9"
-dependencies = [
- "log",
- "markup5ever 0.38.0",
-]
-
-[[package]]
 name = "yoke"
 version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5619,7 +5528,7 @@ dependencies = [
 [[package]]
 name = "youtube"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/modules#4db64b99bfb1c1a14669c4c4b46586d39f654c6d"
+source = "git+https://github.com/zayden-bots/modules#0fdb1138996108e1ef953614142aeec308a41dda"
 dependencies = [
  "async-trait",
  "futures",
@@ -5645,7 +5554,7 @@ dependencies = [
 [[package]]
 name = "zayden-app"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/platform#46ef19dd46451cc2b9f12e497bbe0a08d84d486b"
+source = "git+https://github.com/zayden-bots/platform#15e1926d0feadd10519d3bb4138198e35fb2af1c"
 dependencies = [
  "async-trait",
  "aws-lc-rs",
@@ -5669,7 +5578,7 @@ dependencies = [
 [[package]]
 name = "zayden-core"
 version = "1.0.0"
-source = "git+https://github.com/zayden-bots/platform#46ef19dd46451cc2b9f12e497bbe0a08d84d486b"
+source = "git+https://github.com/zayden-bots/platform#15e1926d0feadd10519d3bb4138198e35fb2af1c"
 dependencies = [
  "async-trait",
  "base64 0.23.1",
