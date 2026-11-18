@@ -159,9 +159,9 @@ fn greeting_errors_read_as_the_bot_words_them() {
 #[test]
 fn reaction_role_errors_read_as_the_bot_words_them() {
     assert_eq!(
-        EngagementError::from(ReactionRoleError::UnsupportedEmoji("x".to_owned()))
+        EngagementError::from(ReactionRoleError::DuplicateMapping("x".to_owned()))
             .to_string(),
-        "Unsupported emoji: x"
+        "x is already mapped on that message"
     );
 }
 
