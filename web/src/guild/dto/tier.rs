@@ -28,7 +28,7 @@ impl Tier {
     pub const fn price(self) -> &'static str {
         match self {
             Self::Free => "$0",
-            Self::Pro => "$2.99",
+            Self::Pro => "$4.99",
             Self::Ultra => "$9.99",
         }
     }

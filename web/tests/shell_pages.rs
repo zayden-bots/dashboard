@@ -1070,7 +1070,7 @@ async fn the_upgrade_page_follows_the_viewer_and_links_kofi_emails(
         "<strong>Lower greeting cooldowns</strong><span>Drop the per-member and server-wide limits on <code>/good</code> - for servers busy enough to hit them.</span>"
     ), "{html}");
     assert!(html.contains(&format!(
-        r#"<div class="plan-ladder"><div class="plan-card plan-pro"><div class="flex items-baseline justify-between gap-3"><span class="{TIER_BADGE} tier-pro">Pro</span><span class="text-[22px] font-bold text-text">$2.99<small class="text-[13px] font-medium text-text-2">/mo</small></span></div>{PLAN_SPECS}<a href="{UPGRADE_URL}" class="{}" rel="external noopener noreferrer" target="_blank">Get Pro on upgrade.example</a></div></div>{}"#,
+        r#"<div class="plan-ladder"><div class="plan-card plan-pro"><div class="flex items-baseline justify-between gap-3"><span class="{TIER_BADGE} tier-pro">Pro</span><span class="text-[22px] font-bold text-text">$4.99<small class="text-[13px] font-medium text-text-2">/mo</small></span></div>{PLAN_SPECS}<a href="{UPGRADE_URL}" class="{}" rel="external noopener noreferrer" target="_blank">Get Pro on upgrade.example</a></div></div>{}"#,
         support::btn("primary"),
         subscribe()
     )), "{html}");

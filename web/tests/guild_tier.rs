@@ -7,7 +7,7 @@ use zayden_app::entitlement;
 fn every_tier_has_its_label_price_and_limits() {
     let rows = [
         (Tier::Free, "Free", "$0", 10, "60 min", "free"),
-        (Tier::Pro, "Pro", "$2.99", 50, "30 min", "pro"),
+        (Tier::Pro, "Pro", "$4.99", 50, "30 min", "pro"),
         (Tier::Ultra, "Ultra", "$9.99", 100, "10 min", "ultra"),
     ];
 
